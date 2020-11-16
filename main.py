@@ -14,15 +14,32 @@ class create(QMainWindow):
         super(create, self).__init__(parent)
         uic.loadUi('./mainwindow.ui', self)
         self.option = self.findChild(QComboBox, 'comboBox')
-        self.option.addItems(["20 mA", u"200 µA", u"2 µA"])
-        self.frame_8 = self.findChild(QFrame, 'frame_8')
-        self.frame_5 = self.findChild(QFrame, 'frame_5')
-        self.frame_5.hide()
+        self.option.addItems(["Charge/disch", "Rate testing", "Cyclic voltammetry"])
+        self.button_cancel = self.findChild(QPushButton, 'button_cancel')
+        self.button_cancel.clicked.connect(self.exit_window)
+
+        self.frame_0 = self.findChild(QFrame, 'charge_disch')
+        self.frame_1 = self.findChild(QFrame, 'rate_testing')
+        self.frame_2 = self.findChild(QFrame, 'cyclic_voltammetry')
+
+        self.frame_1.hide()
+        self.frame_2.hide()
         self.option.activated.connect(self.do_something) 
-    def do_something(self):
-        print("hello")
-        self.frame_8.hide()
-        self.frame_5.show()
+    def do_something(self, index):
+        if (index == 0):
+            self.frame_1.hide()
+            self.frame_2.hide()
+            self.frame_0.show()
+        elif (index == 1):
+            self.frame_0.hide()
+            self.frame_2.hide()
+            self.frame_1.show()
+        else:
+            self.frame_0.hide()
+            self.frame_1.hide()
+            self.frame_2.show()
+    def exit_window(self):
+        self.close()
 
 class main(QMainWindow):
     def __init__(self):
