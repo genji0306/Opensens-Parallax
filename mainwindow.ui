@@ -514,7 +514,7 @@ font: 12pt;</string>
      <rect>
       <x>7</x>
       <y>9</y>
-      <width>50</width>
+      <width>70</width>
       <height>19</height>
      </rect>
     </property>
@@ -531,7 +531,7 @@ font: 12pt;</string>
 font: 14pt;</string>
     </property>
     <property name="text">
-     <string>Chanel</string>
+     <string>Technique</string>
     </property>
     <property name="textFormat">
      <enum>Qt::PlainText</enum>
