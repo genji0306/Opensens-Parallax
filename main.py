@@ -46,6 +46,7 @@ class main(QMainWindow):
     def __init__(self):
         super(main, self).__init__()
         uic.loadUi('./form.ui', self)
+        self.setMinimumSize(300,521)
         self.option = self.findChild(QComboBox, 'comboBox')
         self.option.addItems(["20 mA", u"200 µA", u"2 µA"])
         self.option2 = self.findChild(QComboBox, 'comboBox_2')
