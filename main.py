@@ -13,6 +13,7 @@ class create(QMainWindow):
     def __init__(self, parent=None):
         super(create, self).__init__(parent)
         uic.loadUi('./mainwindow.ui', self)
+        self.setFixedSize(305,543)
         self.option = self.findChild(QComboBox, 'comboBox')
         self.option.addItems(["Charge/disch", "Rate testing", "Cyclic voltammetry"])
         self.button_cancel = self.findChild(QPushButton, 'button_cancel')
