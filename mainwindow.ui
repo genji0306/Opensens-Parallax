@@ -10,6 +10,12 @@
     <height>543</height>
    </rect>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
@@ -89,7 +95,7 @@ font: 10pt;</string>
      </property>
      <property name="font">
       <font>
-       <pointsize>12</pointsize>
+       <pointsize>10</pointsize>
        <weight>50</weight>
        <italic>false</italic>
        <bold>false</bold>
@@ -97,7 +103,7 @@ font: 10pt;</string>
      </property>
      <property name="styleSheet">
       <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
      </property>
      <property name="text">
       <string>Lower bound (V)</string>
@@ -117,7 +123,7 @@ font: 12pt;</string>
      </property>
      <property name="font">
       <font>
-       <pointsize>12</pointsize>
+       <pointsize>10</pointsize>
        <weight>50</weight>
        <italic>false</italic>
        <bold>false</bold>
@@ -125,7 +131,7 @@ font: 12pt;</string>
      </property>
      <property name="styleSheet">
       <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
      </property>
      <property name="text">
       <string>Upper bound (V)</string>
@@ -145,7 +151,7 @@ font: 12pt;</string>
      </property>
      <property name="font">
       <font>
-       <pointsize>12</pointsize>
+       <pointsize>10</pointsize>
        <weight>50</weight>
        <italic>false</italic>
        <bold>false</bold>
@@ -153,7 +159,7 @@ font: 12pt;</string>
      </property>
      <property name="styleSheet">
       <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
      </property>
      <property name="text">
       <string>Start potential (V)</string>
@@ -173,7 +179,7 @@ font: 12pt;</string>
      </property>
      <property name="font">
       <font>
-       <pointsize>12</pointsize>
+       <pointsize>10</pointsize>
        <weight>50</weight>
        <italic>false</italic>
        <bold>false</bold>
@@ -181,7 +187,7 @@ font: 12pt;</string>
      </property>
      <property name="styleSheet">
       <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
      </property>
      <property name="text">
       <string>Charge current (µA)</string>
@@ -366,7 +372,7 @@ border-color: &quot;Solid&quot;;</string>
      </property>
      <property name="font">
       <font>
-       <pointsize>12</pointsize>
+       <pointsize>10</pointsize>
        <weight>50</weight>
        <italic>false</italic>
        <bold>false</bold>
@@ -374,7 +380,7 @@ border-color: &quot;Solid&quot;;</string>
      </property>
      <property name="styleSheet">
       <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
      </property>
      <property name="text">
       <string>Discharge current (µA)</string>
@@ -460,7 +466,7 @@ border-color: &quot;Solid&quot;;</string>
      </property>
      <property name="font">
       <font>
-       <pointsize>12</pointsize>
+       <pointsize>10</pointsize>
        <weight>50</weight>
        <italic>false</italic>
        <bold>false</bold>
@@ -468,7 +474,7 @@ border-color: &quot;Solid&quot;;</string>
      </property>
      <property name="styleSheet">
       <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
      </property>
      <property name="text">
       <string>Number of half cycles</string>
@@ -488,7 +494,7 @@ font: 12pt;</string>
      </property>
      <property name="font">
       <font>
-       <pointsize>12</pointsize>
+       <pointsize>10</pointsize>
        <weight>50</weight>
        <italic>false</italic>
        <bold>false</bold>
@@ -496,7 +502,7 @@ font: 12pt;</string>
      </property>
      <property name="styleSheet">
       <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
      </property>
      <property name="text">
       <string>Samples to average</string>
@@ -514,13 +520,13 @@ font: 12pt;</string>
      <rect>
       <x>7</x>
       <y>9</y>
-      <width>70</width>
+      <width>80</width>
       <height>19</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>14</pointsize>
+      <pointsize>12</pointsize>
       <weight>50</weight>
       <italic>false</italic>
       <bold>false</bold>
@@ -528,7 +534,7 @@ font: 12pt;</string>
     </property>
     <property name="styleSheet">
      <string notr="true">color: rgb(254, 253, 255);
-font: 14pt;</string>
+font: 12pt;</string>
     </property>
     <property name="text">
      <string>Technique</string>
@@ -645,7 +651,7 @@ color:white</string>
      </property>
      <property name="font">
       <font>
-       <pointsize>12</pointsize>
+       <pointsize>10</pointsize>
        <weight>50</weight>
        <italic>false</italic>
        <bold>false</bold>
@@ -653,7 +659,7 @@ color:white</string>
      </property>
      <property name="styleSheet">
       <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
      </property>
      <property name="text">
       <string>Lower bound (V)</string>
@@ -673,7 +679,7 @@ font: 12pt;</string>
      </property>
      <property name="font">
       <font>
-       <pointsize>12</pointsize>
+       <pointsize>10</pointsize>
        <weight>50</weight>
        <italic>false</italic>
        <bold>false</bold>
@@ -681,7 +687,7 @@ font: 12pt;</string>
      </property>
      <property name="styleSheet">
       <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
      </property>
      <property name="text">
       <string>Upper bound (V)</string>
@@ -701,7 +707,7 @@ font: 12pt;</string>
      </property>
      <property name="font">
       <font>
-       <pointsize>12</pointsize>
+       <pointsize>10</pointsize>
        <weight>50</weight>
        <italic>false</italic>
        <bold>false</bold>
@@ -709,7 +715,7 @@ font: 12pt;</string>
      </property>
      <property name="styleSheet">
       <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
      </property>
      <property name="text">
       <string>C (µAh)</string>
@@ -729,7 +735,7 @@ font: 12pt;</string>
      </property>
      <property name="font">
       <font>
-       <pointsize>12</pointsize>
+       <pointsize>10</pointsize>
        <weight>50</weight>
        <italic>false</italic>
        <bold>false</bold>
@@ -737,7 +743,7 @@ font: 12pt;</string>
      </property>
      <property name="styleSheet">
       <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
      </property>
      <property name="text">
       <string>C-rates</string>
@@ -922,7 +928,7 @@ border-color: &quot;Solid&quot;;</string>
      </property>
      <property name="font">
       <font>
-       <pointsize>12</pointsize>
+       <pointsize>10</pointsize>
        <weight>50</weight>
        <italic>false</italic>
        <bold>false</bold>
@@ -930,7 +936,7 @@ border-color: &quot;Solid&quot;;</string>
      </property>
      <property name="styleSheet">
       <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
      </property>
      <property name="text">
       <string>Cycles per C-rate</string>
@@ -969,7 +975,7 @@ font: 12pt;</string>
      </property>
      <property name="font">
       <font>
-       <pointsize>12</pointsize>
+       <pointsize>10</pointsize>
        <weight>50</weight>
        <italic>false</italic>
        <bold>false</bold>
@@ -977,7 +983,7 @@ font: 12pt;</string>
      </property>
      <property name="styleSheet">
       <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
      </property>
      <property name="text">
       <string>Lower bound (V)</string>
@@ -997,7 +1003,7 @@ font: 12pt;</string>
      </property>
      <property name="font">
       <font>
-       <pointsize>12</pointsize>
+       <pointsize>10</pointsize>
        <weight>50</weight>
        <italic>false</italic>
        <bold>false</bold>
@@ -1005,7 +1011,7 @@ font: 12pt;</string>
      </property>
      <property name="styleSheet">
       <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
      </property>
      <property name="text">
       <string>Upper bound (V)</string>
@@ -1025,7 +1031,7 @@ font: 12pt;</string>
      </property>
      <property name="font">
       <font>
-       <pointsize>12</pointsize>
+       <pointsize>10</pointsize>
        <weight>50</weight>
        <italic>false</italic>
        <bold>false</bold>
@@ -1033,7 +1039,7 @@ font: 12pt;</string>
      </property>
      <property name="styleSheet">
       <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
      </property>
      <property name="text">
       <string>Start potential (V)</string>
@@ -1053,7 +1059,7 @@ font: 12pt;</string>
      </property>
      <property name="font">
       <font>
-       <pointsize>12</pointsize>
+       <pointsize>10</pointsize>
        <weight>50</weight>
        <italic>false</italic>
        <bold>false</bold>
@@ -1061,7 +1067,7 @@ font: 12pt;</string>
      </property>
      <property name="styleSheet">
       <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
      </property>
      <property name="text">
       <string>Stop potential (V)</string>
@@ -1246,7 +1252,7 @@ border-color: &quot;Solid&quot;;</string>
      </property>
      <property name="font">
       <font>
-       <pointsize>12</pointsize>
+       <pointsize>10</pointsize>
        <weight>50</weight>
        <italic>false</italic>
        <bold>false</bold>
@@ -1254,7 +1260,7 @@ border-color: &quot;Solid&quot;;</string>
      </property>
      <property name="styleSheet">
       <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
      </property>
      <property name="text">
       <string>Scan rate (mV/s)</string>
@@ -1340,7 +1346,7 @@ border-color: &quot;Solid&quot;;</string>
      </property>
      <property name="font">
       <font>
-       <pointsize>12</pointsize>
+       <pointsize>10</pointsize>
        <weight>50</weight>
        <italic>false</italic>
        <bold>false</bold>
@@ -1348,7 +1354,7 @@ border-color: &quot;Solid&quot;;</string>
      </property>
      <property name="styleSheet">
       <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
      </property>
      <property name="text">
       <string>Number of cycles</string>
@@ -1368,7 +1374,7 @@ font: 12pt;</string>
      </property>
      <property name="font">
       <font>
-       <pointsize>12</pointsize>
+       <pointsize>10</pointsize>
        <weight>50</weight>
        <italic>false</italic>
        <bold>false</bold>
@@ -1376,7 +1382,7 @@ font: 12pt;</string>
      </property>
      <property name="styleSheet">
       <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
      </property>
      <property name="text">
       <string>Samples to average</string>
