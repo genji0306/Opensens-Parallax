@@ -10,13 +10,31 @@
     <height>900</height>
    </rect>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>305</width>
+    <height>545</height>
+   </size>
+  </property>
+  <property name="mouseTracking">
+   <bool>true</bool>
+  </property>
+  <property name="acceptDrops">
+   <bool>true</bool>
+  </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <property name="styleSheet">
    <string notr="true">background-color: #000000;</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
+  <widget class="QWidget" name="main_widget">
+   <property name="mouseTracking">
+    <bool>true</bool>
+   </property>
+   <property name="acceptDrops">
+    <bool>true</bool>
+   </property>
    <widget class="QFrame" name="frame">
     <property name="geometry">
      <rect>
@@ -49,8 +67,7 @@
      </property>
      <property name="font">
       <font>
-       <family>Monaco</family>
-       <pointsize>16</pointsize>
+       <pointsize>12</pointsize>
        <weight>50</weight>
        <italic>false</italic>
        <bold>false</bold>
@@ -58,7 +75,7 @@
      </property>
      <property name="styleSheet">
       <string notr="true">color: rgb(254, 253, 255);
-font: 16pt;</string>
+font: 12pt;</string>
      </property>
      <property name="text">
       <string>USB Interface</string>
@@ -85,7 +102,7 @@ font: 16pt;</string>
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <widget class="QLabel" name="label_2">
+     <widget class="QLabel" name="vid_label">
       <property name="geometry">
        <rect>
         <x>7</x>
@@ -96,8 +113,7 @@ font: 16pt;</string>
       </property>
       <property name="font">
        <font>
-        <family>Monaco</family>
-        <pointsize>12</pointsize>
+        <pointsize>10</pointsize>
         <weight>50</weight>
         <italic>false</italic>
         <bold>false</bold>
@@ -105,7 +121,7 @@ font: 16pt;</string>
       </property>
       <property name="styleSheet">
        <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
       </property>
       <property name="text">
        <string>VID</string>
@@ -114,7 +130,7 @@ font: 12pt;</string>
        <enum>Qt::PlainText</enum>
       </property>
      </widget>
-     <widget class="QLabel" name="label_3">
+     <widget class="QLabel" name="pid_label">
       <property name="geometry">
        <rect>
         <x>169</x>
@@ -125,8 +141,7 @@ font: 12pt;</string>
       </property>
       <property name="font">
        <font>
-        <family>Monaco</family>
-        <pointsize>12</pointsize>
+        <pointsize>10</pointsize>
         <weight>50</weight>
         <italic>false</italic>
         <bold>false</bold>
@@ -134,7 +149,7 @@ font: 12pt;</string>
       </property>
       <property name="styleSheet">
        <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
       </property>
       <property name="text">
        <string>PID</string>
@@ -164,6 +179,9 @@ border-color: &quot;Solid&quot;;</string>
          <width>76</width>
          <height>15</height>
         </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(255, 255, 255);</string>
        </property>
       </widget>
      </widget>
@@ -195,9 +213,12 @@ border-color: &quot;Solid&quot;;</string>
          <height>15</height>
         </rect>
        </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(255, 255, 255);</string>
+       </property>
       </widget>
      </widget>
-     <widget class="QPushButton" name="pushButton">
+     <widget class="QPushButton" name="usb_connect">
       <property name="geometry">
        <rect>
         <x>6</x>
@@ -216,7 +237,8 @@ border-color: &quot;Solid&quot;;</string>
       </property>
       <property name="styleSheet">
        <string notr="true">background-color: #181818;
-border-color: &quot;Solid&quot;;</string>
+border-color: &quot;Solid&quot;;
+color:white</string>
       </property>
       <property name="text">
        <string>Connect</string>
@@ -240,8 +262,7 @@ border-color: &quot;Solid&quot;;</string>
      </property>
      <property name="font">
       <font>
-       <family>Monaco</family>
-       <pointsize>16</pointsize>
+       <pointsize>12</pointsize>
        <weight>50</weight>
        <italic>false</italic>
        <bold>false</bold>
@@ -249,7 +270,7 @@ border-color: &quot;Solid&quot;;</string>
      </property>
      <property name="styleSheet">
       <string notr="true">color: rgb(254, 253, 255);
-font: 16pt;</string>
+font: 12pt;</string>
      </property>
      <property name="text">
       <string>Device Information</string>
@@ -287,8 +308,7 @@ font: 16pt;</string>
       </property>
       <property name="font">
        <font>
-        <family>Monaco</family>
-        <pointsize>12</pointsize>
+        <pointsize>10</pointsize>
         <weight>50</weight>
         <italic>false</italic>
         <bold>false</bold>
@@ -296,7 +316,7 @@ font: 16pt;</string>
       </property>
       <property name="styleSheet">
        <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
       </property>
       <property name="text">
        <string>Manufacture:</string>
@@ -316,8 +336,7 @@ font: 12pt;</string>
       </property>
       <property name="font">
        <font>
-        <family>Monaco</family>
-        <pointsize>12</pointsize>
+        <pointsize>10</pointsize>
         <weight>50</weight>
         <italic>false</italic>
         <bold>false</bold>
@@ -325,7 +344,7 @@ font: 12pt;</string>
       </property>
       <property name="styleSheet">
        <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
       </property>
       <property name="text">
        <string>Product:</string>
@@ -345,8 +364,7 @@ font: 12pt;</string>
       </property>
       <property name="font">
        <font>
-        <family>Monaco</family>
-        <pointsize>12</pointsize>
+        <pointsize>10</pointsize>
         <weight>50</weight>
         <italic>false</italic>
         <bold>false</bold>
@@ -354,7 +372,7 @@ font: 12pt;</string>
       </property>
       <property name="styleSheet">
        <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
       </property>
       <property name="text">
        <string>Serial #:</string>
@@ -378,8 +396,7 @@ font: 12pt;</string>
      </property>
      <property name="font">
       <font>
-       <family>Monaco</family>
-       <pointsize>16</pointsize>
+       <pointsize>12</pointsize>
        <weight>50</weight>
        <italic>false</italic>
        <bold>false</bold>
@@ -387,7 +404,7 @@ font: 12pt;</string>
      </property>
      <property name="styleSheet">
       <string notr="true">color: rgb(254, 253, 255);
-font: 16pt;</string>
+font: 12pt;</string>
      </property>
      <property name="text">
       <string>Calibration</string>
@@ -425,8 +442,7 @@ font: 16pt;</string>
       </property>
       <property name="font">
        <font>
-        <family>Monaco</family>
-        <pointsize>12</pointsize>
+        <pointsize>10</pointsize>
         <weight>50</weight>
         <italic>false</italic>
         <bold>false</bold>
@@ -434,7 +450,7 @@ font: 16pt;</string>
       </property>
       <property name="styleSheet">
        <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
       </property>
       <property name="text">
        <string>DAC Offset</string>
@@ -448,14 +464,13 @@ font: 12pt;</string>
        <rect>
         <x>8</x>
         <y>26</y>
-        <width>60</width>
+        <width>65</width>
         <height>14</height>
        </rect>
       </property>
       <property name="font">
        <font>
-        <family>Monaco</family>
-        <pointsize>12</pointsize>
+        <pointsize>10</pointsize>
         <weight>50</weight>
         <italic>false</italic>
         <bold>false</bold>
@@ -463,7 +478,7 @@ font: 12pt;</string>
       </property>
       <property name="styleSheet">
        <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
       </property>
       <property name="text">
        <string>DAC Gain</string>
@@ -483,8 +498,7 @@ font: 12pt;</string>
       </property>
       <property name="font">
        <font>
-        <family>Monaco</family>
-        <pointsize>12</pointsize>
+        <pointsize>10</pointsize>
         <weight>50</weight>
         <italic>false</italic>
         <bold>false</bold>
@@ -492,7 +506,7 @@ font: 12pt;</string>
       </property>
       <property name="styleSheet">
        <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
       </property>
       <property name="text">
        <string>Pot. Offset</string>
@@ -512,8 +526,7 @@ font: 12pt;</string>
       </property>
       <property name="font">
        <font>
-        <family>Monaco</family>
-        <pointsize>12</pointsize>
+        <pointsize>10</pointsize>
         <weight>50</weight>
         <italic>false</italic>
         <bold>false</bold>
@@ -521,7 +534,7 @@ font: 12pt;</string>
       </property>
       <property name="styleSheet">
        <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
       </property>
       <property name="text">
        <string>Curr. Offset</string>
@@ -558,6 +571,9 @@ border-color: &quot;Solid&quot;;</string>
          <height>17</height>
         </rect>
        </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(255, 255, 255);</string>
+       </property>
       </widget>
      </widget>
      <widget class="QFrame" name="frame_10">
@@ -587,6 +603,9 @@ border-color: &quot;Solid&quot;;</string>
          <width>111</width>
          <height>17</height>
         </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(255, 255, 255);</string>
        </property>
       </widget>
      </widget>
@@ -618,6 +637,9 @@ border-color: &quot;Solid&quot;;</string>
          <height>17</height>
         </rect>
        </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(255, 255, 255);</string>
+       </property>
       </widget>
      </widget>
      <widget class="QFrame" name="frame_12">
@@ -648,6 +670,9 @@ border-color: &quot;Solid&quot;;</string>
          <height>17</height>
         </rect>
        </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(255, 255, 255);</string>
+       </property>
       </widget>
      </widget>
      <widget class="QLabel" name="label_15">
@@ -661,8 +686,7 @@ border-color: &quot;Solid&quot;;</string>
       </property>
       <property name="font">
        <font>
-        <family>Monaco</family>
-        <pointsize>12</pointsize>
+        <pointsize>10</pointsize>
         <weight>50</weight>
         <italic>false</italic>
         <bold>false</bold>
@@ -670,7 +694,7 @@ border-color: &quot;Solid&quot;;</string>
       </property>
       <property name="styleSheet">
        <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
       </property>
       <property name="text">
        <string>R1</string>
@@ -690,8 +714,7 @@ font: 12pt;</string>
       </property>
       <property name="font">
        <font>
-        <family>Monaco</family>
-        <pointsize>12</pointsize>
+        <pointsize>10</pointsize>
         <weight>50</weight>
         <italic>false</italic>
         <bold>false</bold>
@@ -699,7 +722,7 @@ font: 12pt;</string>
       </property>
       <property name="styleSheet">
        <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
       </property>
       <property name="text">
        <string>R2</string>
@@ -719,8 +742,7 @@ font: 12pt;</string>
       </property>
       <property name="font">
        <font>
-        <family>Monaco</family>
-        <pointsize>12</pointsize>
+        <pointsize>10</pointsize>
         <weight>50</weight>
         <italic>false</italic>
         <bold>false</bold>
@@ -728,7 +750,7 @@ font: 12pt;</string>
       </property>
       <property name="styleSheet">
        <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
       </property>
       <property name="text">
        <string>R3</string>
@@ -765,6 +787,9 @@ border-color: &quot;Solid&quot;;</string>
          <height>13</height>
         </rect>
        </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(255, 255, 255);</string>
+       </property>
       </widget>
      </widget>
      <widget class="QFrame" name="frame_14">
@@ -794,6 +819,9 @@ border-color: &quot;Solid&quot;;</string>
          <width>42</width>
          <height>13</height>
         </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(255, 255, 255);</string>
        </property>
       </widget>
      </widget>
@@ -825,6 +853,9 @@ border-color: &quot;Solid&quot;;</string>
          <height>13</height>
         </rect>
        </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(255, 255, 255);</string>
+       </property>
       </widget>
      </widget>
      <widget class="QPushButton" name="pushButton_4">
@@ -838,8 +869,8 @@ border-color: &quot;Solid&quot;;</string>
       </property>
       <property name="font">
        <font>
-        <family>Monaco</family>
-        <pointsize>12</pointsize>
+        <family>DejaVu Sans</family>
+        <pointsize>10</pointsize>
        </font>
       </property>
       <property name="autoFillBackground">
@@ -847,7 +878,8 @@ border-color: &quot;Solid&quot;;</string>
       </property>
       <property name="styleSheet">
        <string notr="true">background-color: #181818;
-border-color: &quot;Solid&quot;;</string>
+border-color: &quot;Solid&quot;;
+color:white</string>
       </property>
       <property name="text">
        <string>Save to device</string>
@@ -867,8 +899,8 @@ border-color: &quot;Solid&quot;;</string>
       </property>
       <property name="font">
        <font>
-        <family>Monaco</family>
-        <pointsize>12</pointsize>
+        <family>DejaVu Sans</family>
+        <pointsize>10</pointsize>
        </font>
       </property>
       <property name="autoFillBackground">
@@ -876,7 +908,8 @@ border-color: &quot;Solid&quot;;</string>
       </property>
       <property name="styleSheet">
        <string notr="true">background-color: #181818;
-border-color: &quot;Solid&quot;;</string>
+border-color: &quot;Solid&quot;;
+color:white</string>
       </property>
       <property name="text">
        <string>Load from device</string>
@@ -900,8 +933,7 @@ border-color: &quot;Solid&quot;;</string>
      </property>
      <property name="font">
       <font>
-       <family>Monaco</family>
-       <pointsize>16</pointsize>
+       <pointsize>12</pointsize>
        <weight>50</weight>
        <italic>false</italic>
        <bold>false</bold>
@@ -909,7 +941,7 @@ border-color: &quot;Solid&quot;;</string>
      </property>
      <property name="styleSheet">
       <string notr="true">color: rgb(254, 253, 255);
-font: 16pt;</string>
+font: 12pt;</string>
      </property>
      <property name="text">
       <string>Manual Control</string>
@@ -936,7 +968,7 @@ font: 16pt;</string>
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <widget class="QLabel" name="label_19">
+     <widget class="QLabel" name="cell_connect_label">
       <property name="geometry">
        <rect>
         <x>8</x>
@@ -947,8 +979,7 @@ font: 16pt;</string>
       </property>
       <property name="font">
        <font>
-        <family>Monaco</family>
-        <pointsize>12</pointsize>
+        <pointsize>10</pointsize>
         <weight>50</weight>
         <italic>false</italic>
         <bold>false</bold>
@@ -956,7 +987,7 @@ font: 16pt;</string>
       </property>
       <property name="styleSheet">
        <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
       </property>
       <property name="text">
        <string>Cell connection</string>
@@ -965,19 +996,18 @@ font: 12pt;</string>
        <enum>Qt::PlainText</enum>
       </property>
      </widget>
-     <widget class="QLabel" name="label_20">
+     <widget class="QLabel" name="mode_label">
       <property name="geometry">
        <rect>
         <x>8</x>
         <y>52</y>
-        <width>31</width>
-        <height>14</height>
+        <width>41</width>
+        <height>16</height>
        </rect>
       </property>
       <property name="font">
        <font>
-        <family>Monaco</family>
-        <pointsize>12</pointsize>
+        <pointsize>10</pointsize>
         <weight>50</weight>
         <italic>false</italic>
         <bold>false</bold>
@@ -985,7 +1015,7 @@ font: 12pt;</string>
       </property>
       <property name="styleSheet">
        <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
       </property>
       <property name="text">
        <string>Mode</string>
@@ -994,7 +1024,7 @@ font: 12pt;</string>
        <enum>Qt::PlainText</enum>
       </property>
      </widget>
-     <widget class="QLabel" name="label_21">
+     <widget class="QLabel" name="current_range_label">
       <property name="geometry">
        <rect>
         <x>8</x>
@@ -1005,8 +1035,7 @@ font: 12pt;</string>
       </property>
       <property name="font">
        <font>
-        <family>Monaco</family>
-        <pointsize>12</pointsize>
+        <pointsize>10</pointsize>
         <weight>50</weight>
         <italic>false</italic>
         <bold>false</bold>
@@ -1014,7 +1043,7 @@ font: 12pt;</string>
       </property>
       <property name="styleSheet">
        <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
       </property>
       <property name="text">
        <string>Current range</string>
@@ -1034,8 +1063,8 @@ font: 12pt;</string>
       </property>
       <property name="font">
        <font>
-        <family>Monaco</family>
-        <pointsize>12</pointsize>
+        <family>DejaVu Sans</family>
+        <pointsize>10</pointsize>
        </font>
       </property>
       <property name="autoFillBackground">
@@ -1043,7 +1072,8 @@ font: 12pt;</string>
       </property>
       <property name="styleSheet">
        <string notr="true">background-color: #181818;
-border-color: &quot;Solid&quot;;</string>
+border-color: &quot;Solid&quot;;
+color:white</string>
       </property>
       <property name="text">
        <string>ON</string>
@@ -1063,8 +1093,8 @@ border-color: &quot;Solid&quot;;</string>
       </property>
       <property name="font">
        <font>
-        <family>Monaco</family>
-        <pointsize>12</pointsize>
+        <family>DejaVu Sans</family>
+        <pointsize>10</pointsize>
        </font>
       </property>
       <property name="autoFillBackground">
@@ -1072,7 +1102,8 @@ border-color: &quot;Solid&quot;;</string>
       </property>
       <property name="styleSheet">
        <string notr="true">background-color: #181818;
-border-color: &quot;Solid&quot;;</string>
+border-color: &quot;Solid&quot;;
+color:white</string>
       </property>
       <property name="text">
        <string>OFF</string>
@@ -1092,8 +1123,8 @@ border-color: &quot;Solid&quot;;</string>
       </property>
       <property name="font">
        <font>
-        <family>Monaco</family>
-        <pointsize>12</pointsize>
+        <family>DejaVu Sans</family>
+        <pointsize>10</pointsize>
        </font>
       </property>
       <property name="autoFillBackground">
@@ -1101,7 +1132,8 @@ border-color: &quot;Solid&quot;;</string>
       </property>
       <property name="styleSheet">
        <string notr="true">background-color: #181818;
-border-color: &quot;Solid&quot;;</string>
+border-color: &quot;Solid&quot;;
+color:white</string>
       </property>
       <property name="text">
        <string>Potentiostat</string>
@@ -1121,8 +1153,8 @@ border-color: &quot;Solid&quot;;</string>
       </property>
       <property name="font">
        <font>
-        <family>Monaco</family>
-        <pointsize>12</pointsize>
+        <family>DejaVu Sans</family>
+        <pointsize>10</pointsize>
        </font>
       </property>
       <property name="autoFillBackground">
@@ -1130,7 +1162,8 @@ border-color: &quot;Solid&quot;;</string>
       </property>
       <property name="styleSheet">
        <string notr="true">background-color: #181818;
-border-color: &quot;Solid&quot;;</string>
+border-color: &quot;Solid&quot;;
+color:white</string>
       </property>
       <property name="text">
        <string>Galvanostatic</string>
@@ -1150,8 +1183,8 @@ border-color: &quot;Solid&quot;;</string>
       </property>
       <property name="font">
        <font>
-        <family>Monaco</family>
-        <pointsize>12</pointsize>
+        <family>DejaVu Sans</family>
+        <pointsize>10</pointsize>
        </font>
       </property>
       <property name="autoFillBackground">
@@ -1159,7 +1192,8 @@ border-color: &quot;Solid&quot;;</string>
       </property>
       <property name="styleSheet">
        <string notr="true">background-color: #181818;
-border-color: &quot;Solid&quot;;</string>
+border-color: &quot;Solid&quot;;
+color:white</string>
       </property>
       <property name="text">
        <string>SET</string>
@@ -1179,8 +1213,8 @@ border-color: &quot;Solid&quot;;</string>
       </property>
       <property name="font">
        <font>
-        <family>Monaco</family>
-        <pointsize>12</pointsize>
+        <family>DejaVu Sans</family>
+        <pointsize>10</pointsize>
        </font>
       </property>
       <property name="autoFillBackground">
@@ -1188,7 +1222,8 @@ border-color: &quot;Solid&quot;;</string>
       </property>
       <property name="styleSheet">
        <string notr="true">background-color: #181818;
-border-color: &quot;Solid&quot;;</string>
+border-color: &quot;Solid&quot;;
+color:white</string>
       </property>
       <property name="text">
        <string>SET</string>
@@ -1225,6 +1260,9 @@ border-color: &quot;Solid&quot;;</string>
          <height>26</height>
         </rect>
        </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(255, 255, 255);</string>
+       </property>
       </widget>
      </widget>
      <widget class="QFrame" name="frame_18">
@@ -1260,7 +1298,7 @@ border-color: &quot;Solid&quot;;</string>
        </property>
        <property name="styleSheet">
         <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
        </property>
        <property name="editable">
         <bool>false</bool>
@@ -1303,7 +1341,7 @@ border-color: &quot;Solid&quot;;</string>
        </property>
        <property name="styleSheet">
         <string notr="true">color: rgb(254, 253, 255);
-font: 12pt;</string>
+font: 10pt;</string>
        </property>
        <property name="editable">
         <bool>false</bool>
@@ -1316,10 +1354,16 @@ font: 12pt;</string>
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>661</y>
+      <y>530</y>
       <width>1440</width>
-      <height>239</height>
+      <height>73</height>
      </rect>
+    </property>
+    <property name="mouseTracking">
+     <bool>false</bool>
+    </property>
+    <property name="acceptDrops">
+     <bool>false</bool>
     </property>
     <property name="styleSheet">
      <string notr="true">background-color: #181818;
@@ -1332,6 +1376,69 @@ border-color: &quot;Solid&quot;;</string>
      <enum>QFrame::Raised</enum>
     </property>
    </widget>
+   <widget class="QFrame" name="frame_6">
+    <property name="geometry">
+     <rect>
+      <x>310</x>
+      <y>3</y>
+      <width>127</width>
+      <height>102</height>
+     </rect>
+    </property>
+    <property name="mouseTracking">
+     <bool>true</bool>
+    </property>
+    <property name="acceptDrops">
+     <bool>true</bool>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: #181818;
+border-color: &quot;Solid&quot;;color: white;</string>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+    <widget class="QPushButton" name="create_measure">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>127</width>
+       <height>102</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+      </font>
+     </property>
+     <property name="cursor">
+      <cursorShape>ArrowCursor</cursorShape>
+     </property>
+     <property name="mouseTracking">
+      <bool>true</bool>
+     </property>
+     <property name="acceptDrops">
+      <bool>true</bool>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>plus-icon-black-2.png</normaloff>plus-icon-black-2.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>60</width>
+       <height>60</height>
+      </size>
+     </property>
+     <property name="flat">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -1341,6 +1448,9 @@ border-color: &quot;Solid&quot;;</string>
      <width>1440</width>
      <height>22</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(255, 255, 255);</string>
    </property>
    <property name="defaultUp">
     <bool>false</bool>
