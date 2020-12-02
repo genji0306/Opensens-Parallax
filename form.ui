@@ -16,13 +16,25 @@
     <height>545</height>
    </size>
   </property>
+  <property name="mouseTracking">
+   <bool>true</bool>
+  </property>
+  <property name="acceptDrops">
+   <bool>true</bool>
+  </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <property name="styleSheet">
    <string notr="true">background-color: #000000;</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
+  <widget class="QWidget" name="main_widget">
+   <property name="mouseTracking">
+    <bool>true</bool>
+   </property>
+   <property name="acceptDrops">
+    <bool>true</bool>
+   </property>
    <widget class="QFrame" name="frame">
     <property name="geometry">
      <rect>
@@ -90,7 +102,7 @@ font: 12pt;</string>
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <widget class="QLabel" name="label_2">
+     <widget class="QLabel" name="vid_label">
       <property name="geometry">
        <rect>
         <x>7</x>
@@ -118,7 +130,7 @@ font: 10pt;</string>
        <enum>Qt::PlainText</enum>
       </property>
      </widget>
-     <widget class="QLabel" name="label_3">
+     <widget class="QLabel" name="pid_label">
       <property name="geometry">
        <rect>
         <x>169</x>
@@ -206,7 +218,7 @@ border-color: &quot;Solid&quot;;</string>
        </property>
       </widget>
      </widget>
-     <widget class="QPushButton" name="pushButton">
+     <widget class="QPushButton" name="usb_connect">
       <property name="geometry">
        <rect>
         <x>6</x>
@@ -956,7 +968,7 @@ font: 12pt;</string>
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <widget class="QLabel" name="label_19">
+     <widget class="QLabel" name="cell_connect_label">
       <property name="geometry">
        <rect>
         <x>8</x>
@@ -984,7 +996,7 @@ font: 10pt;</string>
        <enum>Qt::PlainText</enum>
       </property>
      </widget>
-     <widget class="QLabel" name="label_20">
+     <widget class="QLabel" name="mode_label">
       <property name="geometry">
        <rect>
         <x>8</x>
@@ -1012,7 +1024,7 @@ font: 10pt;</string>
        <enum>Qt::PlainText</enum>
       </property>
      </widget>
-     <widget class="QLabel" name="label_21">
+     <widget class="QLabel" name="current_range_label">
       <property name="geometry">
        <rect>
         <x>8</x>
@@ -1342,10 +1354,16 @@ font: 10pt;</string>
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>661</y>
+      <y>530</y>
       <width>1440</width>
-      <height>239</height>
+      <height>73</height>
      </rect>
+    </property>
+    <property name="mouseTracking">
+     <bool>false</bool>
+    </property>
+    <property name="acceptDrops">
+     <bool>false</bool>
     </property>
     <property name="styleSheet">
      <string notr="true">background-color: #181818;
@@ -1361,11 +1379,17 @@ border-color: &quot;Solid&quot;;</string>
    <widget class="QFrame" name="frame_6">
     <property name="geometry">
      <rect>
-      <x>350</x>
-      <y>200</y>
-      <width>120</width>
-      <height>20</height>
+      <x>310</x>
+      <y>3</y>
+      <width>127</width>
+      <height>102</height>
      </rect>
+    </property>
+    <property name="mouseTracking">
+     <bool>true</bool>
+    </property>
+    <property name="acceptDrops">
+     <bool>true</bool>
     </property>
     <property name="styleSheet">
      <string notr="true">background-color: #181818;
@@ -1377,13 +1401,13 @@ border-color: &quot;Solid&quot;;color: white;</string>
     <property name="frameShadow">
      <enum>QFrame::Raised</enum>
     </property>
-    <widget class="QPushButton" name="pushButton_2">
+    <widget class="QPushButton" name="create_measure">
      <property name="geometry">
       <rect>
        <x>0</x>
        <y>0</y>
-       <width>120</width>
-       <height>18</height>
+       <width>127</width>
+       <height>102</height>
       </rect>
      </property>
      <property name="font">
@@ -1391,8 +1415,27 @@ border-color: &quot;Solid&quot;;color: white;</string>
        <pointsize>10</pointsize>
       </font>
      </property>
-     <property name="text">
-      <string>PushButton</string>
+     <property name="cursor">
+      <cursorShape>ArrowCursor</cursorShape>
+     </property>
+     <property name="mouseTracking">
+      <bool>true</bool>
+     </property>
+     <property name="acceptDrops">
+      <bool>true</bool>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>plus-icon-black-2.png</normaloff>plus-icon-black-2.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>60</width>
+       <height>60</height>
+      </size>
+     </property>
+     <property name="flat">
+      <bool>false</bool>
      </property>
     </widget>
    </widget>
