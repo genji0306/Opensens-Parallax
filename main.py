@@ -10,17 +10,44 @@ import pyqtgraph as pg
 import random
 import copy
 import usb
+import time
+import platform
+import timeit
+import collections
 
 pg.setConfigOption('background', 'w')
 
 x = [450, 594, 310, 450, 594, 310, 450, 594]
 y = [3, 3, 115, 115, 115, 227, 227, 227]
-y_size = [56, 176, 296, 416, 536]
+y_size = [110, 230, 350, 470, 590]
 
 usb_vid = "0xa0a0"  # Default USB vendor ID, can also be adjusted in the GUI
 usb_pid = "0x0002"  # Default USB product ID, can also be adjusted in the GUI
 
 dev = None  # Global object which is reserved for the USB device
+potential = 0.  # Measured potential in V
+current = 0.  # Measured current in mA
+raw_potential = 0  # Measured potential in ADC counts
+raw_current = 0  # Measured current in ADC counts
+time_of_last_adcread = 0.
+adcread_interval = 0.09  # ADC sampling interval (in seconds)
+current_offset = 0.  # Current offset in DAC counts
+potential_offset = 0.  # Potential offset in DAC counts
+currentrange = 0
+shunt_calibration = [1., 1., 1.]
+last_potential_values = collections.deque(maxlen=200)
+last_current_values = collections.deque(maxlen=200)
+last_raw_potential_values = collections.deque(maxlen=200)
+last_raw_current_values = collections.deque(maxlen=200)
+
+if platform.system() != "Windows":
+    # On Linux/OSX, use the Qt timer
+    busyloop_interval = 0
+    qt_timer_period = 1e3*adcread_interval  # convert to ms
+else:
+    # On MS Windows, system timing is inaccurate, so use a busy loop instead
+    busyloop_interval = adcread_interval
+    qt_timer_period = 0
 
 
 class States:
@@ -48,7 +75,6 @@ def connect_disconnect_usb():
     usb_pid_string = str(main_window.text_pid.text())
     dev = usb.core.find(idVendor=int(usb_vid_string, 0),
                         idProduct=int(usb_pid_string, 0))
-    print(dev)
     if dev is None:
         print("USB Device Not Found, No USB device was found with VID %s and PID %s. Verify the vendor/product ID and check the USB connection." %
               (usb_vid_string, usb_pid_string))
@@ -56,7 +82,6 @@ def connect_disconnect_usb():
         main_window.usb_connect.setText("Disconnect")
         # log_message("USB Interface connected.")
         try:
-            print(dev.manufacturer, dev.product, dev.serial_number)
             main_window.label_manufacture.setText(
                 "Manufacture:   %s" % (dev.manufacturer))
             main_window.label_product.setText("Product:   %s" % (dev.product))
@@ -75,6 +100,104 @@ def connect_disconnect_usb():
             pass  # In case the device is not yet calibrated
 
 
+def twocomplement_to_decimal(msb, middlebyte, lsb):
+    """Convert a 22-bit two-complement ADC value consisting of three bytes to a signed integer (see MCP3550 datasheet for details)."""
+    ovh = (msb > 63) and (msb < 128)  # Check for overflow high (B22 set)
+    ovl = (msb > 127)  # Check for overflow low (B23 set)
+    combined_value = (msb % 64)*2**16+middlebyte*2**8 + \
+        lsb  # Get rid of overflow bits
+    if not ovh and not ovl:
+        if msb > 31:  # B21 set -> negative number
+            answer = combined_value - 2**22
+        else:
+            answer = combined_value
+    else:  # overflow
+        if msb > 127:  # B23 set -> negative number
+            answer = combined_value - 2**22
+        else:
+            answer = combined_value
+    return answer
+
+
+def wait_for_adcread():
+    """Wait for the duration specified in the busyloop_interval."""
+    if busyloop_interval == 0:
+        return  # On Linux/Mac, system timing is used instead of the busyloop
+    else:
+        # Sleep for some time to prevent wasting too many CPU cycles
+        time.sleep(busyloop_interval/2.)
+        app.processEvents()  # Update the GUI
+        while timeit.default_timer() < time_of_last_adcread + busyloop_interval:
+            # Busy loop (this is the only way to get accurate timing on MS Windows)
+            pass
+
+
+def read_potential_current():
+    """Read the most recent potential and current values from the device's ADC."""
+    global potential, current, raw_potential, raw_current, time_of_last_adcread
+    wait_for_adcread()
+    time_of_last_adcread = timeit.default_timer()
+    dev.write(0x01, b'ADCREAD')  # 0x01 = write address of EP1
+    response = bytes(dev.read(0x81, 64))  # 0x81 = read address of EP1
+    if response != b'WAIT':  # 'WAIT' is received if a conversion has not yet finished
+        raw_potential = twocomplement_to_decimal(
+            response[0], response[1], response[2])
+        raw_current = twocomplement_to_decimal(
+            response[3], response[4], response[5])
+        potential = (raw_potential-potential_offset)/2097152. * \
+            8.  # Calculate potential in V, compensating for offset
+        # Calculate current in mA, taking current range into account and compensating for offset
+        current = (raw_current-current_offset)/2097152.*25. / \
+            (shunt_calibration[currentrange]*100.**currentrange)
+        # potential_monitor.setText(potential_to_string(potential))
+        # current_monitor.setText(current_to_string(currentrange, current))
+        # # If enabled, all measurements are appended to an output file (even in idle mode)
+        # if logging_enabled:
+        #     try:
+        #         # Output tab-separated data containing time (in s), potential (in V), and current (in A)
+        #         print("%.2f\t%e\t%e" % (time_of_last_adcread, potential,
+        #                                 current*1e-3), file=open(hardware_log_filename.text(), 'a', 1))
+        #     except:
+        #         QtGui.QMessageBox.critical(
+        #             mainwidget, "Logging error!", "Logging error!")
+        #         # Disable logging in case of file errors
+        #         hardware_log_checkbox.setChecked(False)
+
+
+def idle_init():
+    """Perform some necessary initialization before entering the Idle state."""
+    global potential_plot_curve, current_plot_curve, legend, state
+    main_window.dynamicPlt2.clear()
+    try:
+        legend.scene().removeItem(legend)  # Remove any previous legends
+    except AttributeError:
+        pass  # In case the legend was already removed
+    except NameError:
+        pass  # In case a legend has never been created
+    main_window.dynamicPlt2.setLabel('bottom', 'Sample #', units="")
+    main_window.dynamicPlt2.setLabel('left', 'Value', units="")
+    legend = main_window.dynamicPlt2.addLegend()
+    main_window.dynamicPlt2.enableAutoRange()
+    main_window.dynamicPlt2.setXRange(0, 200, update=True)
+    potential_plot_curve = main_window.dynamicPlt2.plot(
+        pen='g', name='Potential (V)')
+    current_plot_curve = main_window.dynamicPlt2.plot(
+        pen='r', name='Current (mA)')
+    state = States.Idle  # Proceed to the Idle state
+
+
+def update_live_graph():
+    """Add newly measured potential and current values to their respective buffers and update the plot curves."""
+    last_potential_values.append(potential)
+    last_current_values.append(current)
+    last_raw_potential_values.append(raw_potential)
+    last_raw_current_values.append(raw_current)
+    xvalues = range(last_potential_values.maxlen -
+                    len(last_potential_values), last_potential_values.maxlen)
+    potential_plot_curve.setData(xvalues, list(last_potential_values))
+    current_plot_curve.setData(xvalues, list(last_current_values))
+
+
 class Frame(QPushButton):
     def __init__(self, parent):
         super(Frame, self).__init__(parent)
@@ -89,7 +212,7 @@ class Frame(QPushButton):
     def mouseReleaseEvent(self, e):
         if (main_window.frame_y.pos().y()-50 < self.pos().y() < main_window.frame_y.pos().y()+50):
             self.check_move = 0
-            self.resize(120, 73)
+            self.resize(120, 37)
             # self.setStyleSheet(
             #     "background-color: #202932;")
             self.move(y_size[main_window.status_line],
@@ -197,25 +320,24 @@ class main(QMainWindow):
         self.frame_y = self.findChild(QFrame, 'frame_20')
         self.dynamicPlt = pg.PlotWidget(self)
 
-        self.dynamicPlt.move(0, 630)
-        self.dynamicPlt.resize(1440, 50)
+        self.dynamicPlt.move(0, 585)
+        self.dynamicPlt.resize(1440, 120)
 
         self.dynamicPlt2 = pg.PlotWidget(self)
-
         self.dynamicPlt2.move(777, 0)
         self.dynamicPlt2.resize(663, 519)
 
         self.timer2 = pg.QtCore.QTimer()
         self.timer2.timeout.connect(self.update)
-        self.timer2.start(200)
+        self.timer2.start(1e3*0.09)
         self.show()
 
     def update(self):
-        QApplication.processEvents()
-        z = np.random.normal(size=1)
-        u = np.random.normal(size=1)
-        self.dynamicPlt.plot(z, u, pen=None, symbol='o')
-        self.dynamicPlt2.plot(z, u, pen=None, symbol='o')
+        if state == States.Idle_Init:
+            idle_init()
+        if state == States.Idle:
+            read_potential_current()
+            update_live_graph()
 
     def open_new(self):
         qt_wid = create(self)

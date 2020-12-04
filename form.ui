@@ -1354,9 +1354,9 @@ font: 10pt;</string>
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>530</y>
+      <y>523</y>
       <width>1440</width>
-      <height>73</height>
+      <height>37</height>
      </rect>
     </property>
     <property name="mouseTracking">
@@ -1375,7 +1375,7 @@ border-color: &quot;Solid&quot;;</string>
     <property name="frameShadow">
      <enum>QFrame::Raised</enum>
     </property>
-    <widget class="QPushButton" name="pushButton">
+    <widget class="QPushButton" name="button_start">
      <property name="geometry">
       <rect>
        <x>0</x>
@@ -1392,11 +1392,11 @@ font: 10pt;background-color: #181818;</string>
       <string>Start</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="pushButton_2">
+    <widget class="QPushButton" name="button_refresh">
      <property name="geometry">
       <rect>
-       <x>0</x>
-       <y>37</y>
+       <x>55</x>
+       <y>1</y>
        <width>55</width>
        <height>35</height>
       </rect>
