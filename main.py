@@ -23,22 +23,32 @@ y_size = [110, 230, 350, 470, 590]
 
 usb_vid = "0xa0a0"  # Default USB vendor ID, can also be adjusted in the GUI
 usb_pid = "0x0002"  # Default USB product ID, can also be adjusted in the GUI
-
+current_range_list = ["20 mA", u"200 µA", u"2 µA"]
+# Fine adjustment for shunt resistors, containing values of R1/10ohm, R2/1kohm, R3/100kohm (can also be adjusted in the GUI)
+shunt_calibration = [1., 1., 1.]
+# Default current range (expressed as index in current_range_list)
+currentrange = 0
+units_list = ["Potential (V)", "Current (mA)", "DAC Code"]
 dev = None  # Global object which is reserved for the USB device
-potential = 0.  # Measured potential in V
-current = 0.  # Measured current in mA
-raw_potential = 0  # Measured potential in ADC counts
-raw_current = 0  # Measured current in ADC counts
-time_of_last_adcread = 0.
-adcread_interval = 0.09  # ADC sampling interval (in seconds)
 current_offset = 0.  # Current offset in DAC counts
 potential_offset = 0.  # Potential offset in DAC counts
-currentrange = 0
-shunt_calibration = [1., 1., 1.]
+potential = 0.  # Measured potential in V
+current = 0.  # Measured current in mA
 last_potential_values = collections.deque(maxlen=200)
 last_current_values = collections.deque(maxlen=200)
+raw_potential = 0  # Measured potential in ADC counts
+raw_current = 0  # Measured current in ADC counts
 last_raw_potential_values = collections.deque(maxlen=200)
 last_raw_current_values = collections.deque(maxlen=200)
+cv_parameters = {}  # Dictionary to hold the CV parameters
+cd_parameters = {}  # Dictionary to hold the charge/discharge parameters
+rate_parameters = {}  # Dictionary to hold the rate testing parameters
+# Global counters used for automatic current ranging
+overcounter, undercounter, skipcounter = 0, 0, 0
+time_of_last_adcread = 0.
+adcread_interval = 0.09  # ADC sampling interval (in seconds)
+# Enable logging of potential and current in idle mode (can be adjusted in the GUI)
+logging_enabled = False
 
 if platform.system() != "Windows":
     # On Linux/OSX, use the Qt timer
@@ -119,6 +129,24 @@ def twocomplement_to_decimal(msb, middlebyte, lsb):
     return answer
 
 
+def decimal_to_dac_bytes(value):
+    """Convert a floating-point number, ranging from -2**19 to 2**19-1, to three data bytes in the proper format for the DAC1220."""
+    code = 2**19 + \
+        int(round(value))  # Convert the (signed) input value to an unsigned 20-bit integer with zero at midway
+    # If the input exceeds the boundaries of the 20-bit integer, clip it
+    code = numpy.clip(code, 0, 2**20 - 1)
+    byte1 = code // 2**12
+    byte2 = (code % 2**12) // 2**4
+    byte3 = (code - byte1*2**12 - byte2*2**4)*2**4
+    return bytes([byte1, byte2, byte3])
+
+
+def dac_bytes_to_decimal(dac_bytes):
+    """Convert three data bytes in the DAC1220 format to a 20-bit number ranging from -2**19 to 2**19-1."""
+    code = 2**12*dac_bytes[0]+2**4*dac_bytes[1]+dac_bytes[2]/2**4
+    return code - 2**19
+
+
 def wait_for_adcread():
     """Wait for the duration specified in the busyloop_interval."""
     if busyloop_interval == 0:
@@ -167,21 +195,21 @@ def read_potential_current():
 def idle_init():
     """Perform some necessary initialization before entering the Idle state."""
     global potential_plot_curve, current_plot_curve, legend, state
-    main_window.dynamicPlt2.clear()
+    main_window.dynamicPlt.clear()
     try:
         legend.scene().removeItem(legend)  # Remove any previous legends
     except AttributeError:
         pass  # In case the legend was already removed
     except NameError:
         pass  # In case a legend has never been created
-    main_window.dynamicPlt2.setLabel('bottom', 'Sample #', units="")
-    main_window.dynamicPlt2.setLabel('left', 'Value', units="")
-    legend = main_window.dynamicPlt2.addLegend()
-    main_window.dynamicPlt2.enableAutoRange()
-    main_window.dynamicPlt2.setXRange(0, 200, update=True)
-    potential_plot_curve = main_window.dynamicPlt2.plot(
+    main_window.dynamicPlt.setLabel('bottom', 'Sample #', units="")
+    main_window.dynamicPlt.setLabel('left', 'Value', units="")
+    main_window.dynamicPlt.enableAutoRange()
+    main_window.dynamicPlt.setXRange(0, 200, update=True)
+    legend = main_window.dynamicPlt.addLegend(size=(5, 20), offset=(10, 10))
+    potential_plot_curve = main_window.dynamicPlt.plot(
         pen='g', name='Potential (V)')
-    current_plot_curve = main_window.dynamicPlt2.plot(
+    current_plot_curve = main_window.dynamicPlt.plot(
         pen='r', name='Current (mA)')
     state = States.Idle  # Proceed to the Idle state
 
@@ -329,7 +357,7 @@ class main(QMainWindow):
 
         self.timer2 = pg.QtCore.QTimer()
         self.timer2.timeout.connect(self.update)
-        self.timer2.start(1e3*0.09)
+        self.timer2.start(qt_timer_period)
         self.show()
 
     def update(self):

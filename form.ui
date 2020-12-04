@@ -431,7 +431,7 @@ font: 12pt;</string>
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <widget class="QLabel" name="label_11">
+     <widget class="QLabel" name="dac_offset">
       <property name="geometry">
        <rect>
         <x>8</x>
@@ -459,7 +459,7 @@ font: 10pt;</string>
        <enum>Qt::PlainText</enum>
       </property>
      </widget>
-     <widget class="QLabel" name="label_12">
+     <widget class="QLabel" name="dac_gain">
       <property name="geometry">
        <rect>
         <x>8</x>
@@ -487,7 +487,7 @@ font: 10pt;</string>
        <enum>Qt::PlainText</enum>
       </property>
      </widget>
-     <widget class="QLabel" name="label_13">
+     <widget class="QLabel" name="pot_offset">
       <property name="geometry">
        <rect>
         <x>8</x>
@@ -515,7 +515,7 @@ font: 10pt;</string>
        <enum>Qt::PlainText</enum>
       </property>
      </widget>
-     <widget class="QLabel" name="label_14">
+     <widget class="QLabel" name="curr_offset">
       <property name="geometry">
        <rect>
         <x>8</x>
@@ -778,7 +778,7 @@ border-color: &quot;Solid&quot;;</string>
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
-      <widget class="QLineEdit" name="lineEdit_10">
+      <widget class="QLineEdit" name="r1">
        <property name="geometry">
         <rect>
          <x>0</x>
@@ -811,7 +811,7 @@ border-color: &quot;Solid&quot;;</string>
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
-      <widget class="QLineEdit" name="lineEdit_11">
+      <widget class="QLineEdit" name="r3">
        <property name="geometry">
         <rect>
          <x>0</x>
@@ -844,7 +844,7 @@ border-color: &quot;Solid&quot;;</string>
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
-      <widget class="QLineEdit" name="lineEdit_12">
+      <widget class="QLineEdit" name="r2">
        <property name="geometry">
         <rect>
          <x>0</x>
@@ -1052,7 +1052,7 @@ font: 10pt;</string>
        <enum>Qt::PlainText</enum>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_3">
+     <widget class="QPushButton" name="cell_connect_on">
       <property name="geometry">
        <rect>
         <x>173</x>
@@ -1082,7 +1082,7 @@ color:white</string>
        <bool>false</bool>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_5">
+     <widget class="QPushButton" name="cell_connect_off">
       <property name="geometry">
        <rect>
         <x>236</x>
