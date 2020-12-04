@@ -100,10 +100,10 @@ def connect_disconnect_usb():
 
             # hardware_device_info_text.setText("Manufacturer: %s\nProduct: %s\nSerial #: %s" % (
             #     dev.manufacturer, dev.product, dev.serial_number))
-            # get_calibration()
+            get_calibration()
             # set_cell_status(False)  # Cell off
             # set_control_mode(False)  # Potentiostatic control
-            # set_current_range()  # Read current range from GUI
+            set_current_range()  # Read current range from GUI
             state = States.Idle_Init  # Start idle mode
         except ValueError:
             print("### Error USB")
@@ -145,6 +145,55 @@ def dac_bytes_to_decimal(dac_bytes):
     """Convert three data bytes in the DAC1220 format to a 20-bit number ranging from -2**19 to 2**19-1."""
     code = 2**12*dac_bytes[0]+2**4*dac_bytes[1]+dac_bytes[2]/2**4
     return code - 2**19
+
+
+def get_offset():
+    """Retrieve offset values from the device's flash memory."""
+    global potential_offset, current_offset
+    if dev is not None:  # Make sure it's connected
+        dev.write(0x01, b'OFFSETREAD')  # 0x01 = write address of EP1
+        response = bytes(dev.read(0x81, 64))  # 0x81 = read address of EP1
+        # If no offset value has been stored, all bits will be set
+        if response != bytes([255, 255, 255, 255, 255, 255]):
+            potential_offset = dac_bytes_to_decimal(response[0:3])
+            current_offset = dac_bytes_to_decimal(response[3:6])
+            main_window.pot_offset.setText("%d" % potential_offset)
+            main_window.curr_offset.setText("%d" % current_offset)
+        else:
+            print("ERROR get offset")
+    else:
+        print("Not connected")
+
+
+def get_dac_calibration():
+    """Retrieve DAC calibration values from the device's flash memory."""
+    if dev is not None:  # Make sure it's connected
+        dev.write(0x01, b'DACCALGET')  # 0x01 = write address of EP1
+        response = bytes(dev.read(0x81, 64))  # 0x81 = write address of EP1
+        # If no calibration value has been stored, all bits are set
+        if response != bytes([255, 255, 255, 255, 255, 255]):
+            dac_offset = dac_bytes_to_decimal(response[0:3])
+            dac_gain = dac_bytes_to_decimal(response[3:6])+2**19
+            main_window.dac_offset.setText("%d" % dac_offset)
+            main_window.dac_gain.setText("%d" % dac_gain)
+        else:
+            print("ERROR get offset")
+    else:
+        print("Not connected")
+
+
+def get_calibration():
+    """Retrieve all calibration values from the device's flash memory."""
+    get_dac_calibration()
+    get_offset()
+    # get_shunt_calibration()
+
+
+def set_current_range():
+    """Switch the current range based on the GUI dropdown selection."""
+    global currentrange
+    index = main_window.current_range_box.currentIndex()
+    currentrange = index
 
 
 def wait_for_adcread():
@@ -315,14 +364,23 @@ class main(QMainWindow):
         self.setMouseTracking(True)
 
         self.main_widget = self.findChild(QWidget, 'main_widget')
-        self.option = self.findChild(QComboBox, 'comboBox')
 
         self.usb_connect = self.findChild(QPushButton, 'usb_connect')
         self.usb_connect.clicked.connect(connect_disconnect_usb)
 
-        self.option.addItems(["20 mA", u"200 µA", u"2 µA"])
+        self.current_range_set = self.findChild(
+            QPushButton, 'current_range_set')
+        self.current_range_set.clicked.connect(set_current_range)
+
+        self.current_range_box = self.findChild(QComboBox, 'current_range_box')
+        self.current_range_box.addItems(["20 mA", u"200 µA", u"2 µA"])
         self.option2 = self.findChild(QComboBox, 'comboBox_2')
         self.option2.addItems(["Potential (V)", "Current (mA)", "DAC Code"])
+
+        self.dac_offset = self.findChild(QLineEdit, 'dac_offset_input')
+        self.dac_gain = self.findChild(QLineEdit, 'dac_gain_input')
+        self.pot_offset = self.findChild(QLineEdit, 'pot_offset_input')
+        self.curr_offset = self.findChild(QLineEdit, 'curr_offset_input')
 
         self.text_vid = self.findChild(QLineEdit, 'usb_vid')
         self.text_vid.setText(usb_vid)
