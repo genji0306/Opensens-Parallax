@@ -17,8 +17,8 @@ import collections
 
 pg.setConfigOption('background', 'w')
 
-x = [450, 594, 310, 450, 594, 310, 450, 594]
-y = [3, 3, 115, 115, 115, 227, 227, 227]
+x = [450, 590, 310, 450, 590, 310, 450, 590, 310, 450, 590, 310, 450, 590]
+y = [3, 3, 115, 115, 115, 227, 227, 227, 339, 339, 339, 451, 451, 451]
 y_size = [110, 230, 350, 470, 590]
 
 usb_vid = "0xa0a0"  # Default USB vendor ID, can also be adjusted in the GUI
@@ -282,6 +282,7 @@ class Frame(QPushButton):
         self.index_table = 0
         self.index_line = 0
         self.setMouseTracking(True)
+        self.index_measure = 0
 
     def mousePressEvent(self, e):
         self.check_move = 1
@@ -315,16 +316,30 @@ class create(QMainWindow):
         self.option = self.findChild(QComboBox, 'comboBox')
         self.option.addItems(
             ["Charge/disch", "Rate testing", "Cyclic voltammetry"])
+
         self.button_cancel = self.findChild(QPushButton, 'button_cancel')
         self.button_cancel.clicked.connect(self.exit_window)
+
         self.button_add = self.findChild(QPushButton, 'button_add')
         self.button_add.clicked.connect(self.add)
+
         self.frame_0 = self.findChild(QFrame, 'charge_disch')
         self.frame_1 = self.findChild(QFrame, 'rate_testing')
         self.frame_2 = self.findChild(QFrame, 'cyclic_voltammetry')
 
+        self.cd_ubound = self.findChild(QLineEdit, 'cd_ubound')
+        self.cd_chargecurrent = self.findChild(QLineEdit, 'cd_chargecurrent')
+        self.cd_dischargecurrent = self.findChild(
+            QLineEdit, 'cd_dischargecurrent')
+        self.cd_numsamples = self.findChild(QLineEdit, 'cd_numsamples')
+        self.cd_numcycles = self.findChild(QLineEdit, 'cd_numcycles')
+        self.cd_lbound = self.findChild(QLineEdit, 'cd_lbound')
+
+        self.cd_parameters = {}
+
         self.frame_1.hide()
         self.frame_2.hide()
+
         self.option.activated.connect(self.do_something)
 
     def do_something(self, index):
@@ -341,12 +356,25 @@ class create(QMainWindow):
             self.frame_1.hide()
             self.frame_2.show()
 
+    def get_para(self, index):
+        if index == 0:
+            self.cd_parameters['lbound'] = float(self.cd_lbound.text())
+            self.cd_parameters['ubound'] = float(self.cd_ubound.text())
+            self.cd_parameters['chargecurrent'] = float(
+                self.cd_chargecurrent.text())/1e3
+            self.cd_parameters['dischargecurrent'] = float(
+                self.cd_dischargecurrent.text())/1e3
+            self.cd_parameters['numcycles'] = int(self.cd_numcycles.text())
+            self.cd_parameters['numsamples'] = int(self.cd_numsamples.text())
+
     def exit_window(self):
         self.close()
 
     def add(self):
         if main_window.status_table < 8:
             frame_ = Frame(main_window.main_widget)
+            frame_.index_measure = self.option.currentIndex()
+            self.get_para(frame_.index_measure)
             frame_.setStyleSheet("background-color: #181818;")
             frame_.resize(127, 102)
             frame_.index_table = main_window.status_table
