@@ -41,7 +41,7 @@ raw_potential = 0  # Measured potential in ADC counts
 raw_current = 0  # Measured current in ADC counts
 last_raw_potential_values = collections.deque(maxlen=200)
 last_raw_current_values = collections.deque(maxlen=200)
-cv_parameters = {}  # Dictionary to hold the CV parameters
+cv_parameters = {}  # Dictionary to hold the CV 
 cd_parameters = {}  # Dictionary to hold the charge/discharge parameters
 rate_parameters = {}  # Dictionary to hold the rate testing parameters
 # Global counters used for automatic current ranging

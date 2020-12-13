@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import *
 # from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5 import uic, QtOpenGL, QtGui
-import numpy as np
+import numpy
 import pyqtgraph as pg
 import random
 import copy
@@ -14,6 +14,7 @@ import time
 import platform
 import timeit
 import collections
+import scipy.integrate
 
 pg.setConfigOption('background', 'w')
 
@@ -40,9 +41,9 @@ raw_potential = 0  # Measured potential in ADC counts
 raw_current = 0  # Measured current in ADC counts
 last_raw_potential_values = collections.deque(maxlen=200)
 last_raw_current_values = collections.deque(maxlen=200)
-cv_parameters = {}  # Dictionary to hold the CV parameters
-cd_parameters = {}  # Dictionary to hold the charge/discharge parameters
-rate_parameters = {}  # Dictionary to hold the rate testing parameters
+# cv_parameters = {}  # Dictionary to hold the CV parameters
+# cd_parameters = {}  # Dictionary to hold the charge/discharge parameters
+# rate_parameters = {}  # Dictionary to hold the rate testing parameters
 # Global counters used for automatic current ranging
 overcounter, undercounter, skipcounter = 0, 0, 0
 time_of_last_adcread = 0.
@@ -59,14 +60,38 @@ else:
     busyloop_interval = adcread_interval
     qt_timer_period = 0
 
+class AverageBuffer:
+    """Collect samples and compute an average as soon as a sufficient number of samples is added."""
+
+    def __init__(self, number_of_samples_to_average):
+        self.number_of_samples_to_average = number_of_samples_to_average
+        self.samples = []
+        self.averagebuffer = []
+
+    def add_sample(self, sample):
+        self.samples.append(sample)
+        if len(self.samples) >= self.number_of_samples_to_average:
+            self.averagebuffer.append(sum(self.samples)/len(self.samples))
+            self.samples = []
+
+    def clear(self):
+        self.samples = []
+        self.averagebuffer = []
 
 class States:
     """Expose a named list of states to be used as a simple state machine."""
     NotConnected, Idle_Init, Idle, Measuring_Offset, Stationary_Graph, Measuring_CV, Measuring_CD, Measuring_Rate = range(
         8)
 
+def check_state(desired_states):
+    """Check if the current state is in a given list. If so, return True; otherwise, show an error message and return False."""
+    if state not in desired_states:
+        return False
+    else:
+        return True
 
 state = States.NotConnected  # Initial state
+
 
 
 def connect_disconnect_usb():
@@ -307,6 +332,82 @@ class Frame(QPushButton):
             # self.setStyleSheet("background-color: #181818;")
             self.move(x[self.index_table], y[self.index_table])
 
+cd_parameters = []
+start_stop = 1
+
+def cd_start():
+    global start_stop,cd_charges, cd_currentsetpoint, cd_starttime, cd_currentcycle, cd_time_data, cd_potential_data, cd_current_data, cd_plot_curves, state
+    if not start_stop:
+        start_stop = 1
+        cd_stop(interrupted=False)
+        return
+    
+    if check_state([States.Idle, States.Stationary_Graph]) and start_stop:
+        cd_currentcycle = 1
+        cd_charges = []
+        cd_plot_curves = []
+        cd_currentsetpoint = cd_parameters[0]['chargecurrent']
+        set_current_range() 
+        time.sleep(.2)  # Allow DAC some time to settle
+        cd_starttime = timeit.default_timer()
+        # Holds averaged data for elapsed time
+        cd_time_data = AverageBuffer(cd_parameters[0]['numsamples'])
+        # Holds averaged data for potential
+        cd_potential_data = AverageBuffer(cd_parameters[0]['numsamples'])
+        # Holds averaged data for current
+        cd_current_data = AverageBuffer(cd_parameters[0]['numsamples'])
+        main_window.dynamicPlt2.clear()
+        main_window.dynamicPlt2.enableAutoRange()
+        main_window.dynamicPlt2.setLabel('bottom', 'Inserted/extracted charge', units="Ah")
+        main_window.dynamicPlt2.setLabel('left', 'Potential', units="V")
+        cd_plot_curves.append(main_window.dynamicPlt2.plot(pen='y'))
+        state = States.Measuring_CD
+        main_window.button_start.setText("Stop")
+        start_stop = 0
+
+def cd_update():
+    """Add a new data point to the charge/discharge measurement (should be called regularly)."""
+    global cd_currentsetpoint, cd_currentcycle, state
+    elapsed_time = timeit.default_timer()-cd_starttime
+    # End of charge/discharge measurements
+    if cd_currentcycle > cd_parameters[0]['numcycles']:
+        cd_stop(interrupted=False)
+    else:  # Continue charge/discharge measurement process
+        read_potential_current()  # Read new potential and current
+        cd_time_data.add_sample(elapsed_time)
+        cd_potential_data.add_sample(potential)
+        cd_current_data.add_sample(1e-3*current)  # Convert mA to A
+        # A new average was just calculated
+        if len(cd_time_data.samples) == 0 and len(cd_time_data.averagebuffer) > 0:
+            charge = numpy.abs(scipy.integrate.cumtrapz(cd_current_data.averagebuffer,
+                                                        cd_time_data.averagebuffer, initial=0.)/3600.)  # Cumulative charge in Ah
+            # Update the graph
+            cd_plot_curves[cd_currentcycle -
+                        1].setData(charge, cd_potential_data.averagebuffer)
+        # A potential cut-off has been reached
+        if (cd_currentsetpoint > 0 and potential > cd_parameters[0]['ubound']) or (cd_currentsetpoint < 0 and potential < cd_parameters[0]['lbound']):
+            # Switch from the discharge phase to the charge phase or vice versa
+            if cd_currentsetpoint == cd_parameters[0]['chargecurrent']:
+                cd_currentsetpoint = cd_parameters[0]['dischargecurrent']
+            else:
+                cd_currentsetpoint = cd_parameters[0]['chargecurrent']
+            set_current_range()  # Set new current range
+            # Start a new plot curve and append it to the plot area (keeping the old ones as well)
+            cd_plot_curves.append(main_window.dynamicPlt2.plot(pen='y'))
+            cd_charges.append(numpy.abs(numpy.trapz(
+                cd_current_data.averagebuffer, cd_time_data.averagebuffer)/3600.))  # Cumulative charge in Ah
+            # Clear average buffers to prepare them for the next cycle
+            for data in [cd_time_data, cd_potential_data, cd_current_data]:
+                data.clear()
+            cd_currentcycle += 1  # Next cycle
+
+def cd_stop(interrupted=True):
+    """Finish the charge/discharge measurement."""
+    global state
+    if check_state([States.Measuring_CD]):
+        main_window.button_start.setText("Start")
+        state = States.Stationary_Graph
+        # preview_cancel_button.show()
 
 class create(QMainWindow):
     def __init__(self, parent=None):
@@ -335,7 +436,7 @@ class create(QMainWindow):
         self.cd_numcycles = self.findChild(QLineEdit, 'cd_numcycles')
         self.cd_lbound = self.findChild(QLineEdit, 'cd_lbound')
 
-        self.cd_parameters = {}
+        self.cd_parameter = {}
 
         self.frame_1.hide()
         self.frame_2.hide()
@@ -358,14 +459,20 @@ class create(QMainWindow):
 
     def get_para(self, index):
         if index == 0:
-            self.cd_parameters['lbound'] = float(self.cd_lbound.text())
-            self.cd_parameters['ubound'] = float(self.cd_ubound.text())
-            self.cd_parameters['chargecurrent'] = float(
-                self.cd_chargecurrent.text())/1e3
-            self.cd_parameters['dischargecurrent'] = float(
-                self.cd_dischargecurrent.text())/1e3
-            self.cd_parameters['numcycles'] = int(self.cd_numcycles.text())
-            self.cd_parameters['numsamples'] = int(self.cd_numsamples.text())
+            try:
+                self.cd_parameter['lbound'] = float(self.cd_lbound.text())
+                self.cd_parameter['ubound'] = float(self.cd_ubound.text())
+                self.cd_parameter['chargecurrent'] = float(
+                    self.cd_chargecurrent.text())/1e3
+                self.cd_parameter['dischargecurrent'] = float(
+                    self.cd_dischargecurrent.text())/1e3
+                self.cd_parameter['numcycles'] = int(self.cd_numcycles.text())
+                self.cd_parameter['numsamples'] = int(self.cd_numsamples.text())
+                cd_parameters.append(self.cd_parameter)
+                return True
+            except ValueError:
+                self.exit_window()
+                return False
 
     def exit_window(self):
         self.close()
@@ -374,14 +481,14 @@ class create(QMainWindow):
         if main_window.status_table < 8:
             frame_ = Frame(main_window.main_widget)
             frame_.index_measure = self.option.currentIndex()
-            self.get_para(frame_.index_measure)
-            frame_.setStyleSheet("background-color: #181818;")
-            frame_.resize(127, 102)
-            frame_.index_table = main_window.status_table
-            frame_.move(x[main_window.status_table],
-                        y[main_window.status_table])
-            main_window.status_table += 1
-            frame_.show()
+            if self.get_para(frame_.index_measure):
+                frame_.setStyleSheet("background-color: #181818;")
+                frame_.resize(127, 102)
+                frame_.index_table = main_window.status_table
+                frame_.move(x[main_window.status_table],
+                            y[main_window.status_table])
+                main_window.status_table += 1
+                frame_.show()
         self.exit_window()
 
 
@@ -395,6 +502,9 @@ class main(QMainWindow):
 
         self.usb_connect = self.findChild(QPushButton, 'usb_connect')
         self.usb_connect.clicked.connect(connect_disconnect_usb)
+
+        self.button_start = self.findChild(QPushButton, 'button_start')
+        self.button_start.clicked.connect(cd_start)
 
         self.current_range_set = self.findChild(
             QPushButton, 'current_range_set')
@@ -449,9 +559,11 @@ class main(QMainWindow):
     def update(self):
         if state == States.Idle_Init:
             idle_init()
-        if state == States.Idle:
+        elif state == States.Idle:
             read_potential_current()
             update_live_graph()
+        elif state == States.Measuring_CD:
+            cd_update()
 
     def open_new(self):
         qt_wid = create(self)
