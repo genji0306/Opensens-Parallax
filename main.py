@@ -60,6 +60,7 @@ else:
     busyloop_interval = adcread_interval
     qt_timer_period = 0
 
+
 class AverageBuffer:
     """Collect samples and compute an average as soon as a sufficient number of samples is added."""
 
@@ -78,10 +79,12 @@ class AverageBuffer:
         self.samples = []
         self.averagebuffer = []
 
+
 class States:
     """Expose a named list of states to be used as a simple state machine."""
-    NotConnected, Idle_Init, Idle, Measuring_Offset, Stationary_Graph, Measuring_CV, Measuring_CD, Measuring_Rate = range(
-        8)
+    NotConnected, Idle_Init, Idle, Measuring_Offset, Stationary_Graph, Measuring_CV, Measuring_CD, Measuring_Rate, Measuring_start = range(
+        9)
+
 
 def check_state(desired_states):
     """Check if the current state is in a given list. If so, return True; otherwise, show an error message and return False."""
@@ -90,8 +93,8 @@ def check_state(desired_states):
     else:
         return True
 
-state = States.NotConnected  # Initial state
 
+state = States.NotConnected  # Initial state
 
 
 def connect_disconnect_usb():
@@ -332,45 +335,51 @@ class Frame(QPushButton):
             # self.setStyleSheet("background-color: #181818;")
             self.move(x[self.index_table], y[self.index_table])
 
+
 cd_parameters = []
 start_stop = 1
 
-def cd_start():
-    global start_stop,cd_charges, cd_currentsetpoint, cd_starttime, cd_currentcycle, cd_time_data, cd_potential_data, cd_current_data, cd_plot_curves, state
-    if not start_stop:
-        start_stop = 1
-        cd_stop(interrupted=False)
-        return
-    
-    if check_state([States.Idle, States.Stationary_Graph]) and start_stop:
+
+def cd_start(index):
+    global start_stop, cd_charges, cd_currentsetpoint, cd_starttime, cd_currentcycle, cd_time_data, cd_potential_data, cd_current_data, cd_plot_curves, state
+    # if not start_stop:
+    #     start_stop = 1
+    #     cd_stop(interrupted=False)
+    #     return
+
+    if check_state([States.Idle, States.Stationary_Graph, States.Measuring_start]) and start_stop:
         cd_currentcycle = 1
         cd_charges = []
         cd_plot_curves = []
-        cd_currentsetpoint = cd_parameters[0]['chargecurrent']
-        set_current_range() 
+        cd_currentsetpoint = cd_parameters[index]['chargecurrent']
+        set_current_range()
         time.sleep(.2)  # Allow DAC some time to settle
         cd_starttime = timeit.default_timer()
         # Holds averaged data for elapsed time
-        cd_time_data = AverageBuffer(cd_parameters[0]['numsamples'])
+        cd_time_data = AverageBuffer(cd_parameters[index]['numsamples'])
         # Holds averaged data for potential
-        cd_potential_data = AverageBuffer(cd_parameters[0]['numsamples'])
+        cd_potential_data = AverageBuffer(cd_parameters[index]['numsamples'])
         # Holds averaged data for current
-        cd_current_data = AverageBuffer(cd_parameters[0]['numsamples'])
+        cd_current_data = AverageBuffer(cd_parameters[index]['numsamples'])
         main_window.dynamicPlt2.clear()
         main_window.dynamicPlt2.enableAutoRange()
-        main_window.dynamicPlt2.setLabel('bottom', 'Inserted/extracted charge', units="Ah")
+        main_window.dynamicPlt2.setLabel(
+            'bottom', 'Inserted/extracted charge', units="Ah")
         main_window.dynamicPlt2.setLabel('left', 'Potential', units="V")
         cd_plot_curves.append(main_window.dynamicPlt2.plot(pen='y'))
         state = States.Measuring_CD
-        main_window.button_start.setText("Stop")
-        start_stop = 0
+        print("------ start CD")
+        # main_window.button_start.setText("Stop")
+        # start_stop = 0
 
-def cd_update():
+
+def cd_update(index):
     """Add a new data point to the charge/discharge measurement (should be called regularly)."""
     global cd_currentsetpoint, cd_currentcycle, state
     elapsed_time = timeit.default_timer()-cd_starttime
     # End of charge/discharge measurements
-    if cd_currentcycle > cd_parameters[0]['numcycles']:
+    print(elapsed_time)
+    if cd_currentcycle > cd_parameters[index]['numcycles'] or elapsed_time > 10:
         cd_stop(interrupted=False)
     else:  # Continue charge/discharge measurement process
         read_potential_current()  # Read new potential and current
@@ -383,14 +392,14 @@ def cd_update():
                                                         cd_time_data.averagebuffer, initial=0.)/3600.)  # Cumulative charge in Ah
             # Update the graph
             cd_plot_curves[cd_currentcycle -
-                        1].setData(charge, cd_potential_data.averagebuffer)
+                           1].setData(charge, cd_potential_data.averagebuffer)
         # A potential cut-off has been reached
-        if (cd_currentsetpoint > 0 and potential > cd_parameters[0]['ubound']) or (cd_currentsetpoint < 0 and potential < cd_parameters[0]['lbound']):
+        if (cd_currentsetpoint > 0 and potential > cd_parameters[index]['ubound']) or (cd_currentsetpoint < 0 and potential < cd_parameters[index]['lbound']):
             # Switch from the discharge phase to the charge phase or vice versa
-            if cd_currentsetpoint == cd_parameters[0]['chargecurrent']:
-                cd_currentsetpoint = cd_parameters[0]['dischargecurrent']
+            if cd_currentsetpoint == cd_parameters[index]['chargecurrent']:
+                cd_currentsetpoint = cd_parameters[index]['dischargecurrent']
             else:
-                cd_currentsetpoint = cd_parameters[0]['chargecurrent']
+                cd_currentsetpoint = cd_parameters[index]['chargecurrent']
             set_current_range()  # Set new current range
             # Start a new plot curve and append it to the plot area (keeping the old ones as well)
             cd_plot_curves.append(main_window.dynamicPlt2.plot(pen='y'))
@@ -401,13 +410,25 @@ def cd_update():
                 data.clear()
             cd_currentcycle += 1  # Next cycle
 
+
 def cd_stop(interrupted=True):
     """Finish the charge/discharge measurement."""
     global state
     if check_state([States.Measuring_CD]):
-        main_window.button_start.setText("Start")
-        state = States.Stationary_Graph
+        # main_window.button_start.setText("Start")
+        # state = States.Stationary_Graph
+        state = States.Measuring_start
         # preview_cancel_button.show()
+
+
+queue_measure = [{'index': 0, "type": "cd"}, {'index': 1, "type": "cd"}]
+
+
+def start():
+    global state
+    state = States.Measuring_start
+    print('----state', state)
+
 
 class create(QMainWindow):
     def __init__(self, parent=None):
@@ -467,7 +488,8 @@ class create(QMainWindow):
                 self.cd_parameter['dischargecurrent'] = float(
                     self.cd_dischargecurrent.text())/1e3
                 self.cd_parameter['numcycles'] = int(self.cd_numcycles.text())
-                self.cd_parameter['numsamples'] = int(self.cd_numsamples.text())
+                self.cd_parameter['numsamples'] = int(
+                    self.cd_numsamples.text())
                 cd_parameters.append(self.cd_parameter)
                 return True
             except ValueError:
@@ -504,7 +526,7 @@ class main(QMainWindow):
         self.usb_connect.clicked.connect(connect_disconnect_usb)
 
         self.button_start = self.findChild(QPushButton, 'button_start')
-        self.button_start.clicked.connect(cd_start)
+        self.button_start.clicked.connect(start)
 
         self.current_range_set = self.findChild(
             QPushButton, 'current_range_set')
@@ -533,6 +555,8 @@ class main(QMainWindow):
         self.status_line = 0
         self.sort_ = 0
 
+        self.index_measure = 0
+
         # self.frame_x = Frame(self.main_widget)
         # self.frame_x.setStyleSheet("background-color: #181818;")
         # self.frame_x.resize(127, 102)
@@ -557,13 +581,24 @@ class main(QMainWindow):
         self.show()
 
     def update(self):
+        global queue_measure, state
         if state == States.Idle_Init:
             idle_init()
         elif state == States.Idle:
             read_potential_current()
             update_live_graph()
         elif state == States.Measuring_CD:
-            cd_update()
+            cd_update(self.index_measure)
+        elif state == States.Measuring_start:
+            print(queue_measure)
+            if queue_measure:
+                if queue_measure[0]["type"] == "cd":
+                    self.index_measure = queue_measure[0]["index"]
+                    cd_start(self.index_measure)
+                    print("------", queue_measure[0])
+                    queue_measure.pop(0)
+            else:
+                state = States.Stationary_Graph
 
     def open_new(self):
         qt_wid = create(self)
