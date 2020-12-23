@@ -110,6 +110,30 @@ def check_state(desired_states):
 state = States.NotConnected  # Initial state
 
 
+def set_cell_status(cell_on_boolean):
+    """Switch the cell connection (True = cell on, False = cell off)."""
+    if cell_on_boolean:
+        if send_command(b'CELL ON', b'OK'):
+            return
+            # cell_status_monitor.setText("CELL ON")
+    else:
+        if send_command(b'CELL OFF', b'OK'):
+            return
+            # cell_status_monitor.setText("CELL OFF")
+
+
+def set_control_mode(galvanostatic_boolean):
+    """Switch the control mode (True = galvanostatic, False = potentiostatic)."""
+    if galvanostatic_boolean:
+        if send_command(b'GALVANOSTATIC', b'OK'):
+            return
+            # control_mode_monitor.setText("GALVANOSTATIC")
+    else:
+        if send_command(b'POTENTIOSTATIC', b'OK'):
+            return
+            # control_mode_monitor.setText("POTENTIOSTATIC")
+
+
 def connect_disconnect_usb():
     """Toggle the USB device between connected and disconnected states."""
     global dev, state
@@ -142,8 +166,8 @@ def connect_disconnect_usb():
             # hardware_device_info_text.setText("Manufacturer: %s\nProduct: %s\nSerial #: %s" % (
             #     dev.manufacturer, dev.product, dev.serial_number))
             get_calibration()
-            # set_cell_status(False)  # Cell off
-            # set_control_mode(False)  # Potentiostatic control
+            set_cell_status(False)  # Cell off
+            set_control_mode(False)  # Potentiostatic control
             set_current_range()  # Read current range from GUI
             state = States.Idle_Init  # Start idle mode
         except ValueError:
@@ -168,6 +192,12 @@ def twocomplement_to_decimal(msb, middlebyte, lsb):
         else:
             answer = combined_value
     return answer
+
+
+def twobytes_to_float(bytes_in):
+    """Convert two bytes to a number ranging from -2^15 to 2^15-1."""
+    code = 2**8*bytes_in[0]+bytes_in[1]
+    return float(code - 2**15)
 
 
 def decimal_to_dac_bytes(value):
@@ -223,11 +253,32 @@ def get_dac_calibration():
         print("Not connected")
 
 
+def not_connected_errormessage():
+    """Generate an error message stating that the device is not connected."""
+    QtGui.QMessageBox.critical(main_window, "Not connected",
+                               "This command cannot be executed because the USB device is not connected. Press the \"Connect\" button and try again.")
+
+
+def get_shunt_calibration():
+    """Retrieve shunt calibration values from the device's flash memory."""
+    if dev is not None:  # Make sure it's connected
+        dev.write(0x01, b'SHUNTCALREAD')  # 0x01 = write address of EP1
+        response = bytes(dev.read(0x81, 64))  # 0x81 = read address of EP1
+        # If no calibration value has been stored, all bits are set
+        if response != bytes([255, 255, 255, 255, 255, 255]):
+            for i in range(0, 3):
+                # Yields an adjustment range from 0.967 to 1.033 in steps of 1 ppm
+                shunt_calibration[i] = 1. + \
+                    twobytes_to_float(response[2*i:2*i+2])/1e6
+    else:
+        not_connected_errormessage()
+
+
 def get_calibration():
     """Retrieve all calibration values from the device's flash memory."""
     get_dac_calibration()
     get_offset()
-    # get_shunt_calibration()
+    get_shunt_calibration()
 
 
 def set_current_range():
@@ -235,6 +286,32 @@ def set_current_range():
     global currentrange
     index = main_window.current_range_box.currentIndex()
     currentrange = index
+
+
+def send_command(command_string, expected_response, log_msg=None):
+    """Send a command string to the USB device and check the response; optionally logs a message to the message log."""
+    if dev is not None:  # Make sure it's connected
+        dev.write(0x01, command_string)  # 0x01 = write address of EP1
+        response = bytes(dev.read(0x81, 64))  # 0x81 = read address of EP1
+        if response != expected_response:
+            QtGui.QMessageBox.critical(main_window, "Unexpected Response", "The command \"%s\" resulted in an unexpected response. The expected response was \"%s\"; the actual response was \"%s\"" % (
+                command_string, expected_response.decode("ascii"), response.decode("ascii")))
+        return True
+    else:
+        not_connected_errormessage()
+        return False
+
+
+def set_output(value_units_index, value):
+    """Output data to the DAC; units can be either V (index 0), mA (index 1), or raw counts (index 2)."""
+    if value_units_index == 0:
+        send_command(b'DACSET '+decimal_to_dac_bytes(value/8.*2. **
+                                                     19+int(round(potential_offset/4.))), b'OK')
+    elif value_units_index == 1:
+        send_command(b'DACSET '+decimal_to_dac_bytes(value/(25. /
+                                                            (shunt_calibration[currentrange]*100.**currentrange))*2.**19+int(round(current_offset/4.))), b'OK')
+    elif value_units_index == 2:
+        send_command(b'DACSET '+decimal_to_dac_bytes(value), b'OK')
 
 
 def wait_for_adcread():
@@ -389,7 +466,7 @@ def cd_update(index):
     elapsed_time = timeit.default_timer()-cd_starttime
     # End of charge/discharge measurements
     print(elapsed_time)
-    if cd_currentcycle > cd_parameters[index]['numcycles'] or elapsed_time > 10:
+    if cd_currentcycle > cd_parameters[index]['numcycles'] or elapsed_time > 60*5:
         cd_stop(interrupted=False)
     else:  # Continue charge/discharge measurement process
         read_potential_current()  # Read new potential and current
@@ -508,6 +585,8 @@ def cv_start(index):
     """Initialize the CV measurement."""
     global cv_time_data, cv_potential_data, cv_current_data, cv_plot_curve, cv_outputfile, state, skipcounter
     if check_state([States.Idle, States.Stationary_Graph, States.Measuring_start]):
+        set_output(0, cv_parameters[index]['startpot'])
+        set_control_mode(False)
         set_current_range()
         time.sleep(.1)  # Allow DAC some time to settle
         # Holds averaged data for elapsed time
@@ -516,6 +595,7 @@ def cv_start(index):
         cv_potential_data = AverageBuffer(cv_parameters[index]['numsamples'])
         # Holds averaged data for current
         cv_current_data = AverageBuffer(cv_parameters[index]['numsamples'])
+        set_cell_status(True)
         time.sleep(.1)  # Allow feedback loop some time to settle
         read_potential_current()
         time.sleep(.1)
@@ -540,7 +620,6 @@ def cv_start(index):
         state = States.Measuring_CV
         skipcounter = 2  # Skip first two data points to suppress artifacts
         cv_parameters[index]['starttime'] = timeit.default_timer()
-        state = States.Measuring_CV
 
 
 def cv_update(index):
@@ -552,6 +631,7 @@ def cv_update(index):
     if cv_output == None:  # This signifies the end of the CV scan
         cv_stop(interrupted=False)
     else:
+        set_output(0, cv_output)
         read_potential_current()  # Read new potential and current
         if skipcounter == 0:  # Process new measurements
             cv_time_data.add_sample(elapsed_time)
