@@ -502,11 +502,12 @@ def cv_start(index):
             legend.scene().removeItem(legend)
         except AttributeError:
             pass
-        plot_frame.clear()
-        plot_frame.enableAutoRange()
-        plot_frame.setLabel('bottom', 'Potential', units="V")
-        plot_frame.setLabel('left', 'Current', units="A")
-        cv_plot_curve = plot_frame.plot(pen='y')  # Plot CV in yellow
+        main_window.dynamicPlt.clear()
+        main_window.dynamicPlt.enableAutoRange()
+        main_window.dynamicPlt.setLabel('bottom', 'Potential', units="V")
+        main_window.dynamicPlt.setLabel('left', 'Current', units="A")
+        cv_plot_curve = main_window.dynamicPlt.plot(
+            pen='y')  # Plot CV in yellow
         state = States.Measuring_CV
         skipcounter = 2  # Skip first two data points to suppress artifacts
         cv_parameters[index]['starttime'] = timeit.default_timer()
@@ -574,15 +575,16 @@ def rate_start(index):
             legend.scene().removeItem(legend)
         except AttributeError:
             pass
-        plot_frame.clear()
-        legend = plot_frame.addLegend()
-        plot_frame.enableAutoRange()
-        plot_frame.setLabel('bottom', 'C-rate')
-        plot_frame.setLabel('left', 'Inserted/extracted charge', units="Ah")
+        main_window.dynamicPlt.clear()
+        legend = main_window.dynamicPlt.addLegend()
+        main_window.dynamicPlt.enableAutoRange()
+        main_window.dynamicPlt.setLabel('bottom', 'C-rate')
+        main_window.dynamicPlt.setLabel(
+            'left', 'Inserted/extracted charge', units="Ah")
         # Plot charge capacity as a function of C-rate with red circles
-        rate_plot_scatter_chg = plot_frame.plot(
+        rate_plot_scatter_chg = main_window.dynamicPlt.plot(
             symbol='o', pen=None, symbolPen='r', symbolBrush='r', name='Charge')
-        rate_plot_scatter_dis = plot_frame.plot(symbol='o', pen=None, symbolPen=(100, 100, 255), symbolBrush=(
+        rate_plot_scatter_dis = main_window.dynamicPlt.plot(symbol='o', pen=None, symbolPen=(100, 100, 255), symbolBrush=(
             100, 100, 255), name='Discharge')  # Plot discharge capacity as a function of C-rate with blue circles
         state = States.Measuring_Rate
 
