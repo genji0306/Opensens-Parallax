@@ -18,10 +18,22 @@ import scipy.integrate
 
 pg.setConfigOption('background', 'w')
 
-x = [450, 590, 310, 450, 590, 310, 450, 590, 310, 450, 590, 310, 450, 590]
-y = [3, 3, 115, 115, 115, 227, 227, 227, 339, 339, 339, 451, 451, 451]
-y_size = [110, 230, 350, 470, 590]
+ADD_TABLE_SIZE = [4,3] # Size of album table
+COLOR_TABLE = [
+                '#b18484',
+                '#eababa', 
+                '#c4c7ff',
+                '#d67676', 
+                '#86a9dc',
+                '#feff57',
+                '#5700ff',
+            ]
 
+LIST_TECHNIQUES = [
+    "Charge/disch",
+    "Rate testing",
+    "Cyclic voltammetry"
+    ]
 usb_vid = "0xa0a0"  # Default USB vendor ID, can also be adjusted in the GUI
 usb_pid = "0x0002"  # Default USB product ID, can also be adjusted in the GUI
 current_range_list = ["20 mA", u"200 µA", u"2 µA"]
@@ -307,6 +319,7 @@ class Frame(QPushButton):
     def __init__(self, parent):
         super(Frame, self).__init__(parent)
         self.check_move = 0
+        self.check_stack = 0 # Check frame is on stack list or not
         self.index_table = 0
         self.index_line = 0
         self.setMouseTracking(True)
@@ -316,24 +329,28 @@ class Frame(QPushButton):
         self.check_move = 1
 
     def mouseReleaseEvent(self, e):
-        if (main_window.frame_y.pos().y()-50 < self.pos().y() < main_window.frame_y.pos().y()+50):
+        if (main_window.frame_y.pos().y()-50 < self.pos().y() < main_window.frame_y.pos().y()+50) and self.check_stack == 0:
             self.check_move = 0
-            self.resize(120, 37)
+            self.check_stack = 1
+            pos_x_line =  main_window.button_refresh.pos().x() + main_window.button_refresh.width()
+            pos_y_line =  main_window.frame_y.pos().y()
+            self.resize(120, main_window.frame_y.height())
             # self.setStyleSheet(
             #     "background-color: #202932;")
-            self.move(y_size[main_window.status_line],
-                      main_window.frame_y.pos().y())
+            self.move(pos_x_line + main_window.status_line*120, pos_y_line)
             main_window.status_line += 1
-            main_window.status_table -= 1
+            # main_window.status_table -= 1
             self.index_line = main_window.status_line
         else:
             self.check_move = 0
-            self.resize(127, 102)
+            self.check_stack = 0
+            self.resize(80, 61)
             if self.index_line:
                 main_window.status_line -= 1
                 self.index_line = 0
             # self.setStyleSheet("background-color: #181818;")
-            self.move(x[self.index_table], y[self.index_table])
+            self.move(main_window.x_axis[int(self.index_table % ADD_TABLE_SIZE[1])],
+                            main_window.y_axis[int(self.index_table / ADD_TABLE_SIZE[1])])
 
 
 cd_parameters = []
@@ -361,12 +378,12 @@ def cd_start(index):
         cd_potential_data = AverageBuffer(cd_parameters[index]['numsamples'])
         # Holds averaged data for current
         cd_current_data = AverageBuffer(cd_parameters[index]['numsamples'])
-        main_window.dynamicPlt2.clear()
-        main_window.dynamicPlt2.enableAutoRange()
-        main_window.dynamicPlt2.setLabel(
+        main_window.dynamicPlt.clear()
+        main_window.dynamicPlt.enableAutoRange()
+        main_window.dynamicPlt.setLabel(
             'bottom', 'Inserted/extracted charge', units="Ah")
-        main_window.dynamicPlt2.setLabel('left', 'Potential', units="V")
-        cd_plot_curves.append(main_window.dynamicPlt2.plot(pen='y'))
+        main_window.dynamicPlt.setLabel('left', 'Potential', units="V")
+        cd_plot_curves.append(main_window.dynamicPlt.plot(pen='y'))
         state = States.Measuring_CD
         print("------ start CD")
         # main_window.button_start.setText("Stop")
@@ -402,7 +419,7 @@ def cd_update(index):
                 cd_currentsetpoint = cd_parameters[index]['chargecurrent']
             set_current_range()  # Set new current range
             # Start a new plot curve and append it to the plot area (keeping the old ones as well)
-            cd_plot_curves.append(main_window.dynamicPlt2.plot(pen='y'))
+            cd_plot_curves.append(main_window.dynamicPlt.plot(pen='y'))
             cd_charges.append(numpy.abs(numpy.trapz(
                 cd_current_data.averagebuffer, cd_time_data.averagebuffer)/3600.))  # Cumulative charge in Ah
             # Clear average buffers to prepare them for the next cycle
@@ -436,8 +453,7 @@ class create(QMainWindow):
         uic.loadUi('./mainwindow.ui', self)
         self.setFixedSize(305, 543)
         self.option = self.findChild(QComboBox, 'comboBox')
-        self.option.addItems(
-            ["Charge/disch", "Rate testing", "Cyclic voltammetry"])
+        self.option.addItems(LIST_TECHNIQUES)
 
         self.button_cancel = self.findChild(QPushButton, 'button_cancel')
         self.button_cancel.clicked.connect(self.exit_window)
@@ -500,15 +516,16 @@ class create(QMainWindow):
         self.close()
 
     def add(self):
-        if main_window.status_table < 8:
+        if main_window.status_table < ADD_TABLE_SIZE[0]*ADD_TABLE_SIZE[1]:
             frame_ = Frame(main_window.main_widget)
             frame_.index_measure = self.option.currentIndex()
             if self.get_para(frame_.index_measure):
-                frame_.setStyleSheet("background-color: #181818;")
-                frame_.resize(127, 102)
+                frame_.setStyleSheet("background-color: %s;"%COLOR_TABLE[frame_.index_measure])
+                frame_.setText(LIST_TECHNIQUES[frame_.index_measure])
+                frame_.resize(80, 61)
                 frame_.index_table = main_window.status_table
-                frame_.move(x[main_window.status_table],
-                            y[main_window.status_table])
+                frame_.move(main_window.x_axis[int(main_window.status_table % ADD_TABLE_SIZE[1])],
+                            main_window.y_axis[int(main_window.status_table / ADD_TABLE_SIZE[1])])
                 main_window.status_table += 1
                 frame_.show()
         self.exit_window()
@@ -519,6 +536,15 @@ class main(QMainWindow):
         super(main, self).__init__()
         uic.loadUi('./form.ui', self)
         self.setMouseTracking(True)
+
+        # Create index for album area
+        setting_width = self.frame.width ()
+        addBtn_width = self.create_measure.width ()
+        addBtn_height = self.create_measure.height()
+        gap_col = (setting_width - ADD_TABLE_SIZE[1] * addBtn_width)/(ADD_TABLE_SIZE[1] - 1)
+        self.x_axis =  [col*(gap_col + addBtn_width) for col in range(ADD_TABLE_SIZE[1])]
+        gap_row = 10
+        self.y_axis =  [self.create_frame.y() + row*(gap_row + addBtn_height) for row in range(ADD_TABLE_SIZE[0])]
 
         self.main_widget = self.findChild(QWidget, 'main_widget')
 
@@ -551,7 +577,7 @@ class main(QMainWindow):
         self.label_product = self.findChild(QLabel, 'label_product')
         self.label_serial = self.findChild(QLabel, 'label_serial')
 
-        self.status_table = 0
+        self.status_table = 1
         self.status_line = 0
         self.sort_ = 0
 
@@ -568,12 +594,12 @@ class main(QMainWindow):
         self.frame_y = self.findChild(QFrame, 'frame_20')
         self.dynamicPlt = pg.PlotWidget(self)
 
-        self.dynamicPlt.move(0, 585)
-        self.dynamicPlt.resize(1440, 120)
-
+        self.dynamicPlt.move(305, 22)
+        self.dynamicPlt.resize(690, 520)
+    
         self.dynamicPlt2 = pg.PlotWidget(self)
-        self.dynamicPlt2.move(777, 0)
-        self.dynamicPlt2.resize(663, 519)
+        self.dynamicPlt2.move(1000, 22)
+        self.dynamicPlt2.resize(370, 520)
 
         self.timer2 = pg.QtCore.QTimer()
         self.timer2.timeout.connect(self.update)

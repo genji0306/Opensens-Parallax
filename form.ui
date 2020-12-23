@@ -41,7 +41,7 @@
       <x>0</x>
       <y>0</y>
       <width>300</width>
-      <height>521</height>
+      <height>161</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -1354,7 +1354,7 @@ font: 10pt;</string>
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>523</y>
+      <y>530</y>
       <width>1440</width>
       <height>37</height>
      </rect>
@@ -1378,7 +1378,7 @@ border-color: &quot;Solid&quot;;</string>
     <widget class="QPushButton" name="button_start">
      <property name="geometry">
       <rect>
-       <x>0</x>
+       <x>30</x>
        <y>1</y>
        <width>55</width>
        <height>35</height>
@@ -1395,7 +1395,7 @@ font: 10pt;background-color: #181818;</string>
     <widget class="QPushButton" name="button_refresh">
      <property name="geometry">
       <rect>
-       <x>55</x>
+       <x>85</x>
        <y>1</y>
        <width>55</width>
        <height>35</height>
@@ -1409,14 +1409,31 @@ font: 10pt;background-color: #181818;</string>
       <string>Refresh</string>
      </property>
     </widget>
+    <widget class="QLabel" name="label_2">
+     <property name="geometry">
+      <rect>
+       <x>-1</x>
+       <y>1</y>
+       <width>31</width>
+       <height>35</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(254, 253, 255);
+font: 10pt;background-color: #181818;</string>
+     </property>
+     <property name="text">
+      <string># 1</string>
+     </property>
+    </widget>
    </widget>
-   <widget class="QFrame" name="frame_6">
+   <widget class="QFrame" name="create_frame">
     <property name="geometry">
      <rect>
-      <x>310</x>
-      <y>3</y>
-      <width>127</width>
-      <height>102</height>
+      <x>1</x>
+      <y>170</y>
+      <width>80</width>
+      <height>61</height>
      </rect>
     </property>
     <property name="mouseTracking">
@@ -1438,10 +1455,10 @@ border-color: &quot;Solid&quot;;color: white;</string>
     <widget class="QPushButton" name="create_measure">
      <property name="geometry">
       <rect>
-       <x>0</x>
+       <x>1</x>
        <y>0</y>
-       <width>127</width>
-       <height>102</height>
+       <width>80</width>
+       <height>61</height>
       </rect>
      </property>
      <property name="font">
@@ -1473,6 +1490,160 @@ border-color: &quot;Solid&quot;;color: white;</string>
      </property>
     </widget>
    </widget>
+   <widget class="QFrame" name="frame_21">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>580</y>
+      <width>1440</width>
+      <height>37</height>
+     </rect>
+    </property>
+    <property name="mouseTracking">
+     <bool>false</bool>
+    </property>
+    <property name="acceptDrops">
+     <bool>false</bool>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: #202932;;
+border-color: &quot;Solid&quot;;</string>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+    <widget class="QPushButton" name="button_start_5">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>1</y>
+       <width>55</width>
+       <height>35</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(254, 253, 255);
+font: 10pt;background-color: #181818;</string>
+     </property>
+     <property name="text">
+      <string>Start</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="button_refresh_5">
+     <property name="geometry">
+      <rect>
+       <x>85</x>
+       <y>1</y>
+       <width>55</width>
+       <height>35</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(254, 253, 255);
+font: 10pt;background-color: #181818;</string>
+     </property>
+     <property name="text">
+      <string>Refresh</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_3">
+     <property name="geometry">
+      <rect>
+       <x>-1</x>
+       <y>1</y>
+       <width>31</width>
+       <height>35</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(254, 253, 255);
+font: 10pt;background-color: #181818;</string>
+     </property>
+     <property name="text">
+      <string># 2</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QFrame" name="frame_22">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>630</y>
+      <width>1440</width>
+      <height>37</height>
+     </rect>
+    </property>
+    <property name="mouseTracking">
+     <bool>false</bool>
+    </property>
+    <property name="acceptDrops">
+     <bool>false</bool>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: #202932;;
+border-color: &quot;Solid&quot;;</string>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+    <widget class="QPushButton" name="button_start_2">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>1</y>
+       <width>55</width>
+       <height>35</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(254, 253, 255);
+font: 10pt;background-color: #181818;</string>
+     </property>
+     <property name="text">
+      <string>Start</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="button_refresh_2">
+     <property name="geometry">
+      <rect>
+       <x>85</x>
+       <y>1</y>
+       <width>55</width>
+       <height>35</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(254, 253, 255);
+font: 10pt;background-color: #181818;</string>
+     </property>
+     <property name="text">
+      <string>Refresh</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_5">
+     <property name="geometry">
+      <rect>
+       <x>-1</x>
+       <y>1</y>
+       <width>31</width>
+       <height>35</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(254, 253, 255);
+font: 10pt;background-color: #181818;</string>
+     </property>
+     <property name="text">
+      <string># 3</string>
+     </property>
+    </widget>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -1480,7 +1651,7 @@ border-color: &quot;Solid&quot;;color: white;</string>
      <x>0</x>
      <y>0</y>
      <width>1440</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="styleSheet">
