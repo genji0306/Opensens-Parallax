@@ -743,7 +743,7 @@ border-color: &quot;Solid&quot;;</string>
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <widget class="QLineEdit" name="lineEdit_13">
+     <widget class="QLineEdit" name="rate_one_c_current">
       <property name="geometry">
        <rect>
         <x>0</x>
@@ -809,7 +809,7 @@ border-color: &quot;Solid&quot;;</string>
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <widget class="QLineEdit" name="lineEdit_15">
+     <widget class="QLineEdit" name="rate_crates">
       <property name="geometry">
        <rect>
         <x>0</x>
@@ -842,7 +842,7 @@ border-color: &quot;Solid&quot;;</string>
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <widget class="QLineEdit" name="lineEdit_16">
+     <widget class="QLineEdit" name="rate_numcycles">
       <property name="geometry">
        <rect>
         <x>0</x>
@@ -1034,7 +1034,7 @@ border-color: &quot;Solid&quot;;</string>
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <widget class="QLineEdit" name="lineEdit_17">
+     <widget class="QLineEdit" name="cv_lbound">
       <property name="geometry">
        <rect>
         <x>0</x>
@@ -1067,7 +1067,7 @@ border-color: &quot;Solid&quot;;</string>
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <widget class="QLineEdit" name="lineEdit_18">
+     <widget class="QLineEdit" name="cv_startpot">
       <property name="geometry">
        <rect>
         <x>0</x>
@@ -1100,7 +1100,7 @@ border-color: &quot;Solid&quot;;</string>
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <widget class="QLineEdit" name="lineEdit_19">
+     <widget class="QLineEdit" name="cv_ubound">
       <property name="geometry">
        <rect>
         <x>0</x>
@@ -1133,7 +1133,7 @@ border-color: &quot;Solid&quot;;</string>
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <widget class="QLineEdit" name="lineEdit_20">
+     <widget class="QLineEdit" name="cv_stoppot">
       <property name="geometry">
        <rect>
         <x>0</x>
@@ -1166,7 +1166,7 @@ border-color: &quot;Solid&quot;;</string>
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <widget class="QLineEdit" name="lineEdit_21">
+     <widget class="QLineEdit" name="cv_scanrate">
       <property name="geometry">
        <rect>
         <x>0</x>
@@ -1227,7 +1227,7 @@ border-color: &quot;Solid&quot;;</string>
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <widget class="QLineEdit" name="lineEdit_22">
+     <widget class="QLineEdit" name="cv_numsamples">
       <property name="geometry">
        <rect>
         <x>0</x>
@@ -1260,7 +1260,7 @@ border-color: &quot;Solid&quot;;</string>
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <widget class="QLineEdit" name="lineEdit_23">
+     <widget class="QLineEdit" name="cv_numcycles">
       <property name="geometry">
        <rect>
         <x>0</x>
