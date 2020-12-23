@@ -16,7 +16,8 @@ import timeit
 import collections
 import scipy.integrate
 
-pg.setConfigOption('background', 'w')
+# pg.setConfigOption('background', 'w')
+pg.setConfigOptions(foreground="#e5e5e5", background="#00304f")
 
 ADD_TABLE_SIZE = [4, 3]  # Size of album table
 COLOR_TABLE = [
@@ -580,6 +581,7 @@ def rate_start(index):
     """Initialize the rate testing measurement."""
     global state, crate_index, rate_halfcycle_countdown, rate_chg_charges, rate_dis_charges, rate_outputfile_raw, rate_outputfile_capacities, rate_starttime, rate_time_data, rate_potential_data, rate_current_data, rate_plot_scatter_chg, rate_plot_scatter_dis, legend
     if check_state([States.Idle, States.Stationary_Graph, States.Measuring_start]):
+        print("----start")
         crate_index = 0  # Index in the list of C-rates
         # Holds amount of remaining half cycles
         rate_halfcycle_countdown = 2*rate_parameters[index]['numcycles']
@@ -603,6 +605,8 @@ def rate_start(index):
             legend.scene().removeItem(legend)
         except AttributeError:
             pass
+        except NameError:
+            pass  # In case a legend has never been created
         main_window.dynamicPlt.clear()
         legend = main_window.dynamicPlt.addLegend()
         main_window.dynamicPlt.enableAutoRange()
@@ -610,6 +614,7 @@ def rate_start(index):
         main_window.dynamicPlt.setLabel(
             'left', 'Inserted/extracted charge', units="Ah")
         # Plot charge capacity as a function of C-rate with red circles
+        print('--------')
         rate_plot_scatter_chg = main_window.dynamicPlt.plot(
             symbol='o', pen=None, symbolPen='r', symbolBrush='r', name='Charge')
         rate_plot_scatter_dis = main_window.dynamicPlt.plot(symbol='o', pen=None, symbolPen=(100, 100, 255), symbolBrush=(
@@ -628,12 +633,14 @@ def rate_update(index):
     # A potential cut-off has been reached
     if (rate_halfcycle_countdown % 2 == 0 and potential > rate_parameters[index]['ubound']) or (rate_halfcycle_countdown % 2 != 0 and potential < rate_parameters[index]['lbound']):
         rate_halfcycle_countdown -= 1
+        print("--1")
         if rate_halfcycle_countdown == 1:  # Last charge cycle for this C-rate, so calculate and plot the charge capacity
             charge = numpy.abs(scipy.integrate.trapz(
                 rate_current_data.averagebuffer, rate_time_data.averagebuffer)/3600.)  # Charge in Ah
             rate_chg_charges.append(charge)
             rate_plot_scatter_chg.setData(
                 rate_parameters[index]['crates'][0:crate_index+1], rate_chg_charges)
+            print("--2")
         elif rate_halfcycle_countdown == 0:  # Last discharge cycle for this C-rate, so calculate and plot the discharge capacity, and go to the next C-rate
             charge = numpy.abs(scipy.integrate.trapz(
                 rate_current_data.averagebuffer, rate_time_data.averagebuffer)/3600.)  # Charge in Ah
@@ -643,8 +650,10 @@ def rate_update(index):
             # Last C-rate was measured
             if crate_index == len(rate_parameters[index]['crates'])-1:
                 rate_stop(interrupted=False)
+                print("--3")
                 return
             else:  # New C-rate
+                print('--4')
                 crate_index += 1
                 # Set the amount of remaining half cycles for the new C-rate
                 rate_halfcycle_countdown = 2 * \
@@ -785,6 +794,73 @@ class create(QMainWindow):
 
         self.option.activated.connect(self.do_something)
 
+    def cv_validate_parameters(self):
+        if self.cv_parameter['ubound'] < self.cv_parameter['lbound']:
+            QtGui.QMessageBox.critical(
+                self, "CV error", "<font color=\"White\">The upper bound cannot be lower than the lower bound.")
+            return False
+        if self.cv_parameter['scanrate'] == 0:
+            QtGui.QMessageBox.critical(
+                self, "CV error", "<font color=\"White\">The scan rate cannot be zero.")
+            return False
+        if (self.cv_parameter['scanrate'] > 0) and (self.cv_parameter['ubound'] < self.cv_parameter['startpot']):
+            QtGui.QMessageBox.critical(
+                self, "CV error", "<font color=\"White\">For a positive scan rate, the start potential must be lower than the upper bound.")
+            return False
+        if (self.cv_parameter['scanrate'] < 0) and (self.cv_parameter['lbound'] > self.cv_parameter['startpot']):
+            QtGui.QMessageBox.critical(
+                self, "CV error", "<font color=\"White\">For a negative scan rate, the start potential must be higher than the lower bound.")
+            return False
+        if self.cv_parameter['numsamples'] < 1:
+            QtGui.QMessageBox.critical(
+                self, "CV error", "<font color=\"White\">The number of samples to average must be at least 1.")
+            return False
+        return True
+
+    def cd_validate_parameters(self):
+        """Check if the chosen charge/discharge parameters make sense. If so, return True."""
+        if self.cd_parameter['ubound'] < self.cd_parameter['lbound']:
+            QtGui.QMessageBox.critical(self, "Charge/discharge error",
+                                       "<font color=\"White\">The upper bound cannot be lower than the lower bound.")
+            return False
+        if self.cd_parameter['chargecurrent'] == 0.:
+            QtGui.QMessageBox.critical(
+                self, "Charge/discharge error", "<font color=\"White\">The charge current cannot be zero.")
+            return False
+        if self.cd_parameter['dischargecurrent'] == 0.:
+            QtGui.QMessageBox.critical(
+                self, "Charge/discharge error", "<font color=\"White\">The discharge current cannot be zero.")
+            return False
+        if self.cd_parameter['chargecurrent']*self.cd_parameter['dischargecurrent'] > 0:
+            QtGui.QMessageBox.critical(self, "Charge/discharge error",
+                                       "<font color=\"White\">Charge and discharge current must have opposite sign.")
+            return False
+        if self.cd_parameter['numcycles'] <= 0:
+            QtGui.QMessageBox.critical(self, "Charge/discharge error",
+                                       "<font color=\"White\">The number of half cycles must be positive and non-zero.")
+            return False
+        if self.cd_parameter['numsamples'] < 1:
+            QtGui.QMessageBox.critical(self, "Charge/discharge error",
+                                       "<font color=\"White\">The number of samples to average must be at least 1.")
+            return False
+        return True
+
+    def rate_validate_parameters(self):
+        """Check if the chosen charge/discharge parameters make sense. If so, return True."""
+        if self.rate_parameter['ubound'] < self.rate_parameter['lbound']:
+            QtGui.QMessageBox.critical(self, "Rate testing error",
+                                       "<font color=\"White\">The upper bound cannot be lower than the lower bound.")
+            return False
+        if 0. in self.rate_parameter['currents']:
+            QtGui.QMessageBox.critical(
+                self, "Rate testing error", "<font color=\"White\">The charge/discharge current cannot be zero.")
+            return False
+        if self.rate_parameter['numcycles'] <= 0:
+            QtGui.QMessageBox.critical(self, "Charge/discharge error",
+                                       "<font color=\"White\">The number of half cycles must be positive and non-zero.")
+            return False
+        return True
+
     def do_something(self, index):
         if (index == 0):
             self.frame_1.hide()
@@ -811,8 +887,11 @@ class create(QMainWindow):
                 self.cd_parameter['numcycles'] = int(self.cd_numcycles.text())
                 self.cd_parameter['numsamples'] = int(
                     self.cd_numsamples.text())
-                cd_parameters.append(self.cd_parameter)
-                return True
+                if self.cd_validate_parameters():
+                    cd_parameters.append(self.cd_parameter)
+                    return True
+                else:
+                    return False
             except ValueError:
                 self.exit_window()
                 return False
@@ -829,8 +908,11 @@ class create(QMainWindow):
                 self.rate_parameter['currents'] = [
                     self.rate_parameter['one_c_current']*rc for rc in self.rate_parameter['crates']]
                 self.rate_parameter['numsamples'] = 1
-                rate_parameters.append(self.rate_parameter)
-                return True
+                if self.rate_validate_parameters():
+                    rate_parameters.append(self.rate_parameter)
+                    return True
+                else:
+                    return False
             except ValueError:
                 self.exit_window()
                 return False
@@ -845,8 +927,12 @@ class create(QMainWindow):
                 self.cv_parameter['numcycles'] = int(self.cv_numcycles.text())
                 self.cv_parameter['numsamples'] = int(
                     self.cv_numsamples.text())
-                cv_parameters.append(self.cv_parameter)
-                return True
+                if self.cv_validate_parameters():
+                    cv_parameters.append(self.cv_parameter)
+                    return True
+                else:
+                    # self.exit_window()
+                    return False
             except ValueError:
                 self.exit_window()
                 return False
