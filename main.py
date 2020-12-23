@@ -315,6 +315,34 @@ def update_live_graph():
     current_plot_curve.setData(xvalues, list(last_current_values))
 
 
+def auto_current_range():
+    """Automatically switch the current range based on the measured current; returns a number of measurements to skip (to suppress artifacts)."""
+    global currentrange, overcounter, undercounter
+    relativecurrent = abs(current/(20./100.**currentrange))
+    # Switch to higher current range (if possible) after three detections
+    if relativecurrent > 1.05 and currentrange != 0:
+        overcounter += 1
+    else:
+        overcounter = 0
+    # Switch to lower current range (if possible) after three detections
+    if relativecurrent < 0.0095 and currentrange != 2:
+        undercounter += 1
+    else:
+        undercounter = 0
+    if overcounter > 3:
+        currentrange -= 1
+        set_current_range()
+        overcounter = 0
+        return 2  # Skip next two measurements to suppress artifacts
+    elif undercounter > 3:
+        currentrange += 1
+        set_current_range()
+        undercounter = 0
+        return 2  # Skip next two measurements to suppress artifacts
+    else:
+        return 0
+
+
 cd_parameters = []
 cv_parameters = []
 rate_parameters = []
