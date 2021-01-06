@@ -63,6 +63,7 @@ time_of_last_adcread = 0.
 adcread_interval = 0.09  # ADC sampling interval (in seconds)
 # Enable logging of potential and current in idle mode (can be adjusted in the GUI)
 logging_enabled = False
+# usb_connected = False
 
 if platform.system() != "Windows":
     # On Linux/OSX, use the Qt timer
@@ -255,8 +256,10 @@ def get_dac_calibration():
 
 def not_connected_errormessage():
     """Generate an error message stating that the device is not connected."""
+    main_window.setStyleSheet("color: white;  background-color: black")
     QtGui.QMessageBox.critical(main_window, "Not connected",
                                "This command cannot be executed because the USB device is not connected. Press the \"Connect\" button and try again.")
+    main_window.setStyleSheet("color: black;  background-color: black")
 
 
 def get_shunt_calibration():
@@ -271,7 +274,8 @@ def get_shunt_calibration():
                 shunt_calibration[i] = 1. + \
                     twobytes_to_float(response[2*i:2*i+2])/1e6
     else:
-        not_connected_errormessage()
+        # not_connected_errormessage()
+        pass
 
 
 def get_calibration():
@@ -298,7 +302,7 @@ def send_command(command_string, expected_response, log_msg=None):
                 command_string, expected_response.decode("ascii"), response.decode("ascii")))
         return True
     else:
-        not_connected_errormessage()
+        # not_connected_errormessage()
         return False
 
 
@@ -858,7 +862,10 @@ index_rate = 0
 
 def start():
     global state
-    state = States.Measuring_start
+    if state == States.NotConnected:
+        not_connected_errormessage()
+    else:
+        state = States.Measuring_start
     print('----state', state)
 
 
