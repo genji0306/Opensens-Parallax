@@ -421,6 +421,38 @@ def auto_current_range():
         return 0
 
 
+def choose_file(questionstring):
+    """Open a file dialog and write the path of the selected file to a given entry field."""
+    filedialog = QtGui.QFileDialog()
+    main_window.setStyleSheet("color: white;  background-color: black")
+    tuple_file = filedialog.getSaveFileName(
+        main_window, questionstring, "", "ASCII data (*.txt)", options=QtGui.QFileDialog.DontConfirmOverwrite)
+    file_name = tuple_file[0]
+    # print(file_name)
+    # file_entry_field.setText(file_name)
+    main_window.setStyleSheet("color: black;  background-color: black")
+    return file_name
+
+
+def validate_file(filename):
+    """Check if a filename can be written to. If so, return True."""
+    main_window.setStyleSheet("color: white;  background-color: black")
+    if os.path.isfile(filename):
+        if QtGui.QMessageBox.question(main_window, "File exists", "<font color=\"White\">The specified output file already exists. Do you want to overwrite it?", QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No) != QtGui.QMessageBox.Yes:
+            main_window.setStyleSheet("color: black;  background-color: black")
+            return False
+    try:
+        tryfile = open(filename, 'w', 1)
+        tryfile.close()
+        main_window.setStyleSheet("color: black;  background-color: black")
+        return True
+    except IOError:
+        QtGui.QMessageBox.critical(
+            main_window, "File error", "<font color=\"White\">The specified output file path is not valid.")
+        main_window.setStyleSheet("color: black;  background-color: black")
+        return False
+
+
 cd_parameters = []
 cv_parameters = []
 rate_parameters = []
@@ -428,18 +460,26 @@ start_stop = 1
 
 
 def cd_start(index):
-    global start_stop, cd_charges, cd_currentsetpoint, cd_starttime, cd_currentcycle, cd_time_data, cd_potential_data, cd_current_data, cd_plot_curves, state
+    global start_stop, cd_charges, cd_currentsetpoint, cd_starttime, cd_currentcycle, cd_time_data, cd_potential_data, cd_current_data, cd_plot_curves, state, cd_outputfile_raw, cd_outputfile_capacities
     # if not start_stop:
     #     start_stop = 1
     #     cd_stop(interrupted=False)
     #     return
 
     if check_state([States.Idle, States.Stationary_Graph, States.Measuring_start]) and start_stop:
+        cd_outputfile_raw = open(cd_parameters[index]['filename'], 'w', 1)
+        cd_outputfile_raw.write("Elapsed time(s)\tPotential(V)\tCurrent(A)\n")
+        base, extension = os.path.splitext(cd_parameters[index]['filename'])
+        cd_outputfile_capacities = open(base+'_capacities'+extension, 'w', 1)
+        cd_outputfile_capacities.write(
+            "Cycle number\tCharge capacity (Ah)\tDischarge capacity (Ah)\n")
         cd_currentcycle = 1
         cd_charges = []
         cd_plot_curves = []
         cd_currentsetpoint = cd_parameters[index]['chargecurrent']
         set_current_range()
+        set_output(1, cd_currentsetpoint)  # Set current to setpoint
+        set_control_mode(True)  # Galvanostatic control
         time.sleep(.2)  # Allow DAC some time to settle
         cd_starttime = timeit.default_timer()
         # Holds averaged data for elapsed time
@@ -448,6 +488,11 @@ def cd_start(index):
         cd_potential_data = AverageBuffer(cd_parameters[index]['numsamples'])
         # Holds averaged data for current
         cd_current_data = AverageBuffer(cd_parameters[index]['numsamples'])
+        set_cell_status(True)  # Cell on
+        try:  # Set up the plotting area
+            legend.scene().removeItem(legend)
+        except AttributeError:
+            pass
         main_window.dynamicPlt.clear()
         main_window.dynamicPlt.enableAutoRange()
         main_window.dynamicPlt.setLabel(
@@ -465,8 +510,8 @@ def cd_update(index):
     global cd_currentsetpoint, cd_currentcycle, state
     elapsed_time = timeit.default_timer()-cd_starttime
     # End of charge/discharge measurements
-    print(elapsed_time)
-    if cd_currentcycle > cd_parameters[index]['numcycles'] or elapsed_time > 60*5:
+    # print(elapsed_time)
+    if cd_currentcycle > cd_parameters[index]['numcycles'] or elapsed_time > 60*3:
         cd_stop(interrupted=False)
     else:  # Continue charge/discharge measurement process
         read_potential_current()  # Read new potential and current
@@ -475,6 +520,8 @@ def cd_update(index):
         cd_current_data.add_sample(1e-3*current)  # Convert mA to A
         # A new average was just calculated
         if len(cd_time_data.samples) == 0 and len(cd_time_data.averagebuffer) > 0:
+            cd_outputfile_raw.write("%e\t%e\t%e\n" % (
+                cd_time_data.averagebuffer[-1], cd_potential_data.averagebuffer[-1], cd_current_data.averagebuffer[-1]))  # Write it out
             charge = numpy.abs(scipy.integrate.cumtrapz(cd_current_data.averagebuffer,
                                                         cd_time_data.averagebuffer, initial=0.)/3600.)  # Cumulative charge in Ah
             # Update the graph
@@ -488,10 +535,15 @@ def cd_update(index):
             else:
                 cd_currentsetpoint = cd_parameters[index]['chargecurrent']
             set_current_range()  # Set new current range
+            set_output(1, cd_currentsetpoint)  # Set current to setpoint
             # Start a new plot curve and append it to the plot area (keeping the old ones as well)
             cd_plot_curves.append(main_window.dynamicPlt.plot(pen='y'))
             cd_charges.append(numpy.abs(numpy.trapz(
                 cd_current_data.averagebuffer, cd_time_data.averagebuffer)/3600.))  # Cumulative charge in Ah
+            # Write out the charge and discharge capacities after both a charge and discharge phase (i.e. after cycle 2, 4, 6...)
+            if cd_currentcycle % 2 == 0:
+                cd_outputfile_capacities.write("%d\t%e\t%e\n" % (
+                    cd_currentcycle/2, cd_charges[cd_currentcycle-2], cd_charges[cd_currentcycle-1]))
             # Clear average buffers to prepare them for the next cycle
             for data in [cd_time_data, cd_potential_data, cd_current_data]:
                 data.clear()
@@ -504,6 +556,9 @@ def cd_stop(interrupted=True):
     if check_state([States.Measuring_CD]):
         # main_window.button_start.setText("Start")
         # state = States.Stationary_Graph
+        set_cell_status(False)  # Cell off
+        cd_outputfile_raw.close()
+        cd_outputfile_capacities.close()
         state = States.Measuring_start
         # preview_cancel_button.show()
 
@@ -585,6 +640,8 @@ def cv_start(index):
     """Initialize the CV measurement."""
     global cv_time_data, cv_potential_data, cv_current_data, cv_plot_curve, cv_outputfile, state, skipcounter
     if check_state([States.Idle, States.Stationary_Graph, States.Measuring_start]):
+        cv_outputfile = open(cv_parameters[index]['filename'], 'w', 1)
+        cv_outputfile.write("Elapsed time(s)\tPotential(V)\tCurrent(A)\n")
         set_output(0, cv_parameters[index]['startpot'])
         set_control_mode(False)
         set_current_range()
@@ -639,6 +696,8 @@ def cv_update(index):
             cv_current_data.add_sample(1e-3*current)  # Convert from mA to A
             # Check if a new average was just calculated
             if len(cv_time_data.samples) == 0 and len(cv_time_data.averagebuffer) > 0:
+                cv_outputfile.write("%e\t%e\t%e\n" % (
+                    cv_time_data.averagebuffer[-1], cv_potential_data.averagebuffer[-1], cv_current_data.averagebuffer[-1]))  # Write it out
                 cv_plot_curve.setData(
                     cv_potential_data.averagebuffer, cv_current_data.averagebuffer)  # Update the graph
             skipcounter = auto_current_range()  # Update the graph
@@ -650,9 +709,19 @@ def cv_stop(interrupted=True):
     """Finish the CV measurement."""
     global state
     if check_state([States.Measuring_CV]):
+        cv_outputfile.close()
         # Integrate current between zero crossings to produce list of inserted/extracted charges
+        main_window.dynamicPlt2.clear()
+        main_window.dynamicPlt2.enableAutoRange()
+        main_window.dynamicPlt2.setLabel('bottom', 'Potential', units="V")
+        main_window.dynamicPlt2.setLabel('left', 'Current', units="A")
+        cv_plot_curve2 = main_window.dynamicPlt2.plot(
+            pen='y')  # Plot CV in yellow
+        cv_plot_curve2.setData(
+            cv_potential_data.averagebuffer, cv_current_data.averagebuffer)
         charge_arr = charge_from_cv(
             cv_time_data.averagebuffer, cv_current_data.averagebuffer)
+        print('----> CV stop')
         # Keep displaying the last plot until the user clicks a button
         state = States.Measuring_start
 
@@ -668,9 +737,19 @@ def rate_start(index):
         rate_chg_charges = []  # List of measured charge capacities
         rate_dis_charges = []  # List of measured discharge capacitiesa
         # Apply positive current for odd half cycles (charge phase) and negative current for even half cycles (discharge phase)
+        rate_outputfile_raw = open(rate_parameters[index]['filename'], 'w', 1)
+        rate_outputfile_raw.write(
+            "Elapsed time(s)\tPotential(V)\tCurrent(A)\n")
+        base, extension = os.path.splitext(rate_parameters[index]['filename'])
+        # This file will contain capacity data for each C-rate
+        rate_outputfile_capacities = open(base+'_capacities'+extension, 'w', 1)
+        rate_outputfile_capacities.write(
+            "C-rate\tCharge capacity (Ah)\tDischarge capacity (Ah)\n")
         rate_current = rate_parameters[index]['currents'][crate_index] if rate_halfcycle_countdown % 2 == 0 else - \
             rate_parameters[index]['currents'][crate_index]
         set_current_range()  # Set new current range
+        set_output(1, rate_current)  # Set current to setpoint
+        set_control_mode(True)  # Galvanostatic control
         time.sleep(.2)  # Allow DAC some time to settle
         rate_starttime = timeit.default_timer()
         numsamples = max(
@@ -681,6 +760,7 @@ def rate_start(index):
         rate_potential_data = AverageBuffer(numsamples)
         # Holds averaged data for current
         rate_current_data = AverageBuffer(numsamples)
+        set_cell_status(True)  # Cell on
         try:  # Set up the plotting area
             legend.scene().removeItem(legend)
         except AttributeError:
@@ -710,6 +790,10 @@ def rate_update(index):
     rate_time_data.add_sample(elapsed_time)
     rate_potential_data.add_sample(potential)
     rate_current_data.add_sample(1e-3*current)  # Convert mA to A
+    # A new average was just calculated
+    if len(rate_time_data.samples) == 0 and len(rate_time_data.averagebuffer) > 0:
+        rate_outputfile_raw.write("%e\t%e\t%e\n" % (
+            rate_time_data.averagebuffer[-1], rate_potential_data.averagebuffer[-1], rate_current_data.averagebuffer[-1]))  # Write it out
     # A potential cut-off has been reached
     if (rate_halfcycle_countdown % 2 == 0 and potential > rate_parameters[index]['ubound']) or (rate_halfcycle_countdown % 2 != 0 and potential < rate_parameters[index]['lbound']):
         rate_halfcycle_countdown -= 1
@@ -727,6 +811,8 @@ def rate_update(index):
             rate_dis_charges.append(charge)
             rate_plot_scatter_dis.setData(
                 rate_parameters[index]['crates'][0:crate_index+1], rate_dis_charges)
+            rate_outputfile_capacities.write("%e\t%e\t%e\n" % (
+                rate_parameters[index]['crates'][crate_index], rate_chg_charges[-1], rate_dis_charges[-1]))
             # Last C-rate was measured
             if crate_index == len(rate_parameters[index]['crates'])-1:
                 rate_stop(interrupted=False)
@@ -747,6 +833,7 @@ def rate_update(index):
         # Apply positive current for odd half cycles (charge phase) and negative current for even half cycles (discharge phase)
         rate_current = rate_parameters[index]['currents'][crate_index] if rate_halfcycle_countdown % 2 == 0 else - \
             rate_parameters[index]['currents'][crate_index]
+        set_output(1, rate_current)  # Set current to setpoint
         # Clear average buffers to prepare them for the next cycle
         for data in [rate_time_data, rate_potential_data, rate_current_data]:
             data.clear()
@@ -757,6 +844,9 @@ def rate_stop(interrupted=True):
     global state
     if check_state([States.Measuring_Rate]):
         # Keep displaying the last plot until the user clicks a button
+        set_cell_status(False)
+        rate_outputfile_raw.close()
+        rate_outputfile_capacities.close()
         state = States.Measuring_start
 
 
@@ -967,7 +1057,9 @@ class create(QMainWindow):
                 self.cd_parameter['numcycles'] = int(self.cd_numcycles.text())
                 self.cd_parameter['numsamples'] = int(
                     self.cd_numsamples.text())
-                if self.cd_validate_parameters():
+                self.cd_parameter['filename'] = choose_file(
+                    "Choose where to save the charge/discharge measurement data")
+                if self.cd_validate_parameters() and validate_file(self.cd_parameter['filename']):
                     cd_parameters.append(self.cd_parameter)
                     return True
                 else:
@@ -988,7 +1080,9 @@ class create(QMainWindow):
                 self.rate_parameter['currents'] = [
                     self.rate_parameter['one_c_current']*rc for rc in self.rate_parameter['crates']]
                 self.rate_parameter['numsamples'] = 1
-                if self.rate_validate_parameters():
+                self.rate_parameter['filename'] = choose_file(
+                    "Choose where to save the rate testing measurement data")
+                if self.rate_validate_parameters() and validate_file(self.rate_parameter['filename']):
                     rate_parameters.append(self.rate_parameter)
                     return True
                 else:
@@ -1007,7 +1101,9 @@ class create(QMainWindow):
                 self.cv_parameter['numcycles'] = int(self.cv_numcycles.text())
                 self.cv_parameter['numsamples'] = int(
                     self.cv_numsamples.text())
-                if self.cv_validate_parameters():
+                self.cv_parameter['filename'] = choose_file(
+                    "Choose where to save the CV measurement data")
+                if self.cv_validate_parameters() and validate_file(self.cv_parameter['filename']):
                     cv_parameters.append(self.cv_parameter)
                     return True
                 else:

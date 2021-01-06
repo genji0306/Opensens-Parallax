@@ -735,7 +735,7 @@ def update_live_graph():
     current_plot_curve.setData(xvalues, list(last_current_values))
 
 
-def choose_file(file_entry_field, questionstring):
+def choose_file(questionstring):
     """Open a file dialog and write the path of the selected file to a given entry field."""
     filedialog = QtGui.QFileDialog()
     tuple_file = filedialog.getSaveFileName(
