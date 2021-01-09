@@ -958,10 +958,22 @@ def refresh():
             frame.frame_refresh()
 
 
+class manual(QMainWindow):
+    def __init__(self, parent=None):
+        super(manual, self).__init__(parent)
+        uic.loadUi('./ui/menubar/manual.ui', self)
+
+
+class calibration(QMainWindow):
+    def __init__(self, parent=None):
+        super(calibration, self).__init__(parent)
+        uic.loadUi('./ui/menubar/calibration.ui', self)
+
+
 class create(QMainWindow):
     def __init__(self, parent=None):
         super(create, self).__init__(parent)
-        uic.loadUi('./create_window.ui', self)
+        uic.loadUi('./ui/sub_window/create_window.ui', self)
         self.setFixedSize(305, 543)
         self.option = self.findChild(QComboBox, 'comboBox')
         self.option.addItems(LIST_TECHNIQUES)
@@ -1238,7 +1250,7 @@ class create(QMainWindow):
 class main(QMainWindow):
     def __init__(self):
         super(main, self).__init__()
-        uic.loadUi('./mainwindow.ui', self)
+        uic.loadUi('./ui/mainwindow.ui', self)
         self.setMouseTracking(True)
 
         # Create index for album area
@@ -1263,6 +1275,10 @@ class main(QMainWindow):
 
         self.button_refresh = self.findChild(QPushButton, 'button_refresh')
         self.button_refresh.clicked.connect(refresh)
+
+        self.actionControl.triggered.connect(self.open_manual)
+
+        self.actionCalibration.triggered.connect(self.open_calibration)
 
         self.current_range_set = self.findChild(
             QPushButton, 'current_range_set')
@@ -1356,6 +1372,14 @@ class main(QMainWindow):
 
     def open_new(self):
         qt_wid = create(self)
+        qt_wid.show()
+
+    def open_manual(self):
+        qt_wid = manual(self)
+        qt_wid.show()
+
+    def open_calibration(self):
+        qt_wid = calibration(self)
         qt_wid.show()
 
     def mouseMoveEvent(self, e):

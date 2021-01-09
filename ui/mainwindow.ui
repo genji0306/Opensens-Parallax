@@ -1477,7 +1477,7 @@ border-color: &quot;Solid&quot;;color: white;</string>
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>plus-icon-black-2.png</normaloff>plus-icon-black-2.png</iconset>
+       <normaloff>./icon/plus-icon-black-2.png</normaloff>./icon/plus-icon-black-2.png</iconset>
      </property>
      <property name="iconSize">
       <size>
@@ -1691,11 +1691,25 @@ font: 10pt;background-color: #181818;</string>
     </property>
     <addaction name="actionHelp"/>
    </widget>
+   <widget class="QMenu" name="menuManual">
+    <property name="title">
+     <string>Manual</string>
+    </property>
+    <addaction name="actionControl"/>
+   </widget>
+   <widget class="QMenu" name="menuCalibration">
+    <property name="title">
+     <string>Calibration</string>
+    </property>
+    <addaction name="actionCalibration"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuOpen"/>
    <addaction name="menuSave"/>
    <addaction name="menuExport"/>
    <addaction name="menuHelp"/>
+   <addaction name="menuManual"/>
+   <addaction name="menuCalibration"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionSave_as">
@@ -1726,6 +1740,21 @@ font: 10pt;background-color: #181818;</string>
   <action name="actionHelp">
    <property name="text">
     <string>Help</string>
+   </property>
+  </action>
+  <action name="actionControl">
+   <property name="text">
+    <string>Control</string>
+   </property>
+  </action>
+  <action name="actionInformation">
+   <property name="text">
+    <string>Information</string>
+   </property>
+  </action>
+  <action name="actionCalibration">
+   <property name="text">
+    <string>Calibration</string>
    </property>
   </action>
  </widget>
