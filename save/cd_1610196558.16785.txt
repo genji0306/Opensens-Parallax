@@ -1,0 +1,2 @@
+Elapsed time(s)	Potential(V)	Current(A)
+4.771850e-02	1.940765e-01	-7.152557e-07

@@ -64,6 +64,8 @@ adcread_interval = 0.09  # ADC sampling interval (in seconds)
 # Enable logging of potential and current in idle mode (can be adjusted in the GUI)
 logging_enabled = False
 # usb_connected = False
+start_stop = 1
+stop = 0
 
 if platform.system() != "Windows":
     # On Linux/OSX, use the Qt timer
@@ -425,41 +427,40 @@ def auto_current_range():
         return 0
 
 
-cd_parameters = []
-cv_parameters = []
-rate_parameters = []
-start_stop = 1
+# cd_parameters = []
+# cv_parameters = []
+# rate_parameters = []
 
 
-def cd_start(index):
+def cd_start(cd_parameters):
     global start_stop, cd_charges, cd_currentsetpoint, cd_starttime, cd_currentcycle, cd_time_data, cd_potential_data, cd_current_data, cd_plot_curves, state, cd_outputfile_raw, cd_outputfile_capacities
     # if not start_stop:
     #     start_stop = 1
     #     cd_stop(interrupted=False)
     #     return
 
-    if check_state([States.Idle, States.Stationary_Graph, States.Measuring_start]) and start_stop:
-        cd_outputfile_raw = open(cd_parameters[index]['filename'], 'w', 1)
+    if check_state([States.Idle, States.Stationary_Graph, States.Measuring_start]):
+        cd_outputfile_raw = open(cd_parameters['filename'], 'w', 1)
         cd_outputfile_raw.write("Elapsed time(s)\tPotential(V)\tCurrent(A)\n")
-        base, extension = os.path.splitext(cd_parameters[index]['filename'])
+        base, extension = os.path.splitext(cd_parameters['filename'])
         cd_outputfile_capacities = open(base+'_capacities'+extension, 'w', 1)
         cd_outputfile_capacities.write(
             "Cycle number\tCharge capacity (Ah)\tDischarge capacity (Ah)\n")
         cd_currentcycle = 1
         cd_charges = []
         cd_plot_curves = []
-        cd_currentsetpoint = cd_parameters[index]['chargecurrent']
+        cd_currentsetpoint = cd_parameters['chargecurrent']
         set_current_range()
         set_output(1, cd_currentsetpoint)  # Set current to setpoint
         set_control_mode(True)  # Galvanostatic control
         time.sleep(.2)  # Allow DAC some time to settle
         cd_starttime = timeit.default_timer()
         # Holds averaged data for elapsed time
-        cd_time_data = AverageBuffer(cd_parameters[index]['numsamples'])
+        cd_time_data = AverageBuffer(cd_parameters['numsamples'])
         # Holds averaged data for potential
-        cd_potential_data = AverageBuffer(cd_parameters[index]['numsamples'])
+        cd_potential_data = AverageBuffer(cd_parameters['numsamples'])
         # Holds averaged data for current
-        cd_current_data = AverageBuffer(cd_parameters[index]['numsamples'])
+        cd_current_data = AverageBuffer(cd_parameters['numsamples'])
         set_cell_status(True)  # Cell on
         try:  # Set up the plotting area
             legend.scene().removeItem(legend)
@@ -477,13 +478,13 @@ def cd_start(index):
         # start_stop = 0
 
 
-def cd_update(index):
+def cd_update(cd_parameters):
     """Add a new data point to the charge/discharge measurement (should be called regularly)."""
     global cd_currentsetpoint, cd_currentcycle, state
     elapsed_time = timeit.default_timer()-cd_starttime
     # End of charge/discharge measurements
     # print(elapsed_time)
-    if cd_currentcycle > cd_parameters[index]['numcycles'] or elapsed_time > 60*3:
+    if cd_currentcycle > cd_parameters['numcycles'] or elapsed_time > 60*3:
         cd_stop(interrupted=False)
     else:  # Continue charge/discharge measurement process
         read_potential_current()  # Read new potential and current
@@ -500,12 +501,12 @@ def cd_update(index):
             cd_plot_curves[cd_currentcycle -
                            1].setData(charge, cd_potential_data.averagebuffer)
         # A potential cut-off has been reached
-        if (cd_currentsetpoint > 0 and potential > cd_parameters[index]['ubound']) or (cd_currentsetpoint < 0 and potential < cd_parameters[index]['lbound']):
+        if (cd_currentsetpoint > 0 and potential > cd_parameters['ubound']) or (cd_currentsetpoint < 0 and potential < cd_parameters['lbound']):
             # Switch from the discharge phase to the charge phase or vice versa
-            if cd_currentsetpoint == cd_parameters[index]['chargecurrent']:
-                cd_currentsetpoint = cd_parameters[index]['dischargecurrent']
+            if cd_currentsetpoint == cd_parameters['chargecurrent']:
+                cd_currentsetpoint = cd_parameters['dischargecurrent']
             else:
-                cd_currentsetpoint = cd_parameters[index]['chargecurrent']
+                cd_currentsetpoint = cd_parameters['chargecurrent']
             set_current_range()  # Set new current range
             set_output(1, cd_currentsetpoint)  # Set current to setpoint
             # Start a new plot curve and append it to the plot area (keeping the old ones as well)
@@ -608,22 +609,22 @@ def charge_from_cv(time_arr, current_arr):
     return charge_arr
 
 
-def cv_start(index):
+def cv_start(cv_parameters):
     """Initialize the CV measurement."""
     global cv_time_data, cv_potential_data, cv_current_data, cv_plot_curve, cv_outputfile, state, skipcounter
     if check_state([States.Idle, States.Stationary_Graph, States.Measuring_start]):
-        cv_outputfile = open(cv_parameters[index]['filename'], 'w', 1)
+        cv_outputfile = open(cv_parameters['filename'], 'w', 1)
         cv_outputfile.write("Elapsed time(s)\tPotential(V)\tCurrent(A)\n")
-        set_output(0, cv_parameters[index]['startpot'])
+        set_output(0, cv_parameters['startpot'])
         set_control_mode(False)
         set_current_range()
         time.sleep(.1)  # Allow DAC some time to settle
         # Holds averaged data for elapsed time
-        cv_time_data = AverageBuffer(cv_parameters[index]['numsamples'])
+        cv_time_data = AverageBuffer(cv_parameters['numsamples'])
         # Holds averaged data for potential
-        cv_potential_data = AverageBuffer(cv_parameters[index]['numsamples'])
+        cv_potential_data = AverageBuffer(cv_parameters['numsamples'])
         # Holds averaged data for current
-        cv_current_data = AverageBuffer(cv_parameters[index]['numsamples'])
+        cv_current_data = AverageBuffer(cv_parameters['numsamples'])
         set_cell_status(True)
         time.sleep(.1)  # Allow feedback loop some time to settle
         read_potential_current()
@@ -648,15 +649,15 @@ def cv_start(index):
             pen='y')  # Plot CV in yellow
         state = States.Measuring_CV
         skipcounter = 2  # Skip first two data points to suppress artifacts
-        cv_parameters[index]['starttime'] = timeit.default_timer()
+        cv_parameters['starttime'] = timeit.default_timer()
 
 
-def cv_update(index):
+def cv_update(cv_parameters):
     """Add a new data point to the CV measurement (should be called regularly)."""
     global state, skipcounter
-    elapsed_time = timeit.default_timer()-cv_parameters[index]['starttime']
-    cv_output = cv_sweep(elapsed_time, cv_parameters[index]['startpot'], cv_parameters[index]['stoppot'],
-                         cv_parameters[index]['ubound'], cv_parameters[index]['lbound'], cv_parameters[index]['scanrate'], cv_parameters[index]['numcycles'])
+    elapsed_time = timeit.default_timer()-cv_parameters['starttime']
+    cv_output = cv_sweep(elapsed_time, cv_parameters['startpot'], cv_parameters['stoppot'],
+                         cv_parameters['ubound'], cv_parameters['lbound'], cv_parameters['scanrate'], cv_parameters['numcycles'])
     if cv_output == None:  # This signifies the end of the CV scan
         cv_stop(interrupted=False)
     else:
@@ -698,34 +699,34 @@ def cv_stop(interrupted=True):
         state = States.Measuring_start
 
 
-def rate_start(index):
+def rate_start(rate_parameters):
     """Initialize the rate testing measurement."""
     global state, crate_index, rate_halfcycle_countdown, rate_chg_charges, rate_dis_charges, rate_outputfile_raw, rate_outputfile_capacities, rate_starttime, rate_time_data, rate_potential_data, rate_current_data, rate_plot_scatter_chg, rate_plot_scatter_dis, legend
     if check_state([States.Idle, States.Stationary_Graph, States.Measuring_start]):
         print("----start")
         crate_index = 0  # Index in the list of C-rates
         # Holds amount of remaining half cycles
-        rate_halfcycle_countdown = 2*rate_parameters[index]['numcycles']
+        rate_halfcycle_countdown = 2*rate_parameters['numcycles']
         rate_chg_charges = []  # List of measured charge capacities
         rate_dis_charges = []  # List of measured discharge capacitiesa
         # Apply positive current for odd half cycles (charge phase) and negative current for even half cycles (discharge phase)
-        rate_outputfile_raw = open(rate_parameters[index]['filename'], 'w', 1)
+        rate_outputfile_raw = open(rate_parameters['filename'], 'w', 1)
         rate_outputfile_raw.write(
             "Elapsed time(s)\tPotential(V)\tCurrent(A)\n")
-        base, extension = os.path.splitext(rate_parameters[index]['filename'])
+        base, extension = os.path.splitext(rate_parameters['filename'])
         # This file will contain capacity data for each C-rate
         rate_outputfile_capacities = open(base+'_capacities'+extension, 'w', 1)
         rate_outputfile_capacities.write(
             "C-rate\tCharge capacity (Ah)\tDischarge capacity (Ah)\n")
-        rate_current = rate_parameters[index]['currents'][crate_index] if rate_halfcycle_countdown % 2 == 0 else - \
-            rate_parameters[index]['currents'][crate_index]
+        rate_current = rate_parameters['currents'][crate_index] if rate_halfcycle_countdown % 2 == 0 else - \
+            rate_parameters['currents'][crate_index]
         set_current_range()  # Set new current range
         set_output(1, rate_current)  # Set current to setpoint
         set_control_mode(True)  # Galvanostatic control
         time.sleep(.2)  # Allow DAC some time to settle
         rate_starttime = timeit.default_timer()
         numsamples = max(
-            1, int(36./rate_parameters[index]['crates'][crate_index]))
+            1, int(36./rate_parameters['crates'][crate_index]))
         # Holds averaged data for elapsed time
         rate_time_data = AverageBuffer(numsamples)
         # Holds averaged data for potential
@@ -754,7 +755,7 @@ def rate_start(index):
         state = States.Measuring_Rate
 
 
-def rate_update(index):
+def rate_update(rate_parameters):
     """Add a new data point to the rate testing measurement (should be called regularly)."""
     global state, crate_index, rate_halfcycle_countdown
     elapsed_time = timeit.default_timer()-rate_starttime
@@ -767,7 +768,7 @@ def rate_update(index):
         rate_outputfile_raw.write("%e\t%e\t%e\n" % (
             rate_time_data.averagebuffer[-1], rate_potential_data.averagebuffer[-1], rate_current_data.averagebuffer[-1]))  # Write it out
     # A potential cut-off has been reached
-    if (rate_halfcycle_countdown % 2 == 0 and potential > rate_parameters[index]['ubound']) or (rate_halfcycle_countdown % 2 != 0 and potential < rate_parameters[index]['lbound']):
+    if (rate_halfcycle_countdown % 2 == 0 and potential > rate_parameters['ubound']) or (rate_halfcycle_countdown % 2 != 0 and potential < rate_parameters['lbound']):
         rate_halfcycle_countdown -= 1
         print("--1")
         if rate_halfcycle_countdown == 1:  # Last charge cycle for this C-rate, so calculate and plot the charge capacity
@@ -775,18 +776,18 @@ def rate_update(index):
                 rate_current_data.averagebuffer, rate_time_data.averagebuffer)/3600.)  # Charge in Ah
             rate_chg_charges.append(charge)
             rate_plot_scatter_chg.setData(
-                rate_parameters[index]['crates'][0:crate_index+1], rate_chg_charges)
+                rate_parameters['crates'][0:crate_index+1], rate_chg_charges)
             print("--2")
         elif rate_halfcycle_countdown == 0:  # Last discharge cycle for this C-rate, so calculate and plot the discharge capacity, and go to the next C-rate
             charge = numpy.abs(scipy.integrate.trapz(
                 rate_current_data.averagebuffer, rate_time_data.averagebuffer)/3600.)  # Charge in Ah
             rate_dis_charges.append(charge)
             rate_plot_scatter_dis.setData(
-                rate_parameters[index]['crates'][0:crate_index+1], rate_dis_charges)
+                rate_parameters['crates'][0:crate_index+1], rate_dis_charges)
             rate_outputfile_capacities.write("%e\t%e\t%e\n" % (
-                rate_parameters[index]['crates'][crate_index], rate_chg_charges[-1], rate_dis_charges[-1]))
+                rate_parameters['crates'][crate_index], rate_chg_charges[-1], rate_dis_charges[-1]))
             # Last C-rate was measured
-            if crate_index == len(rate_parameters[index]['crates'])-1:
+            if crate_index == len(rate_parameters['crates'])-1:
                 rate_stop(interrupted=False)
                 print("--3")
                 return
@@ -795,16 +796,16 @@ def rate_update(index):
                 crate_index += 1
                 # Set the amount of remaining half cycles for the new C-rate
                 rate_halfcycle_countdown = 2 * \
-                    rate_parameters[index]['numcycles']
+                    rate_parameters['numcycles']
                 set_current_range()  # Set new current range
                 # Set an appropriate amount of samples to average for the new C-rate; results in approx. 1000 points per curve
                 numsamples = max(
-                    1, int(36./rate_parameters[index]['crates'][crate_index]))
+                    1, int(36./rate_parameters['crates'][crate_index]))
                 for data in [rate_time_data, rate_potential_data, rate_current_data]:
                     data.number_of_samples_to_average = numsamples
         # Apply positive current for odd half cycles (charge phase) and negative current for even half cycles (discharge phase)
-        rate_current = rate_parameters[index]['currents'][crate_index] if rate_halfcycle_countdown % 2 == 0 else - \
-            rate_parameters[index]['currents'][crate_index]
+        rate_current = rate_parameters['currents'][crate_index] if rate_halfcycle_countdown % 2 == 0 else - \
+            rate_parameters['currents'][crate_index]
         set_output(1, rate_current)  # Set current to setpoint
         # Clear average buffers to prepare them for the next cycle
         for data in [rate_time_data, rate_potential_data, rate_current_data]:
@@ -823,17 +824,26 @@ def rate_stop(interrupted=True):
 
 
 queue_measure = []
-index_cv = 0
-index_cd = 0
-index_rate = 0
+id_ = 0
+para_run = {}
 
 
 def start():
-    global state
+    global state, start_stop, stop
     if state == States.NotConnected:
         not_connected_errormessage()
-    else:
+    elif state != States.NotConnected and start_stop:
         state = States.Measuring_start
+        main_window.button_start.setText('Stop')
+        start_stop = 0
+    elif stop:
+        stop = 0
+        main_window.button_start.setText('Stop')
+        return
+    else:
+        main_window.button_start.setText('Start')
+        stop = 1
+        # start_stop = 1
     print('----state', state)
 
 
@@ -865,6 +875,7 @@ class Frame(QPushButton):
         self.index_line = 0
         self.setMouseTracking(True)
         self.index_measure = 0
+        self.parameters = {}
 
     def mousePressEvent(self, e):
         self.check_move = 1
@@ -884,26 +895,67 @@ class Frame(QPushButton):
             main_window.status_line += 1
             # main_window.status_table -= 1
             self.index_line = main_window.status_line
-            if self.index_measure == 0:
-                queue_measure.append({"index": index_cd, "type": "cd"})
-                index_cd += 1
-            elif self.index_measure == 1:
-                queue_measure.append({"index": index_rate, "type": "rate"})
-                index_rate += 1
-            elif self.index_measure == 2:
-                queue_measure.append({"index": index_cv, "type": "cv"})
-                index_cv += 1
-            print(queue_measure)
+            # if self.index_measure == 0:
+            #     queue_measure.append({"index": index_cd, "type": "cd"})
+            #     index_cd += 1
+            # elif self.index_measure == 1:
+            #     queue_measure.append({"index": index_rate, "type": "rate"})
+            #     index_rate += 1
+            # elif self.index_measure == 2:
+            #     queue_measure.append({"index": index_cv, "type": "cv"})
+            #     index_cv += 1
+            if self.parameters:
+                queue_measure.append(self.parameters)
+                print('----- > queue_measure', queue_measure)
         else:
-            self.check_move = 0
-            self.check_stack = 0
-            self.resize(80, 61)
-            if self.index_line:
-                main_window.status_line -= 1
-                self.index_line = 0
-            # self.setStyleSheet("background-color: #181818;")
-            self.move(main_window.x_axis[int(self.index_table % ADD_TABLE_SIZE[1])],
-                      main_window.y_axis[int(self.index_table / ADD_TABLE_SIZE[1])])
+            if self.parameters:
+                for queue_measure_ in queue_measure:
+                    if queue_measure_['id'] == self.parameters['id']:
+                        queue_measure.remove(queue_measure_)
+                        print('----- > queue_measure remove', queue_measure)
+                self.check_move = 0
+                self.check_stack = 0
+                self.resize(80, 61)
+                if self.index_line:
+                    main_window.status_line -= 1
+                    self.index_line = 0
+                # self.setStyleSheet("background-color: #181818;")
+                self.move(main_window.x_axis[int(self.index_table % ADD_TABLE_SIZE[1])],
+                          main_window.y_axis[int(self.index_table / ADD_TABLE_SIZE[1])])
+            else:
+                self.check_move = 0
+                self.check_stack = 0
+                self.resize(80, 61)
+                if self.index_line:
+                    main_window.status_line -= 1
+                    self.index_line = 0
+                # self.setStyleSheet("background-color: #181818;")
+                self.move(main_window.x_axis[int(self.index_table % ADD_TABLE_SIZE[1])],
+                          main_window.y_axis[int(self.index_table / ADD_TABLE_SIZE[1])])
+
+    def frame_refresh(self):
+        self.check_move = 0
+        self.check_stack = 0
+        self.resize(80, 61)
+        if self.index_line:
+            main_window.status_line -= 1
+            self.index_line = 0
+        # self.setStyleSheet("background-color: #181818;")
+        self.move(main_window.x_axis[int(self.index_table % ADD_TABLE_SIZE[1])],
+                  main_window.y_axis[int(self.index_table / ADD_TABLE_SIZE[1])])
+
+
+def refresh():
+    global state, start_stop, stop, queue_measure
+    stop = 0
+    start_stop = 1
+    main_window.button_start.setText('Start')
+    state = States.Idle_Init
+    queue_measure = []
+    frames = main_window.main_widget.findChildren(Frame)
+    for frame in frames:
+        if frame.check_stack:
+            frame.frame_refresh()
 
 
 class create(QMainWindow):
@@ -1101,8 +1153,9 @@ class create(QMainWindow):
                 # self.cd_parameter['filename'] = choose_file(
                 #     "Choose where to save the charge/discharge measurement data")
                 if self.cd_validate_parameters() and validate_file(self.cd_parameter['filename']):
-                    cd_parameters.append(self.cd_parameter)
-                    return True
+                    parameters = {'id': id_, 'type': 'cd',
+                                  'value': self.cd_parameter}
+                    return parameters
                 else:
                     return False
             except ValueError:
@@ -1124,8 +1177,9 @@ class create(QMainWindow):
                 # self.rate_parameter['filename'] = choose_file(
                 #     "Choose where to save the rate testing measurement data")
                 if self.rate_validate_parameters() and validate_file(self.rate_parameter['filename']):
-                    rate_parameters.append(self.rate_parameter)
-                    return True
+                    parameters = {'id': id_, 'type': 'rate',
+                                  'value': self.rate_parameter}
+                    return parameters
                 else:
                     return False
             except ValueError:
@@ -1145,8 +1199,10 @@ class create(QMainWindow):
                 # self.cv_parameter['filename'] = choose_file(
                 #     "Choose where to save the CV measurement data")
                 if self.cv_validate_parameters() and validate_file(self.cv_parameter['filename']):
-                    cv_parameters.append(self.cv_parameter)
-                    return True
+                    parameters = {'id': id_, 'type': 'cv',
+                                  'value': self.cv_parameter}
+                    # print(parameters)
+                    return parameters
                 else:
                     # self.exit_window()
                     return False
@@ -1158,10 +1214,15 @@ class create(QMainWindow):
         self.close()
 
     def add(self):
+        global id_
         if main_window.status_table < ADD_TABLE_SIZE[0]*ADD_TABLE_SIZE[1]:
             frame_ = Frame(main_window.main_widget)
             frame_.index_measure = self.option.currentIndex()
-            if self.get_para(frame_.index_measure):
+            frame_.parameters = self.get_para(
+                frame_.index_measure)
+            if frame_.parameters:
+                id_ += 1
+                print('----> frame', frame_.parameters)
                 frame_.setStyleSheet("background-color: %s;" %
                                      COLOR_TABLE[frame_.index_measure])
                 frame_.setText(LIST_TECHNIQUES[frame_.index_measure])
@@ -1199,6 +1260,9 @@ class main(QMainWindow):
 
         self.button_start = self.findChild(QPushButton, 'button_start')
         self.button_start.clicked.connect(start)
+
+        self.button_refresh = self.findChild(QPushButton, 'button_refresh')
+        self.button_refresh.clicked.connect(refresh)
 
         self.current_range_set = self.findChild(
             QPushButton, 'current_range_set')
@@ -1253,36 +1317,42 @@ class main(QMainWindow):
         self.show()
 
     def update(self):
-        global queue_measure, state
+        global queue_measure, state, para_run
         if state == States.Idle_Init:
             idle_init()
         elif state == States.Idle:
             read_potential_current()
             update_live_graph()
-        elif state == States.Measuring_CD:
-            cd_update(self.index_measure)
-        elif state == States.Measuring_CV:
-            cv_update(self.index_measure)
-        elif state == States.Measuring_Rate:
-            rate_update(self.index_measure)
-        elif state == States.Measuring_start:
-            print(queue_measure)
+        elif stop:
+            pass
+        elif state == States.Measuring_CD and stop == 0:
+            cd_update(para_run)
+        elif state == States.Measuring_CV and stop == 0:
+            cv_update(para_run)
+        elif state == States.Measuring_Rate and stop == 0:
+            rate_update(para_run)
+        elif state == States.Measuring_start and stop == 0:
             if queue_measure:
+                print(queue_measure)
                 if queue_measure[0]["type"] == "cd":
-                    self.index_measure = queue_measure[0]["index"]
-                    cd_start(self.index_measure)
+                    # self.index_measure = queue_measure[0]["index"]
+                    cd_start(queue_measure[0]['value'])
+                    para_run = queue_measure[0]['value']
                     print("------", queue_measure[0])
                     queue_measure.pop(0)
                 elif queue_measure[0]["type"] == "cv":
-                    self.index_measure = queue_measure[0]["index"]
-                    cv_start(self.index_measure)
+                    # self.index_measure = queue_measure[0]["index"]
+                    cv_start(queue_measure[0]['value'])
+                    para_run = queue_measure[0]['value']
                     queue_measure.pop(0)
                 elif queue_measure[0]["type"] == "rate":
-                    self.index_measure = queue_measure[0]["index"]
-                    rate_start(self.index_measure)
+                    # self.index_measure = queue_measure[0]["index"]
+                    rate_start(queue_measure[0]['value'])
+                    para_run = queue_measure[0]['value']
                     queue_measure.pop(0)
             else:
                 state = States.Stationary_Graph
+                self.button_start.setText('Start')
 
     def open_new(self):
         qt_wid = create(self)
