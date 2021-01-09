@@ -961,7 +961,7 @@ def refresh():
 class create(QMainWindow):
     def __init__(self, parent=None):
         super(create, self).__init__(parent)
-        uic.loadUi('./mainwindow.ui', self)
+        uic.loadUi('./create_window.ui', self)
         self.setFixedSize(305, 543)
         self.option = self.findChild(QComboBox, 'comboBox')
         self.option.addItems(LIST_TECHNIQUES)
@@ -1238,7 +1238,7 @@ class create(QMainWindow):
 class main(QMainWindow):
     def __init__(self):
         super(main, self).__init__()
-        uic.loadUi('./form.ui', self)
+        uic.loadUi('./mainwindow.ui', self)
         self.setMouseTracking(True)
 
         # Create index for album area
