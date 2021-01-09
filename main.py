@@ -35,8 +35,8 @@ LIST_TECHNIQUES = [
     "Rate testing",
     "Cyclic voltammetry"
 ]
-usb_vid = "0xa0a0"  # Default USB vendor ID, can also be adjusted in the GUI
-usb_pid = "0x0002"  # Default USB product ID, can also be adjusted in the GUI
+usb_vid_ = "0xa0a0"  # Default USB vendor ID, can also be adjusted in the GUI
+usb_pid_ = "0x0002"  # Default USB product ID, can also be adjusted in the GUI
 current_range_list = ["20 mA", u"200 µA", u"2 µA"]
 # Fine adjustment for shunt resistors, containing values of R1/10ohm, R2/1kohm, R3/100kohm (can also be adjusted in the GUI)
 shunt_calibration = [1., 1., 1.]
@@ -149,8 +149,8 @@ def connect_disconnect_usb():
         return
 
     # Otherwise, try to connect
-    usb_vid_string = str(main_window.text_vid.text())
-    usb_pid_string = str(main_window.text_pid.text())
+    usb_vid_string = str(main_window.usb_vid.text())
+    usb_pid_string = str(main_window.usb_pid.text())
     dev = usb.core.find(idVendor=int(usb_vid_string, 0),
                         idProduct=int(usb_pid_string, 0))
     if dev is None:
@@ -231,8 +231,8 @@ def get_offset():
         if response != bytes([255, 255, 255, 255, 255, 255]):
             potential_offset = dac_bytes_to_decimal(response[0:3])
             current_offset = dac_bytes_to_decimal(response[3:6])
-            main_window.pot_offset.setText("%d" % potential_offset)
-            main_window.curr_offset.setText("%d" % current_offset)
+            main_window.pot_offset_input.setText("%d" % potential_offset)
+            main_window.curr_offset_input.setText("%d" % current_offset)
         else:
             print("ERROR get offset")
     else:
@@ -248,8 +248,8 @@ def get_dac_calibration():
         if response != bytes([255, 255, 255, 255, 255, 255]):
             dac_offset = dac_bytes_to_decimal(response[0:3])
             dac_gain = dac_bytes_to_decimal(response[3:6])+2**19
-            main_window.dac_offset.setText("%d" % dac_offset)
-            main_window.dac_gain.setText("%d" % dac_gain)
+            main_window.dac_offset_input.setText("%d" % dac_offset)
+            main_window.dac_gain_input.setText("%d" % dac_gain)
         else:
             print("ERROR get offset")
     else:
@@ -882,28 +882,19 @@ class Frame(QPushButton):
 
     def mouseReleaseEvent(self, e):
         global queue_measure, index_cd, index_cv, index_rate
-        if (main_window.frame_y.pos().y()-50 < self.pos().y() < main_window.frame_y.pos().y()+50) and self.check_stack == 0:
+        if (main_window.frame_20.pos().y()-50 < self.pos().y() < main_window.frame_20.pos().y()+50) and self.check_stack == 0:
             self.check_move = 0
             self.check_stack = 1
             pos_x_line = main_window.button_refresh.pos(
             ).x() + main_window.button_refresh.width()
-            pos_y_line = main_window.frame_y.pos().y()
-            self.resize(120, main_window.frame_y.height())
+            pos_y_line = main_window.frame_20.pos().y()
+            self.resize(120, main_window.frame_20.height())
             # self.setStyleSheet(
             #     "background-color: #202932;")
             self.move(pos_x_line + main_window.status_line*120, pos_y_line)
             main_window.status_line += 1
             # main_window.status_table -= 1
             self.index_line = main_window.status_line
-            # if self.index_measure == 0:
-            #     queue_measure.append({"index": index_cd, "type": "cd"})
-            #     index_cd += 1
-            # elif self.index_measure == 1:
-            #     queue_measure.append({"index": index_rate, "type": "rate"})
-            #     index_rate += 1
-            # elif self.index_measure == 2:
-            #     queue_measure.append({"index": index_cv, "type": "cv"})
-            #     index_cv += 1
             if self.parameters:
                 queue_measure.append(self.parameters)
                 print('----- > queue_measure', queue_measure)
@@ -975,47 +966,15 @@ class create(QMainWindow):
         super(create, self).__init__(parent)
         uic.loadUi('./ui/sub_window/create_window.ui', self)
         self.setFixedSize(305, 543)
-        self.option = self.findChild(QComboBox, 'comboBox')
-        self.option.addItems(LIST_TECHNIQUES)
+        self.comboBox.addItems(LIST_TECHNIQUES)
 
-        self.button_cancel = self.findChild(QPushButton, 'button_cancel')
         self.button_cancel.clicked.connect(self.exit_window)
 
-        self.button_add = self.findChild(QPushButton, 'button_add')
         self.button_add.clicked.connect(self.add)
 
-        self.save_button = self.findChild(QPushButton, 'choose_file')
-        self.save_button.clicked.connect(self.choose_file_)
-        self.save_path = self.findChild(QLineEdit, 'save_path')
+        self.choose_file.clicked.connect(self.choose_file_)
 
-        self.frame_0 = self.findChild(QFrame, 'charge_disch')
-        self.frame_1 = self.findChild(QFrame, 'rate_testing')
-        self.frame_2 = self.findChild(QFrame, 'cyclic_voltammetry')
-
-        self.cd_ubound = self.findChild(QLineEdit, 'cd_ubound')
-        self.cd_chargecurrent = self.findChild(QLineEdit, 'cd_chargecurrent')
-        self.cd_dischargecurrent = self.findChild(
-            QLineEdit, 'cd_dischargecurrent')
-        self.cd_numsamples = self.findChild(QLineEdit, 'cd_numsamples')
-        self.cd_numcycles = self.findChild(QLineEdit, 'cd_numcycles')
-        self.cd_lbound = self.findChild(QLineEdit, 'cd_lbound')
-
-        self.cv_ubound = self.findChild(QLineEdit, 'cv_ubound')
-        self.cv_startpot = self.findChild(QLineEdit, 'cv_startpot')
-        self.cv_stoppot = self.findChild(
-            QLineEdit, 'cv_stoppot')
-        self.cv_numsamples = self.findChild(QLineEdit, 'cv_numsamples')
-        self.cv_scanrate = self.findChild(QLineEdit, 'cv_scanrate')
-        self.cv_numcycles = self.findChild(QLineEdit, 'cv_numcycles')
-        self.cv_lbound = self.findChild(QLineEdit, 'cv_lbound')
-
-        self.rate_lbound = self.findChild(QLineEdit, 'rate_lbound')
-        self.rate_ubound = self.findChild(QLineEdit, 'rate_ubound')
-        self.rate_one_c_current = self.findChild(
-            QLineEdit, 'rate_one_c_current')
-        self.rate_crates = self.findChild(QLineEdit, 'rate_crates')
         self.rate_crates.setText("1, 2, 5, 10, 20, 50, 100")
-        self.rate_numcycles = self.findChild(QLineEdit, 'rate_numcycles')
 
         self.cd_parameter = {}
         self.cv_parameter = {}
@@ -1030,11 +989,11 @@ class create(QMainWindow):
 
         self.index = 0
 
-        self.frame_1.hide()
-        self.frame_2.hide()
+        self.rate_testing.hide()
+        self.cyclic_voltammetry.hide()
         self.save_path.setText(self.cd_parameter['filename'])
 
-        self.option.activated.connect(self.do_something)
+        self.comboBox.activated.connect(self.do_something)
 
     def cv_validate_parameters(self):
         if self.cv_parameter['ubound'] < self.cv_parameter['lbound']:
@@ -1132,21 +1091,21 @@ class create(QMainWindow):
 
     def do_something(self, index):
         if (index == 0):
-            self.frame_1.hide()
-            self.frame_2.hide()
-            self.frame_0.show()
+            self.rate_testing.hide()
+            self.cyclic_voltammetry.hide()
+            self.charge_disch.show()
             self.index = index
             self.save_path.setText(self.cd_parameter['filename'])
         elif (index == 1):
-            self.frame_0.hide()
-            self.frame_2.hide()
-            self.frame_1.show()
+            self.charge_disch.hide()
+            self.cyclic_voltammetry.hide()
+            self.rate_testing.show()
             self.index = index
             self.save_path.setText(self.rate_parameter['filename'])
         else:
-            self.frame_0.hide()
-            self.frame_1.hide()
-            self.frame_2.show()
+            self.charge_disch.hide()
+            self.rate_testing.hide()
+            self.cyclic_voltammetry.show()
             self.index = index
             self.save_path.setText(self.cv_parameter['filename'])
 
@@ -1229,7 +1188,7 @@ class create(QMainWindow):
         global id_
         if main_window.status_table < ADD_TABLE_SIZE[0]*ADD_TABLE_SIZE[1]:
             frame_ = Frame(main_window.main_widget)
-            frame_.index_measure = self.option.currentIndex()
+            frame_.index_measure = self.comboBox.currentIndex()
             frame_.parameters = self.get_para(
                 frame_.index_measure)
             if frame_.parameters:
@@ -1265,43 +1224,23 @@ class main(QMainWindow):
         self.y_axis = [self.create_frame.y() + row*(gap_row + addBtn_height)
                        for row in range(ADD_TABLE_SIZE[0])]
 
-        self.main_widget = self.findChild(QWidget, 'main_widget')
-
-        self.usb_connect = self.findChild(QPushButton, 'usb_connect')
         self.usb_connect.clicked.connect(connect_disconnect_usb)
 
-        self.button_start = self.findChild(QPushButton, 'button_start')
         self.button_start.clicked.connect(start)
 
-        self.button_refresh = self.findChild(QPushButton, 'button_refresh')
         self.button_refresh.clicked.connect(refresh)
 
         self.actionControl.triggered.connect(self.open_manual)
 
         self.actionCalibration.triggered.connect(self.open_calibration)
 
-        self.current_range_set = self.findChild(
-            QPushButton, 'current_range_set')
         self.current_range_set.clicked.connect(set_current_range)
 
-        self.current_range_box = self.findChild(QComboBox, 'current_range_box')
         self.current_range_box.addItems(["20 mA", u"200 µA", u"2 µA"])
-        self.option2 = self.findChild(QComboBox, 'comboBox_2')
-        self.option2.addItems(["Potential (V)", "Current (mA)", "DAC Code"])
+        self.comboBox_2.addItems(["Potential (V)", "Current (mA)", "DAC Code"])
 
-        self.dac_offset = self.findChild(QLineEdit, 'dac_offset_input')
-        self.dac_gain = self.findChild(QLineEdit, 'dac_gain_input')
-        self.pot_offset = self.findChild(QLineEdit, 'pot_offset_input')
-        self.curr_offset = self.findChild(QLineEdit, 'curr_offset_input')
-
-        self.text_vid = self.findChild(QLineEdit, 'usb_vid')
-        self.text_vid.setText(usb_vid)
-        self.text_pid = self.findChild(QLineEdit, 'usb_pid')
-        self.text_pid.setText(usb_pid)
-
-        self.label_manufacture = self.findChild(QLabel, 'label_manufacture')
-        self.label_product = self.findChild(QLabel, 'label_product')
-        self.label_serial = self.findChild(QLabel, 'label_serial')
+        self.usb_vid.setText(usb_vid_)
+        self.usb_pid.setText(usb_pid_)
 
         self.status_table = 1
         self.status_line = 0
@@ -1309,15 +1248,8 @@ class main(QMainWindow):
 
         self.index_measure = 0
 
-        # self.frame_x = Frame(self.main_widget)
-        # self.frame_x.setStyleSheet("background-color: #181818;")
-        # self.frame_x.resize(127, 102)
-        # self.frame_x.move(450, 3)
+        self.create_measure.clicked.connect(self.open_new)
 
-        self.button_create = self.findChild(QPushButton, 'create_measure')
-        self.button_create.clicked.connect(self.open_new)
-
-        self.frame_y = self.findChild(QFrame, 'frame_20')
         self.dynamicPlt = pg.PlotWidget(self)
 
         self.dynamicPlt.move(305, 22)
