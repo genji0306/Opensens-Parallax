@@ -17,11 +17,10 @@ import collections
 import scipy.integrate
 from pathlib import Path
 
-# pg.setConfigOption('background', 'w')
 pg.setConfigOptions(foreground="#e5e5e5", background="#00304f")
 base_dir = os.path.dirname(os.path.realpath(__file__))
 SAVE_PATH = os.path.join(base_dir, 'save')
-#Create save path for each technique
+# Create save path for each technique
 Path(SAVE_PATH).mkdir(parents=True, exist_ok=True)
 
 ADD_TABLE_SIZE = [4, 3]  # Size of album table
@@ -355,19 +354,6 @@ def read_potential_current():
         # Calculate current in mA, taking current range into account and compensating for offset
         current = (raw_current-current_offset)/2097152.*25. / \
             (shunt_calibration[currentrange]*100.**currentrange)
-        # potential_monitor.setText(potential_to_string(potential))
-        # current_monitor.setText(current_to_string(currentrange, current))
-        # # If enabled, all measurements are appended to an output file (even in idle mode)
-        # if logging_enabled:
-        #     try:
-        #         # Output tab-separated data containing time (in s), potential (in V), and current (in A)
-        #         print("%.2f\t%e\t%e" % (time_of_last_adcread, potential,
-        #                                 current*1e-3), file=open(hardware_log_filename.text(), 'a', 1))
-        #     except:
-        #         QtGui.QMessageBox.critical(
-        #             mainwidget, "Logging error!", "Logging error!")
-        #         # Disable logging in case of file errors
-        #         hardware_log_checkbox.setChecked(False)
 
 
 def idle_init():
@@ -432,17 +418,8 @@ def auto_current_range():
         return 0
 
 
-# cd_parameters = []
-# cv_parameters = []
-# rate_parameters = []
-
-
 def cd_start(cd_parameters):
     global start_stop, cd_charges, cd_currentsetpoint, cd_starttime, cd_currentcycle, cd_time_data, cd_potential_data, cd_current_data, cd_plot_curves, state, cd_outputfile_raw, cd_outputfile_capacities
-    # if not start_stop:
-    #     start_stop = 1
-    #     cd_stop(interrupted=False)
-    #     return
 
     if check_state([States.Idle, States.Stationary_Graph, States.Measuring_start]):
         cd_outputfile_raw = open(cd_parameters['filename'], 'w', 1)
@@ -478,9 +455,6 @@ def cd_start(cd_parameters):
         main_window.dynamicPlt.setLabel('left', 'Potential', units="V")
         cd_plot_curves.append(main_window.dynamicPlt.plot(pen='y'))
         state = States.Measuring_CD
-        print("------ start CD")
-        # main_window.button_start.setText("Stop")
-        # start_stop = 0
 
 
 def cd_update(cd_parameters):
@@ -488,7 +462,6 @@ def cd_update(cd_parameters):
     global cd_currentsetpoint, cd_currentcycle, state
     elapsed_time = timeit.default_timer()-cd_starttime
     # End of charge/discharge measurements
-    # print(elapsed_time)
     if cd_currentcycle > cd_parameters['numcycles'] or elapsed_time > 60*3:
         cd_stop(interrupted=False)
     else:  # Continue charge/discharge measurement process
@@ -699,7 +672,6 @@ def cv_stop(interrupted=True):
             cv_potential_data.averagebuffer, cv_current_data.averagebuffer)
         charge_arr = charge_from_cv(
             cv_time_data.averagebuffer, cv_current_data.averagebuffer)
-        print('----> CV stop')
         # Keep displaying the last plot until the user clicks a button
         state = States.Measuring_start
 
@@ -708,7 +680,6 @@ def rate_start(rate_parameters):
     """Initialize the rate testing measurement."""
     global state, crate_index, rate_halfcycle_countdown, rate_chg_charges, rate_dis_charges, rate_outputfile_raw, rate_outputfile_capacities, rate_starttime, rate_time_data, rate_potential_data, rate_current_data, rate_plot_scatter_chg, rate_plot_scatter_dis, legend
     if check_state([States.Idle, States.Stationary_Graph, States.Measuring_start]):
-        print("----start")
         crate_index = 0  # Index in the list of C-rates
         # Holds amount of remaining half cycles
         rate_halfcycle_countdown = 2*rate_parameters['numcycles']
@@ -752,7 +723,6 @@ def rate_start(rate_parameters):
         main_window.dynamicPlt.setLabel(
             'left', 'Inserted/extracted charge', units="Ah")
         # Plot charge capacity as a function of C-rate with red circles
-        print('--------')
         rate_plot_scatter_chg = main_window.dynamicPlt.plot(
             symbol='o', pen=None, symbolPen='r', symbolBrush='r', name='Charge')
         rate_plot_scatter_dis = main_window.dynamicPlt.plot(symbol='o', pen=None, symbolPen=(100, 100, 255), symbolBrush=(
@@ -775,14 +745,12 @@ def rate_update(rate_parameters):
     # A potential cut-off has been reached
     if (rate_halfcycle_countdown % 2 == 0 and potential > rate_parameters['ubound']) or (rate_halfcycle_countdown % 2 != 0 and potential < rate_parameters['lbound']):
         rate_halfcycle_countdown -= 1
-        print("--1")
         if rate_halfcycle_countdown == 1:  # Last charge cycle for this C-rate, so calculate and plot the charge capacity
             charge = numpy.abs(scipy.integrate.trapz(
                 rate_current_data.averagebuffer, rate_time_data.averagebuffer)/3600.)  # Charge in Ah
             rate_chg_charges.append(charge)
             rate_plot_scatter_chg.setData(
                 rate_parameters['crates'][0:crate_index+1], rate_chg_charges)
-            print("--2")
         elif rate_halfcycle_countdown == 0:  # Last discharge cycle for this C-rate, so calculate and plot the discharge capacity, and go to the next C-rate
             charge = numpy.abs(scipy.integrate.trapz(
                 rate_current_data.averagebuffer, rate_time_data.averagebuffer)/3600.)  # Charge in Ah
@@ -794,10 +762,8 @@ def rate_update(rate_parameters):
             # Last C-rate was measured
             if crate_index == len(rate_parameters['crates'])-1:
                 rate_stop(interrupted=False)
-                print("--3")
                 return
             else:  # New C-rate
-                print('--4')
                 crate_index += 1
                 # Set the amount of remaining half cycles for the new C-rate
                 rate_halfcycle_countdown = 2 * \
@@ -849,7 +815,6 @@ def start():
         main_window.button_start.setText('Start')
         stop = 1
         # start_stop = 1
-    print('----state', state)
 
 
 def validate_file(filename):
@@ -902,13 +867,11 @@ class Frame(QPushButton):
             self.index_line = main_window.status_line
             if self.parameters:
                 queue_measure.append(self.parameters)
-                print('----- > queue_measure', queue_measure)
         else:
             if self.parameters:
                 for queue_measure_ in queue_measure:
                     if queue_measure_['id'] == self.parameters['id']:
                         queue_measure.remove(queue_measure_)
-                        print('----- > queue_measure remove', queue_measure)
                 self.check_move = 0
                 self.check_stack = 0
                 self.resize(80, 61)
@@ -1177,7 +1140,6 @@ class create(QMainWindow):
                 if self.cv_validate_parameters() and validate_file(self.cv_parameter['filename']):
                     parameters = {'id': id_, 'type': 'cv',
                                   'value': self.cv_parameter}
-                    # print(parameters)
                     return parameters
                 else:
                     # self.exit_window()
@@ -1198,7 +1160,6 @@ class create(QMainWindow):
                 frame_.index_measure)
             if frame_.parameters:
                 id_ += 1
-                print('----> frame', frame_.parameters)
                 frame_.setStyleSheet("background-color: %s;" %
                                      COLOR_TABLE[frame_.index_measure])
                 frame_.setText(LIST_TECHNIQUES[frame_.index_measure])
@@ -1286,20 +1247,15 @@ class main(QMainWindow):
             rate_update(para_run)
         elif state == States.Measuring_start and stop == 0:
             if queue_measure:
-                print(queue_measure)
                 if queue_measure[0]["type"] == "cd":
-                    # self.index_measure = queue_measure[0]["index"]
                     cd_start(queue_measure[0]['value'])
                     para_run = queue_measure[0]['value']
-                    print("------", queue_measure[0])
                     queue_measure.pop(0)
                 elif queue_measure[0]["type"] == "cv":
-                    # self.index_measure = queue_measure[0]["index"]
                     cv_start(queue_measure[0]['value'])
                     para_run = queue_measure[0]['value']
                     queue_measure.pop(0)
                 elif queue_measure[0]["type"] == "rate":
-                    # self.index_measure = queue_measure[0]["index"]
                     rate_start(queue_measure[0]['value'])
                     para_run = queue_measure[0]['value']
                     queue_measure.pop(0)
