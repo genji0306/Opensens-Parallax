@@ -425,38 +425,6 @@ def auto_current_range():
         return 0
 
 
-def choose_file(questionstring):
-    """Open a file dialog and write the path of the selected file to a given entry field."""
-    filedialog = QtGui.QFileDialog()
-    main_window.setStyleSheet("color: white;  background-color: black")
-    tuple_file = filedialog.getSaveFileName(
-        main_window, questionstring, "", "ASCII data (*.txt)", options=QtGui.QFileDialog.DontConfirmOverwrite)
-    file_name = tuple_file[0]
-    # print(file_name)
-    # file_entry_field.setText(file_name)
-    main_window.setStyleSheet("color: black;  background-color: black")
-    return file_name
-
-
-def validate_file(filename):
-    """Check if a filename can be written to. If so, return True."""
-    main_window.setStyleSheet("color: white;  background-color: black")
-    if os.path.isfile(filename):
-        if QtGui.QMessageBox.question(main_window, "File exists", "<font color=\"White\">The specified output file already exists. Do you want to overwrite it?", QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No) != QtGui.QMessageBox.Yes:
-            main_window.setStyleSheet("color: black;  background-color: black")
-            return False
-    try:
-        tryfile = open(filename, 'w', 1)
-        tryfile.close()
-        main_window.setStyleSheet("color: black;  background-color: black")
-        return True
-    except IOError:
-        QtGui.QMessageBox.critical(
-            main_window, "File error", "<font color=\"White\">The specified output file path is not valid.")
-        main_window.setStyleSheet("color: black;  background-color: black")
-        return False
-
-
 cd_parameters = []
 cv_parameters = []
 rate_parameters = []
@@ -869,6 +837,25 @@ def start():
     print('----state', state)
 
 
+def validate_file(filename):
+    """Check if a filename can be written to. If so, return True."""
+    main_window.setStyleSheet("color: white;  background-color: black")
+    if os.path.isfile(filename):
+        if QtGui.QMessageBox.question(main_window, "File exists", "<font color=\"White\">The specified output file already exists. Do you want to overwrite it?", QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No) != QtGui.QMessageBox.Yes:
+            main_window.setStyleSheet("color: black;  background-color: black")
+            return False
+    try:
+        tryfile = open(filename, 'w', 1)
+        tryfile.close()
+        main_window.setStyleSheet("color: black;  background-color: black")
+        return True
+    except IOError:
+        QtGui.QMessageBox.critical(
+            main_window, "File error", "<font color=\"White\">The specified output file path is not valid.")
+        main_window.setStyleSheet("color: black;  background-color: black")
+        return False
+
+
 class Frame(QPushButton):
     def __init__(self, parent):
         super(Frame, self).__init__(parent)
@@ -933,6 +920,10 @@ class create(QMainWindow):
         self.button_add = self.findChild(QPushButton, 'button_add')
         self.button_add.clicked.connect(self.add)
 
+        self.save_button = self.findChild(QPushButton, 'choose_file')
+        self.save_button.clicked.connect(self.choose_file_)
+        self.save_path = self.findChild(QLineEdit, 'save_path')
+
         self.frame_0 = self.findChild(QFrame, 'charge_disch')
         self.frame_1 = self.findChild(QFrame, 'rate_testing')
         self.frame_2 = self.findChild(QFrame, 'cyclic_voltammetry')
@@ -966,8 +957,18 @@ class create(QMainWindow):
         self.cv_parameter = {}
         self.rate_parameter = {}
 
+        self.cd_parameter['filename'] = './save/{}_{}.txt'.format(
+            'cd', str(time.time()))
+        self.cv_parameter['filename'] = './save/{}_{}.txt'.format(
+            'cv', str(time.time()))
+        self.rate_parameter['filename'] = './save/{}_{}.txt'.format(
+            'rate', str(time.time()))
+
+        self.index = 0
+
         self.frame_1.hide()
         self.frame_2.hide()
+        self.save_path.setText(self.cd_parameter['filename'])
 
         self.option.activated.connect(self.do_something)
 
@@ -1038,19 +1039,52 @@ class create(QMainWindow):
             return False
         return True
 
+    def choose_file_(self):
+        """Open a file dialog and write the path of the selected file to a given entry field."""
+        filedialog = QtGui.QFileDialog()
+        self.setStyleSheet("color: white;  background-color: black")
+        if self.index == 0:
+            tuple_file = filedialog.getSaveFileName(
+                self, "Choose where to save the charge/discharge measurement data", "", "ASCII data (*.txt)", options=QtGui.QFileDialog.DontConfirmOverwrite)
+            file_name = tuple_file[0]
+            self.cd_parameter['filename'] = file_name
+            self.save_path.setText(self.cd_parameter['filename'])
+        elif self.index == 1:
+            tuple_file = filedialog.getSaveFileName(
+                self, "Choose where to save the rate testing measurement data", "", "ASCII data (*.txt)", options=QtGui.QFileDialog.DontConfirmOverwrite)
+            file_name = tuple_file[0]
+            self.rate_parameter['filename'] = file_name
+            self.save_path.setText(self.rate_parameter['filename'])
+        elif self.index == 2:
+            tuple_file = filedialog.getSaveFileName(
+                self, "Choose where to save the CV measurement data", "", "ASCII data (*.txt)", options=QtGui.QFileDialog.DontConfirmOverwrite)
+            file_name = tuple_file[0]
+            self.cv_parameter['filename'] = file_name
+            self.save_path.setText(self.cv_parameter['filename'])
+        # file_entry_field.setText(file_name)
+        self.setStyleSheet("color: black;  background-color: black")
+
+        # return file_name
+
     def do_something(self, index):
         if (index == 0):
             self.frame_1.hide()
             self.frame_2.hide()
             self.frame_0.show()
+            self.index = index
+            self.save_path.setText(self.cd_parameter['filename'])
         elif (index == 1):
             self.frame_0.hide()
             self.frame_2.hide()
             self.frame_1.show()
+            self.index = index
+            self.save_path.setText(self.rate_parameter['filename'])
         else:
             self.frame_0.hide()
             self.frame_1.hide()
             self.frame_2.show()
+            self.index = index
+            self.save_path.setText(self.cv_parameter['filename'])
 
     def get_para(self, index):
         if index == 0:
@@ -1064,8 +1098,8 @@ class create(QMainWindow):
                 self.cd_parameter['numcycles'] = int(self.cd_numcycles.text())
                 self.cd_parameter['numsamples'] = int(
                     self.cd_numsamples.text())
-                self.cd_parameter['filename'] = choose_file(
-                    "Choose where to save the charge/discharge measurement data")
+                # self.cd_parameter['filename'] = choose_file(
+                #     "Choose where to save the charge/discharge measurement data")
                 if self.cd_validate_parameters() and validate_file(self.cd_parameter['filename']):
                     cd_parameters.append(self.cd_parameter)
                     return True
@@ -1087,8 +1121,8 @@ class create(QMainWindow):
                 self.rate_parameter['currents'] = [
                     self.rate_parameter['one_c_current']*rc for rc in self.rate_parameter['crates']]
                 self.rate_parameter['numsamples'] = 1
-                self.rate_parameter['filename'] = choose_file(
-                    "Choose where to save the rate testing measurement data")
+                # self.rate_parameter['filename'] = choose_file(
+                #     "Choose where to save the rate testing measurement data")
                 if self.rate_validate_parameters() and validate_file(self.rate_parameter['filename']):
                     rate_parameters.append(self.rate_parameter)
                     return True
@@ -1108,8 +1142,8 @@ class create(QMainWindow):
                 self.cv_parameter['numcycles'] = int(self.cv_numcycles.text())
                 self.cv_parameter['numsamples'] = int(
                     self.cv_numsamples.text())
-                self.cv_parameter['filename'] = choose_file(
-                    "Choose where to save the CV measurement data")
+                # self.cv_parameter['filename'] = choose_file(
+                #     "Choose where to save the CV measurement data")
                 if self.cv_validate_parameters() and validate_file(self.cv_parameter['filename']):
                     cv_parameters.append(self.cv_parameter)
                     return True
