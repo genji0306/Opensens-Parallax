@@ -15,9 +15,14 @@ import platform
 import timeit
 import collections
 import scipy.integrate
+from pathlib import Path
 
 # pg.setConfigOption('background', 'w')
 pg.setConfigOptions(foreground="#e5e5e5", background="#00304f")
+base_dir = os.path.dirname(os.path.realpath(__file__))
+SAVE_PATH = os.path.join(base_dir, 'save')
+#Create save path for each technique
+Path(SAVE_PATH).mkdir(parents=True, exist_ok=True)
 
 ADD_TABLE_SIZE = [4, 3]  # Size of album table
 COLOR_TABLE = [
