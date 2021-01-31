@@ -33,7 +33,7 @@ COLOR_TABLE = [
     '#feff57',
     '#5700ff',
 ]
-
+INDEX_TECHNIQUES = [1, 1, 1]
 LIST_TECHNIQUES = [
     "Charge/disch",
     "Rate testing",
@@ -121,24 +121,24 @@ def set_cell_status(cell_on_boolean):
     """Switch the cell connection (True = cell on, False = cell off)."""
     if cell_on_boolean:
         if send_command(b'CELL ON', b'OK'):
+            main_window.cell_status_monitor.setText("CELL ON")
             return
-            # cell_status_monitor.setText("CELL ON")
     else:
         if send_command(b'CELL OFF', b'OK'):
+            main_window.cell_status_monitor.setText("CELL OFF")
             return
-            # cell_status_monitor.setText("CELL OFF")
 
 
 def set_control_mode(galvanostatic_boolean):
     """Switch the control mode (True = galvanostatic, False = potentiostatic)."""
     if galvanostatic_boolean:
         if send_command(b'GALVANOSTATIC', b'OK'):
+            main_window.control_mode_monitor.setText("GALVANOSTATIC")
             return
-            # control_mode_monitor.setText("GALVANOSTATIC")
     else:
         if send_command(b'POTENTIOSTATIC', b'OK'):
+            main_window.control_mode_monitor.setText("POTENTIOSTATIC")
             return
-            # control_mode_monitor.setText("POTENTIOSTATIC")
 
 
 def connect_disconnect_usb():
@@ -235,8 +235,10 @@ def get_offset():
         if response != bytes([255, 255, 255, 255, 255, 255]):
             potential_offset = dac_bytes_to_decimal(response[0:3])
             current_offset = dac_bytes_to_decimal(response[3:6])
-            main_window.pot_offset_input.setText("%d" % potential_offset)
-            main_window.curr_offset_input.setText("%d" % current_offset)
+            main_window.calibration_window.pot_offset_input.setText(
+                "%d" % potential_offset)
+            main_window.calibration_window.curr_offset_input.setText(
+                "%d" % current_offset)
         else:
             print("ERROR get offset")
     else:
@@ -252,8 +254,10 @@ def get_dac_calibration():
         if response != bytes([255, 255, 255, 255, 255, 255]):
             dac_offset = dac_bytes_to_decimal(response[0:3])
             dac_gain = dac_bytes_to_decimal(response[3:6])+2**19
-            main_window.dac_offset_input.setText("%d" % dac_offset)
-            main_window.dac_gain_input.setText("%d" % dac_gain)
+            main_window.calibration_window.dac_offset_input.setText(
+                "%d" % dac_offset)
+            main_window.calibration_window.dac_gain_input.setText(
+                "%d" % dac_gain)
         else:
             print("ERROR get offset")
     else:
@@ -294,8 +298,12 @@ def get_calibration():
 def set_current_range():
     """Switch the current range based on the GUI dropdown selection."""
     global currentrange
-    index = main_window.current_range_box.currentIndex()
-    currentrange = index
+    index = main_window.manual_window.current_range_box.currentIndex()
+    commandstring = [b'RANGE 1', b'RANGE 2', b'RANGE 3'][index]
+    if send_command(commandstring, b'OK'):
+        main_window.current_range_monitor.setText(current_range_list[index])
+        currentrange = index
+        currentrange = index
 
 
 def send_command(command_string, expected_response, log_msg=None):
@@ -337,6 +345,28 @@ def wait_for_adcread():
             pass
 
 
+def potential_to_string(potential_in_V):
+    """Format the measured potential into a string with appropriate units and number of significant digits."""
+    return u"%+6.3f V" % potential_in_V
+
+
+def current_to_string(currentrange, current_in_mA):
+    """Format the measured current into a string with appropriate units and number of significant digits."""
+    abs_value = abs(current_in_mA)
+    if currentrange == 0:
+        if abs_value <= 9.9995:
+            return u"%+6.3f mA" % current_in_mA
+        else:
+            return u"%+6.2f mA" % current_in_mA
+    elif currentrange == 1:
+        if abs_value < 9.9995e-2:
+            return u"%+06.2f µA" % (current_in_mA*1e3)
+        else:
+            return u"%+6.1f µA" % (current_in_mA*1e3)
+    elif currentrange == 2:
+        return u"%+6.3f µA" % (current_in_mA*1e3)
+
+
 def read_potential_current():
     """Read the most recent potential and current values from the device's ADC."""
     global potential, current, raw_potential, raw_current, time_of_last_adcread
@@ -354,6 +384,41 @@ def read_potential_current():
         # Calculate current in mA, taking current range into account and compensating for offset
         current = (raw_current-current_offset)/2097152.*25. / \
             (shunt_calibration[currentrange]*100.**currentrange)
+        main_window.potential_monitor.setText(potential_to_string(potential))
+        main_window.current_monitor.setText(
+            current_to_string(currentrange, current))
+
+
+def zero_offset():
+    """Calculate offset values in order to zero the potential and current."""
+    if not check_state([States.Idle]):
+        return  # Device needs to be in the idle state for this
+    # Average potential offset
+    pot_offs = int(round(numpy.average(list(last_raw_potential_values))))
+    # Average current offset
+    cur_offs = int(round(numpy.average(list(last_raw_current_values))))
+    # hardware_calibration_potential_offset.setText("%d" % pot_offs)
+    # hardware_calibration_current_offset.setText("%d" % cur_offs)
+    offset_changed_callback()
+
+
+def offset_changed_callback():
+    """Set the potential and current offset from the input fields."""
+    global potential_offset, current_offset
+    try:
+        potential_offset = int(hardware_calibration_potential_offset.text())
+        # hardware_calibration_potential_offset.setStyleSheet("")
+    except ValueError:  # If the input field cannot be interpreted as a number, color it red
+        # hardware_calibration_potential_offset.setStyleSheet(
+        #     "QLineEdit { background: red; }")
+        return
+    try:
+        current_offset = int(hardware_calibration_current_offset.text())
+        # hardware_calibration_current_offset.setStyleSheet("")
+    except ValueError:  # If the input field cannot be interpreted as a number, color it red
+        # hardware_calibration_current_offset.setStyleSheet(
+        #     "QLineEdit { background: red; }")
+        return
 
 
 def idle_init():
@@ -944,6 +1009,8 @@ class create(QMainWindow):
 
         self.rate_crates.setText("1, 2, 5, 10, 20, 50, 100")
 
+        self.ocp_button.clicked.connect(self.cv_get_ocp)
+
         self.cd_parameter = {}
         self.cv_parameter = {}
         self.rate_parameter = {}
@@ -1148,6 +1215,10 @@ class create(QMainWindow):
                 self.exit_window()
                 return False
 
+    def cv_get_ocp(self):
+        """Insert the currently measured (open-circuit) potential into the start potential input field."""
+        self.cv_startpot.setText('%5.3f' % potential)
+
     def exit_window(self):
         self.close()
 
@@ -1162,7 +1233,10 @@ class create(QMainWindow):
                 id_ += 1
                 frame_.setStyleSheet("background-color: %s;" %
                                      COLOR_TABLE[frame_.index_measure])
-                frame_.setText(LIST_TECHNIQUES[frame_.index_measure])
+                name_technique = LIST_TECHNIQUES[frame_.index_measure] + \
+                    '\n' + str(INDEX_TECHNIQUES[frame_.index_measure])
+                frame_.setText(name_technique)
+                INDEX_TECHNIQUES[frame_.index_measure] += 1
                 frame_.resize(80, 61)
                 frame_.index_table = main_window.status_table
                 frame_.move(main_window.x_axis[int(main_window.status_table % ADD_TABLE_SIZE[1])],
@@ -1182,6 +1256,10 @@ class main(QMainWindow):
         setting_width = self.frame.width()
         addBtn_width = self.create_measure.width()
         addBtn_height = self.create_measure.height()
+
+        self.manual_window = manual(self)
+        self.calibration_window = calibration(self)
+
         gap_col = (setting_width -
                    ADD_TABLE_SIZE[1] * addBtn_width)/(ADD_TABLE_SIZE[1] - 1)
         self.x_axis = [col*(gap_col + addBtn_width)
@@ -1202,8 +1280,10 @@ class main(QMainWindow):
 
         self.current_range_set.clicked.connect(set_current_range)
 
-        self.current_range_box.addItems(["20 mA", u"200 µA", u"2 µA"])
-        self.comboBox_2.addItems(["Potential (V)", "Current (mA)", "DAC Code"])
+        self.manual_window.current_range_box.addItems(
+            ["20 mA", u"200 µA", u"2 µA"])
+        self.manual_window.comboBox_2.addItems(
+            ["Potential (V)", "Current (mA)", "DAC Code"])
 
         self.usb_vid.setText(usb_vid_)
         self.usb_pid.setText(usb_pid_)
@@ -1218,8 +1298,8 @@ class main(QMainWindow):
 
         self.dynamicPlt = pg.PlotWidget(self)
 
-        self.dynamicPlt.move(305, 22)
-        self.dynamicPlt.resize(690, 520)
+        self.dynamicPlt.move(305, 92)
+        self.dynamicPlt.resize(690, 450)
 
         self.dynamicPlt2 = pg.PlotWidget(self)
         self.dynamicPlt2.move(1000, 22)
@@ -1248,14 +1328,17 @@ class main(QMainWindow):
         elif state == States.Measuring_start and stop == 0:
             if queue_measure:
                 if queue_measure[0]["type"] == "cd":
+                    zero_offset()
                     cd_start(queue_measure[0]['value'])
                     para_run = queue_measure[0]['value']
                     queue_measure.pop(0)
                 elif queue_measure[0]["type"] == "cv":
+                    zero_offset()
                     cv_start(queue_measure[0]['value'])
                     para_run = queue_measure[0]['value']
                     queue_measure.pop(0)
                 elif queue_measure[0]["type"] == "rate":
+                    zero_offset()
                     rate_start(queue_measure[0]['value'])
                     para_run = queue_measure[0]['value']
                     queue_measure.pop(0)
@@ -1268,12 +1351,10 @@ class main(QMainWindow):
         qt_wid.show()
 
     def open_manual(self):
-        qt_wid = manual(self)
-        qt_wid.show()
+        self.manual_window.show()
 
     def open_calibration(self):
-        qt_wid = calibration(self)
-        qt_wid.show()
+        self.calibration_window.show()
 
     def mouseMoveEvent(self, e):
         list_frame = self.findChildren(Frame)
