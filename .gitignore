@@ -4,6 +4,7 @@
 __pycache__/*
 config/*
 logs/*
+save/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
