@@ -262,6 +262,13 @@ def get_dac_calibration():
             print("ERROR get offset")
     else:
         print("Not connected")
+        not_connected_errormessage()
+
+
+def dac_calibrate():
+    """Activate the automatic DAC1220 calibration function and retrieve the results."""
+    send_command(b'DACCAL', b'OK', "DAC calibration performed.")
+    get_dac_calibration()
 
 
 def not_connected_errormessage():
@@ -283,9 +290,73 @@ def get_shunt_calibration():
                 # Yields an adjustment range from 0.967 to 1.033 in steps of 1 ppm
                 shunt_calibration[i] = 1. + \
                     twobytes_to_float(response[2*i:2*i+2])/1e6
+                main_window.calibration_window.R[i].setText(
+                    "%.4f" % shunt_calibration[i])
     else:
         # not_connected_errormessage()
         pass
+
+
+def set_dac_calibration():
+    """Save DAC calibration values to the DAC and the device's flash memory."""
+    try:
+        dac_offset = int(
+            main_window.calibration_window.dac_offset_input.text())
+        # hardware_calibration_dac_offset.setStyleSheet("")
+    except ValueError:  # If the input field cannot be interpreted as a number, color it red
+        main_window.calibration_window.dac_offset_input.setStyleSheet(
+            "QLineEdit { background: red; }")
+        return
+    try:
+        dac_gain = int(main_window.calibration_window.dac_gain_input.text())
+        # hardware_calibration_dac_gain.setStyleSheet("")
+    except ValueError:  # If the input field cannot be interpreted as a number, color it red
+        main_window.calibration_window.dac_gain_input.setStyleSheet(
+            "")
+        return
+    send_command(b'DACCALSET '+decimal_to_dac_bytes(dac_offset)+decimal_to_dac_bytes(
+        dac_gain-2**19), b'OK', "DAC calibration saved to flash memory.")
+
+
+def set_offset():
+    """Save offset values to the device's flash memory."""
+    send_command(b'OFFSETSAVE '+decimal_to_dac_bytes(potential_offset) +
+                 decimal_to_dac_bytes(current_offset), b'OK', "Offset values saved to flash memory.")
+
+
+def float_to_twobytes(value):
+    """Convert a floating-point number ranging from -2^15 to 2^15-1 to a 16-bit representation stored in two bytes."""
+    code = 2**15 + int(round(value))
+    # If the code exceeds the boundaries of a 16-bit integer, clip it
+    code = numpy.clip(code, 0, 2**16 - 1)
+    byte1 = code // 2**8
+    byte2 = code % 2**8
+    return bytes([byte1, byte2])
+
+
+def shunt_calibration_changed_callback():
+    """Set the shunt calibration values from the input fields."""
+    for i in range(0, 3):
+        try:
+            shunt_calibration[i] = float(
+                main_window.calibration_window.R[i].text())
+            # hardware_calibration_shuntvalues[i].setStyleSheet("")
+        except ValueError:  # If the input field cannot be interpreted as a number, color it red
+            main_window.calibration_window.R[i].setStyleSheet(
+                "")
+
+
+def set_shunt_calibration():
+    """Save shunt calibration values to the device's flash memory."""
+    send_command(b'SHUNTCALSAVE '+float_to_twobytes((shunt_calibration[0]-1.)*1e6)+float_to_twobytes(
+        (shunt_calibration[1]-1.)*1e6)+float_to_twobytes((shunt_calibration[2]-1.)*1e6), b'OK', "Shunt calibration values saved to flash memory.")
+
+
+def set_calibration():
+    """Save all calibration values to the device's flash memory."""
+    set_dac_calibration()
+    set_offset()
+    set_shunt_calibration()
 
 
 def get_calibration():
@@ -293,6 +364,38 @@ def get_calibration():
     get_dac_calibration()
     get_offset()
     get_shunt_calibration()
+
+
+def set_output_from_gui():
+    """Output data to the DAC from the GUI input field (hardware tab, manual control)."""
+    value_units_index = main_window.manual_window.comboBox_2.currentIndex()
+    if value_units_index == 0:  # Potential (V)
+        try:
+            value = float(main_window.manual_window.lineEdit_13.text())
+        except ValueError:
+            QtGui.QMessageBox.critical(
+                main_window, "Not a number", "<font color=\"White\">The value you have entered is not a floating-point number.")
+            main_window.setStyleSheet("color: black;  background-color: black")
+            return
+    elif value_units_index == 1:  # Current (mA)
+        try:
+            value = float(main_window.manual_window.lineEdit_13.text())
+        except ValueError:
+            QtGui.QMessageBox.critical(
+                main_window, "Not a number", "<font color=\"White\">TThe value you have entered is not a floating-point number.")
+            main_window.setStyleSheet("color: black;  background-color: black")
+            return
+    elif value_units_index == 2:  # DAC Code
+        try:
+            value = int(main_window.manual_window.lineEdit_13.text())
+        except ValueError:
+            QtGui.QMessageBox.critical(
+                main_window, "Not a number", "<font color=\"White\">TThe value you have entered is not an integer number.")
+            main_window.setStyleSheet("color: black;  background-color: black")
+            return
+    else:
+        return
+    set_output(value_units_index, value)
 
 
 def set_current_range():
@@ -303,7 +406,6 @@ def set_current_range():
     if send_command(commandstring, b'OK'):
         main_window.current_range_monitor.setText(current_range_list[index])
         currentrange = index
-        currentrange = index
 
 
 def send_command(command_string, expected_response, log_msg=None):
@@ -312,8 +414,9 @@ def send_command(command_string, expected_response, log_msg=None):
         dev.write(0x01, command_string)  # 0x01 = write address of EP1
         response = bytes(dev.read(0x81, 64))  # 0x81 = read address of EP1
         if response != expected_response:
-            QtGui.QMessageBox.critical(main_window, "Unexpected Response", "The command \"%s\" resulted in an unexpected response. The expected response was \"%s\"; the actual response was \"%s\"" % (
+            QtGui.QMessageBox.critical(main_window, "Unexpected Response", "<font color=\"White\">The command \"%s\" resulted in an unexpected response. The expected response was \"%s\"; the actual response was \"%s\"" % (
                 command_string, expected_response.decode("ascii"), response.decode("ascii")))
+            main_window.setStyleSheet("color: black;  background-color: black")
         return True
     else:
         # not_connected_errormessage()
@@ -397,8 +500,8 @@ def zero_offset():
     pot_offs = int(round(numpy.average(list(last_raw_potential_values))))
     # Average current offset
     cur_offs = int(round(numpy.average(list(last_raw_current_values))))
-    # hardware_calibration_potential_offset.setText("%d" % pot_offs)
-    # hardware_calibration_current_offset.setText("%d" % cur_offs)
+    main_window.calibration_window.pot_offset_input.setText("%d" % pot_offs)
+    main_window.calibration_window.curr_offset_input.setText("%d" % cur_offs)
     offset_changed_callback()
 
 
@@ -406,19 +509,19 @@ def offset_changed_callback():
     """Set the potential and current offset from the input fields."""
     global potential_offset, current_offset
     try:
-        potential_offset = int(hardware_calibration_potential_offset.text())
-        # hardware_calibration_potential_offset.setStyleSheet("")
+        potential_offset = int(
+            main_window.calibration_window.pot_offset_input.text())
+        # main_window.calibration_window.pot_offset_input.setStyleSheet("")
     except ValueError:  # If the input field cannot be interpreted as a number, color it red
-        # hardware_calibration_potential_offset.setStyleSheet(
-        #     "QLineEdit { background: red; }")
-        return
+        hardware_calibration_potential_offset.setStyleSheet(
+            "")
     try:
-        current_offset = int(hardware_calibration_current_offset.text())
-        # hardware_calibration_current_offset.setStyleSheet("")
+        current_offset = int(
+            main_window.calibration_window.curr_offset_input.text())
+        # main_window.calibration_window.curr_offset_input.setStyleSheet("")
     except ValueError:  # If the input field cannot be interpreted as a number, color it red
-        # hardware_calibration_current_offset.setStyleSheet(
-        #     "QLineEdit { background: red; }")
-        return
+        main_window.calibration_window.curr_offset_input.setStyleSheet(
+            "")
 
 
 def idle_init():
@@ -986,12 +1089,23 @@ class manual(QMainWindow):
     def __init__(self, parent=None):
         super(manual, self).__init__(parent)
         uic.loadUi('./ui/menubar/manual.ui', self)
+        self.cell_connect_on.clicked.connect(lambda: set_cell_status(True))
+        self.cell_connect_off.clicked.connect(lambda: set_cell_status(False))
+        self.potentiostat.clicked.connect(lambda: set_control_mode(False))
+        self.galvanostatic.clicked.connect(lambda: set_control_mode(True))
+        self.current_range_set.clicked.connect(set_current_range)
+        self.lineEdit_13.returnPressed.connect(set_output_from_gui)
+        self.pushButton_10.clicked.connect(set_output_from_gui)
 
 
 class calibration(QMainWindow):
     def __init__(self, parent=None):
         super(calibration, self).__init__(parent)
         uic.loadUi('./ui/menubar/calibration.ui', self)
+        self.R = [self.r1, self.r2, self.r3]
+        for i in range(0, 3):
+            self.R[i].editingFinished.connect(
+                shunt_calibration_changed_callback)
 
 
 class create(QMainWindow):
@@ -1271,6 +1385,11 @@ class main(QMainWindow):
         self.usb_connect.clicked.connect(connect_disconnect_usb)
 
         self.button_start.clicked.connect(start)
+
+        self.calibration_window.auto_zero.clicked.connect(zero_offset)
+        self.calibration_window.auto_calibrate.clicked.connect(dac_calibrate)
+        self.calibration_window.load_from_device.clicked.connect(
+            get_calibration)
 
         self.button_refresh.clicked.connect(refresh)
 
