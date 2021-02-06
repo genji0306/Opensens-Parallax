@@ -205,7 +205,7 @@ font: 10pt;</string>
      <widget class="QFrame" name="frame_9">
       <property name="geometry">
        <rect>
-        <x>171</x>
+        <x>110</x>
         <y>6</y>
         <width>111</width>
         <height>17</height>
@@ -238,7 +238,7 @@ border-color: &quot;Solid&quot;;</string>
      <widget class="QFrame" name="frame_10">
       <property name="geometry">
        <rect>
-        <x>171</x>
+        <x>110</x>
         <y>46</y>
         <width>111</width>
         <height>17</height>
@@ -271,7 +271,7 @@ border-color: &quot;Solid&quot;;</string>
      <widget class="QFrame" name="frame_11">
       <property name="geometry">
        <rect>
-        <x>171</x>
+        <x>110</x>
         <y>26</y>
         <width>111</width>
         <height>17</height>
@@ -304,7 +304,7 @@ border-color: &quot;Solid&quot;;</string>
      <widget class="QFrame" name="frame_12">
       <property name="geometry">
        <rect>
-        <x>171</x>
+        <x>110</x>
         <y>66</y>
         <width>111</width>
         <height>17</height>
@@ -447,7 +447,8 @@ border-color: &quot;Solid&quot;;</string>
         </rect>
        </property>
        <property name="styleSheet">
-        <string notr="true">color: rgb(255, 255, 255);</string>
+        <string notr="true">color: rgb(255, 255, 255);
+font: 8pt &quot;Ubuntu&quot;;</string>
        </property>
       </widget>
      </widget>
@@ -480,7 +481,8 @@ border-color: &quot;Solid&quot;;</string>
         </rect>
        </property>
        <property name="styleSheet">
-        <string notr="true">color: rgb(255, 255, 255);</string>
+        <string notr="true">color: rgb(255, 255, 255);
+font: 8pt &quot;Ubuntu&quot;;</string>
        </property>
       </widget>
      </widget>
@@ -513,11 +515,12 @@ border-color: &quot;Solid&quot;;</string>
         </rect>
        </property>
        <property name="styleSheet">
-        <string notr="true">color: rgb(255, 255, 255);</string>
+        <string notr="true">color: rgb(255, 255, 255);
+font: 8pt &quot;Ubuntu&quot;;</string>
        </property>
       </widget>
      </widget>
-     <widget class="QPushButton" name="pushButton_4">
+     <widget class="QPushButton" name="save_to_device">
       <property name="geometry">
        <rect>
         <x>160</x>
@@ -547,7 +550,7 @@ color:white</string>
        <bool>false</bool>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_8">
+     <widget class="QPushButton" name="load_from_device">
       <property name="geometry">
        <rect>
         <x>9</x>
@@ -572,6 +575,68 @@ color:white</string>
       </property>
       <property name="text">
        <string>Load from device</string>
+      </property>
+      <property name="autoDefault">
+       <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="auto_calibrate">
+      <property name="geometry">
+       <rect>
+        <x>222</x>
+        <y>4</y>
+        <width>65</width>
+        <height>40</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>DejaVu Sans</family>
+        <pointsize>10</pointsize>
+       </font>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: #181818;
+border-color: &quot;Solid&quot;;
+color:white</string>
+      </property>
+      <property name="text">
+       <string>Auto
+Calibrate</string>
+      </property>
+      <property name="autoDefault">
+       <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="auto_zero">
+      <property name="geometry">
+       <rect>
+        <x>222</x>
+        <y>46</y>
+        <width>65</width>
+        <height>40</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>DejaVu Sans</family>
+        <pointsize>10</pointsize>
+       </font>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: #181818;
+border-color: &quot;Solid&quot;;
+color:white</string>
+      </property>
+      <property name="text">
+       <string>Auto
+Zero</string>
       </property>
       <property name="autoDefault">
        <bool>false</bool>
