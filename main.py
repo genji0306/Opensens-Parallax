@@ -2,7 +2,6 @@ import os
 import sys
 
 from PyQt5.QtWidgets import *
-# from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5 import uic, QtOpenGL, QtGui
 import pyqtgraph as pg
@@ -15,10 +14,15 @@ import timeit
 import collections
 import scipy.integrate
 from pathlib import Path
-from utils import *
+from utils.util import *
+from utils.calculate import *
+from utils.control_usb import *
 
 pg.setConfigOptions(foreground="#e5e5e5", background="#00304f")
 
+# path save file result
+base_dir = os.path.dirname(os.path.realpath(__file__))
+SAVE_PATH = os.path.join(base_dir, 'save')
 # Create save path for each technique
 Path(SAVE_PATH).mkdir(parents=True, exist_ok=True)
 
