@@ -11,6 +11,8 @@ from utils.util import *
 from utils.calculate import *
 from utils.control_usb import *
 from models.device import Device
+from ui.model.manual_ui import Manual
+from ui.model.calibrate_ui import Calibration
 
 pg.setConfigOptions(foreground="#e5e5e5", background="#00304f")
 
@@ -81,34 +83,6 @@ class Frame(QPushButton):
         # self.setStyleSheet("background-color: #181818;")
         self.move(main_window.x_axis[int(self.index_table % ADD_TABLE_SIZE[1])],
                   main_window.y_axis[int(self.index_table / ADD_TABLE_SIZE[1])])
-
-
-class manual(QMainWindow):
-    def __init__(self, device, parent=None):
-        super(manual, self).__init__(parent)
-        uic.loadUi('./ui/menubar/manual.ui', self)
-        self.cell_connect_on.clicked.connect(
-            lambda: set_cell_status(device.dev, main_window, True))
-        self.cell_connect_off.clicked.connect(
-            lambda: set_cell_status(device.dev, main_window, False))
-        self.potentiostat.clicked.connect(
-            lambda: set_control_mode(device.dev, main_window, False))
-        self.galvanostatic.clicked.connect(
-            lambda: set_control_mode(device.dev, main_window, True))
-        self.current_range_set.clicked.connect(device.set_current_range)
-        self.lineEdit_13.returnPressed.connect(device.set_output_from_gui)
-        self.pushButton_10.clicked.connect(device.set_output_from_gui)
-
-
-class calibration(QMainWindow):
-    def __init__(self, device, parent=None):
-        super(calibration, self).__init__(parent)
-        uic.loadUi('./ui/menubar/calibration.ui', self)
-        self.R = [self.r1, self.r2, self.r3]
-        for i in range(0, 3):
-            self.R[i].editingFinished.connect(
-                device.shunt_calibration_changed_callback)
-
 
 class create(QMainWindow):
     def __init__(self, parent=None):
@@ -378,8 +352,8 @@ class main(QMainWindow):
 
         self.new_device = Device(self)
 
-        self.manual_window = manual(self.new_device)
-        self.calibration_window = calibration(self.new_device)
+        self.manual_window = Manual(self, self.new_device)
+        self.calibration_window = Calibration(self.new_device)
 
         gap_col = (setting_width -
                    ADD_TABLE_SIZE[1] * addBtn_width)/(ADD_TABLE_SIZE[1] - 1)
