@@ -16,8 +16,16 @@ from ui.model.calibrate_ui import Calibration
 from ui.model.create import Create
 from ui.model.frame import Frame
 
+from pathlib import Path
+
 pg.setConfigOptions(foreground="#e5e5e5", background="#00304f")
 CONFIG = get_config('./config/config.yml')
+# path save file result
+base_dir = os.path.dirname(os.path.realpath(__file__))
+SAVE_PATH = os.path.join(base_dir, 'save')
+# Create save path for each technique
+Path(SAVE_PATH).mkdir(parents=True, exist_ok=True)
+
 
 class main(QMainWindow):
     def __init__(self):
@@ -52,7 +60,7 @@ class main(QMainWindow):
         self.button_start.clicked.connect(self.new_device.start)
 
         self.calibration_window.auto_zero.clicked.connect(
-            button_zero_offset)
+            self.new_device.zero_offset)
         self.calibration_window.auto_calibrate.clicked.connect(
             self.new_device.dac_calibrate)
         self.calibration_window.load_from_device.clicked.connect(
@@ -113,32 +121,52 @@ class main(QMainWindow):
             self.new_device.rate_update(para_run)
         elif self.new_device.state == States.Measuring_start and stop == 0:
             if queue_measure:
-                check_auto_zero = CONFIG['para']['pot_offs_zero'][0] < self.new_device.potential < self.CONFIG['para']['pot_offs_zero'][1] and self.CONFIG['para']['cur_offs_zero'][0] < self.new_device.current < self.CONFIG['para']['cur_offs_zero'][1]
+                check_auto_zero = 0
                 if queue_measure[0]["type"] == "cd":
                     while not check_auto_zero:
                         self.new_device.zero_offset_()
-                    self.new_device.cd_start(queue_measure[0]['value'])
-                    para_run = queue_measure[0]['value']
-                    queue_measure.pop(0)
+                        self.new_device.read_potential_current()
+                        print(self.new_device.potential,
+                              self.new_device.current)
+                        check_auto_zero = CONFIG['para']['pot_offs_zero'][0] < self.new_device.potential < CONFIG['para']['pot_offs_zero'][
+                            1] and CONFIG['para']['cur_offs_zero'][0] < self.new_device.current < CONFIG['para']['cur_offs_zero'][1]
                 elif queue_measure[0]["type"] == "cv":
                     while not check_auto_zero:
                         self.new_device.zero_offset_()
+                        self.new_device.read_potential_current()
+                        print(self.new_device.potential,
+                              self.new_device.current)
+                        check_auto_zero = CONFIG['para']['pot_offs_zero'][0] < self.new_device.potential < CONFIG['para']['pot_offs_zero'][
+                            1] and CONFIG['para']['cur_offs_zero'][0] < self.new_device.current < CONFIG['para']['cur_offs_zero'][1]
+                    self.new_device.zero_offset_()
                     self.new_device.cv_start(queue_measure[0]['value'])
                     para_run = queue_measure[0]['value']
                     queue_measure.pop(0)
                 elif queue_measure[0]["type"] == "rate":
                     while not check_auto_zero:
                         self.new_device.zero_offset_()
+                        self.new_device.read_potential_current()
+                        print(self.new_device.potential,
+                              self.new_device.current)
+                        check_auto_zero = CONFIG['para']['pot_offs_zero'][0] < self.new_device.potential < CONFIG['para']['pot_offs_zero'][
+                            1] and CONFIG['para']['cur_offs_zero'][0] < self.new_device.current < CONFIG['para']['cur_offs_zero'][1]
+                    self.new_device.zero_offset_()
                     self.new_device.rate_start(queue_measure[0]['value'])
                     para_run = queue_measure[0]['value']
                     queue_measure.pop(0)
             else:
                 self.new_device.state = States.Stationary_Graph
                 self.button_start.setText('Start')
+
     def button_zero_offset(self):
-        check_auto_zero = CONFIG['para']['pot_offs_zero'][0] < self.new_device.potential < self.CONFIG['para']['pot_offs_zero'][1] and self.CONFIG['para']['cur_offs_zero'][0] < self.new_device.current < self.CONFIG['para']['cur_offs_zero'][1]
+        check_auto_zero = 0
         while not check_auto_zero:
             self.new_device.zero_offset_()
+            self.new_device.read_potential_current()
+            print(self.new_device.potential, self.new_device.current)
+            check_auto_zero = CONFIG['para']['pot_offs_zero'][0] < self.new_device.potential < CONFIG['para']['pot_offs_zero'][
+                1] and CONFIG['para']['cur_offs_zero'][0] < self.new_device.current < CONFIG['para']['cur_offs_zero'][1]
+
     def refresh(self):
         global queue_measure
         self.new_device.refresh()

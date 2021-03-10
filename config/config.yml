@@ -1,4 +1,4 @@
 para:
-  pot_offs_zero: [-0.5,0.5]
-  cur_offs_zero: [-0.5,0.5]
+  pot_offs_zero: [-0.01,0.01]
+  cur_offs_zero: [-0.01,0.01]
 

@@ -23,8 +23,10 @@ import platform
 Create attributes and methods for each device
 '''
 
+
 class Device():
     def __init__(self, main_window):
+
         if platform.system() != "Windows":
             # On Linux/OSX, use the Qt timer
             self.busyloop_interval = 0
@@ -37,8 +39,6 @@ class Device():
         self.state = States.NotConnected  # Initial state
         self.main_window = main_window
         self.dev = None
-        self.potential = potential
-        self.current = current
 
     def connect_disconnect_usb(self):
         """Toggle the USB device between connected and disconnected states."""
@@ -52,22 +52,23 @@ class Device():
             return
 
         # Otherwise, try to connect
-       
+
         usb_vid_string = str(self.main_window.usb_vid.text())
         print("value ", usb_vid_string)
         usb_pid_string = str(self.main_window.usb_pid.text())
         self.dev = usb.core.find(idVendor=int(usb_vid_string, 0),
-                            idProduct=int(usb_pid_string, 0))
+                                 idProduct=int(usb_pid_string, 0))
         if self.dev is None:
             print("USB Device Not Found, No USB device was found with VID %s and PID %s. Verify the vendor/product ID and check the USB connection." %
-                (usb_vid_string, usb_pid_string))
+                  (usb_vid_string, usb_pid_string))
         else:
             self.main_window.usb_connect.setText("Disconnect")
             # log_message("USB Interface connected.")
             try:
                 self.main_window.label_manufacture.setText(
                     "Manufacture:   %s" % (self.dev.manufacturer))
-                self.main_window.label_product.setText("Product:   %s" % (self.dev.product))
+                self.main_window.label_product.setText(
+                    "Product:   %s" % (self.dev.product))
                 self.main_window.label_serial.setText(
                     "Serial #:   %s" % (self.dev.serial_number))
 
@@ -75,20 +76,21 @@ class Device():
                 #     dev.manufacturer, dev.product, dev.serial_number))
                 self.get_calibration()
                 set_cell_status(self.dev, self.main_window, False)  # Cell off
-                set_control_mode(self.dev, self.main_window, False)  # Potentiostatic control
+                set_control_mode(self.dev, self.main_window,
+                                 False)  # Potentiostatic control
                 self.set_current_range()  # Read current range from GUI
                 self.state = States.Idle_Init  # Start idle mode
             except ValueError:
                 print("### Error USB")
                 pass  # In case the device is not yet calibrated
 
-
     def get_offset(self):
         """Retrieve offset values from the device's flash memory."""
         global potential_offset, current_offset
         if self.dev is not None:  # Make sure it's connected
             self.dev.write(0x01, b'OFFSETREAD')  # 0x01 = write address of EP1
-            response = bytes(self.dev.read(0x81, 64))  # 0x81 = read address of EP1
+            # 0x81 = read address of EP1
+            response = bytes(self.dev.read(0x81, 64))
             # If no offset value has been stored, all bits will be set
             if response != bytes([255, 255, 255, 255, 255, 255]):
                 potential_offset = dac_bytes_to_decimal(response[0:3])
@@ -102,13 +104,11 @@ class Device():
         else:
             print("Not connected")
 
-
     def dac_calibrate(self):
         """Activate the automatic DAC1220 calibration function and retrieve the results."""
         send_command(self.dev, self.main_window, b'DACCAL', b'OK',
-                    "DAC calibration performed.")
+                     "DAC calibration performed.")
         get_dac_calibration(self.dev, self.main_window)
-
 
     def shunt_calibration_changed_callback(self):
         """Set the shunt calibration values from the input fields."""
@@ -121,13 +121,12 @@ class Device():
                 self.main_window.calibration_window.R[i].setStyleSheet(
                     "")
 
-
     def set_calibration(self):
         """Save all calibration values to the device's flash memory."""
         set_dac_calibration(self.dev, self.main_window)
-        set_offset(self.dev, self.main_window, current_offset, potential_offset)
+        set_offset(self.dev, self.main_window,
+                   current_offset, potential_offset)
         set_shunt_calibration(self.dev, self.main_window, shunt_calibration)
-
 
     def get_calibration(self):
         """Retrieve all calibration values from the device's flash memory."""
@@ -135,25 +134,28 @@ class Device():
         self.get_offset()
         get_shunt_calibration(self.dev, self.main_window, shunt_calibration)
 
-
     def set_output_from_gui(self):
         """Output data to the DAC from the GUI input field (hardware tab, manual control)."""
         value_units_index = self.main_window.manual_window.comboBox_2.currentIndex()
         if value_units_index == 0:  # Potential (V)
             try:
-                value = float(self.main_window.manual_window.lineEdit_13.text())
+                value = float(
+                    self.main_window.manual_window.lineEdit_13.text())
             except ValueError:
                 QtGui.QMessageBox.critical(
                     self.main_window, "Not a number", "<font color=\"White\">The value you have entered is not a floating-point number.")
-                self.main_window.setStyleSheet("color: black;  background-color: black")
+                self.main_window.setStyleSheet(
+                    "color: black;  background-color: black")
                 return
         elif value_units_index == 1:  # Current (mA)
             try:
-                value = float(self.main_window.manual_window.lineEdit_13.text())
+                value = float(
+                    self.main_window.manual_window.lineEdit_13.text())
             except ValueError:
                 QtGui.QMessageBox.critical(
                     self.main_window, "Not a number", "<font color=\"White\">TThe value you have entered is not a floating-point number.")
-                self.main_window.setStyleSheet("color: black;  background-color: black")
+                self.main_window.setStyleSheet(
+                    "color: black;  background-color: black")
                 return
         elif value_units_index == 2:  # DAC Code
             try:
@@ -161,12 +163,12 @@ class Device():
             except ValueError:
                 QtGui.QMessageBox.critical(
                     self.main_window, "Not a number", "<font color=\"White\">TThe value you have entered is not an integer number.")
-                self.main_window.setStyleSheet("color: black;  background-color: black")
+                self.main_window.setStyleSheet(
+                    "color: black;  background-color: black")
                 return
         else:
             return
         self.set_output(value_units_index, value)
-
 
     def set_current_range(self):
         """Switch the current range based on the GUI dropdown selection."""
@@ -174,22 +176,21 @@ class Device():
         index = self.main_window.manual_window.current_range_box.currentIndex()
         commandstring = [b'RANGE 1', b'RANGE 2', b'RANGE 3'][index]
         if send_command(self.dev, self.main_window, commandstring, b'OK'):
-            self.main_window.current_range_monitor.setText(current_range_list[index])
+            self.main_window.current_range_monitor.setText(
+                current_range_list[index])
             currentrange = index
-
 
     def set_output(self, value_units_index, value):
         """Output data to the DAC; units can be either V (index 0), mA (index 1), or raw counts (index 2)."""
         if value_units_index == 0:
             send_command(self.dev, self.main_window, b'DACSET '+decimal_to_dac_bytes(value/8.*2. **
-                                                                        19+int(round(potential_offset/4.))), b'OK')
+                                                                                     19+int(round(potential_offset/4.))), b'OK')
         elif value_units_index == 1:
             send_command(self.dev, self.main_window, b'DACSET '+decimal_to_dac_bytes(value/(25. /
-                                                                                (shunt_calibration[currentrange]*100.**currentrange))*2.**19+int(round(current_offset/4.))), b'OK')
+                                                                                            (shunt_calibration[currentrange]*100.**currentrange))*2.**19+int(round(current_offset/4.))), b'OK')
         elif value_units_index == 2:
             send_command(self.dev, self.main_window, b'DACSET ' +
-                        decimal_to_dac_bytes(value), b'OK')
-
+                         decimal_to_dac_bytes(value), b'OK')
 
     def wait_for_adcread(self):
         """Wait for the duration specified in the busyloop_interval."""
@@ -203,11 +204,9 @@ class Device():
                 # Busy loop (this is the only way to get accurate timing on MS Windows)
                 pass
 
-
     def potential_to_string(self, potential_in_V):
         """Format the measured potential into a string with appropriate units and number of significant digits."""
         return u"%+6.3f V" % potential_in_V
-
 
     def current_to_string(self, currentrange, current_in_mA):
         """Format the measured current into a string with appropriate units and number of significant digits."""
@@ -224,7 +223,6 @@ class Device():
                 return u"%+6.1f µA" % (current_in_mA*1e3)
         elif currentrange == 2:
             return u"%+6.3f µA" % (current_in_mA*1e3)
-
 
     def read_potential_current(self):
         """Read the most recent potential and current values from the device's ADC."""
@@ -243,10 +241,10 @@ class Device():
             # Calculate current in mA, taking current range into account and compensating for offset
             current = (raw_current-current_offset)/2097152.*25. / \
                 (shunt_calibration[currentrange]*100.**currentrange)
-            self.main_window.potential_monitor.setText(self.potential_to_string(potential))
+            self.main_window.potential_monitor.setText(
+                self.potential_to_string(potential))
             self.main_window.current_monitor.setText(
                 self.current_to_string(currentrange, current))
-
 
     def zero_offset(self):
         """Calculate offset values in order to zero the potential and current."""
@@ -257,11 +255,12 @@ class Device():
         # Average current offset
         cur_offs = int(round(numpy.average(list(last_raw_current_values))))
         print('-----')
-        self.main_window.calibration_window.pot_offset_input.setText("%d" % pot_offs)
-        self.main_window.calibration_window.curr_offset_input.setText("%d" % cur_offs)
+        self.main_window.calibration_window.pot_offset_input.setText(
+            "%d" % pot_offs)
+        self.main_window.calibration_window.curr_offset_input.setText(
+            "%d" % cur_offs)
         print('---> auto zero')
         self.offset_changed_callback()
-
 
     def zero_offset_(self):
         """Calculate offset values in order to zero the potential and current."""
@@ -272,11 +271,14 @@ class Device():
         # Average current offset
         cur_offs = int(round(numpy.average(list(last_raw_current_values))))
         print('-----')
-        self.main_window.calibration_window.pot_offset_input.setText("%d" % pot_offs)
-        self.main_window.calibration_window.curr_offset_input.setText("%d" % cur_offs)
+        self.main_window.calibration_window.pot_offset_input.setText(
+            "%d" % pot_offs)
+        self.main_window.calibration_window.curr_offset_input.setText(
+            "%d" % cur_offs)
         print('---> auto zero')
         self.offset_changed_callback()
-
+        self.potential = potential
+        self.current = current
 
     def offset_changed_callback(self):
         """Set the potential and current offset from the input fields."""
@@ -296,7 +298,6 @@ class Device():
             self.main_window.calibration_window.curr_offset_input.setStyleSheet(
                 "")
 
-
     def idle_init(self):
         """Perform some necessary initialization before entering the Idle state."""
         global potential_plot_curve, current_plot_curve, legend
@@ -311,13 +312,13 @@ class Device():
         self.main_window.dynamicPlt.setLabel('left', 'Value', units="")
         self.main_window.dynamicPlt.enableAutoRange()
         self.main_window.dynamicPlt.setXRange(0, 200, update=True)
-        legend = self.main_window.dynamicPlt.addLegend(size=(5, 20), offset=(10, 10))
+        legend = self.main_window.dynamicPlt.addLegend(
+            size=(5, 20), offset=(10, 10))
         potential_plot_curve = self.main_window.dynamicPlt.plot(
             pen='g', name='Potential (V)')
         current_plot_curve = self.main_window.dynamicPlt.plot(
             pen='r', name='Current (mA)')
         self.state = States.Idle  # Proceed to the Idle state
-
 
     def update_live_graph(self):
         """Add newly measured potential and current values to their respective buffers and update the plot curves."""
@@ -329,9 +330,6 @@ class Device():
                         len(last_potential_values), last_potential_values.maxlen)
         potential_plot_curve.setData(xvalues, list(last_potential_values))
         current_plot_curve.setData(xvalues, list(last_current_values))
-        self.potential = potential
-        self.current = current
-
 
     def auto_current_range(self):
         """Automatically switch the current range based on the measured current; returns a number of measurements to skip (to suppress artifacts)."""
@@ -360,15 +358,16 @@ class Device():
         else:
             return 0
 
-
     def cd_start(self, cd_parameters):
         global start_stop, cd_charges, cd_currentsetpoint, cd_starttime, cd_currentcycle, cd_time_data, cd_potential_data, cd_current_data, cd_plot_curves, cd_outputfile_raw, cd_outputfile_capacities
 
         if check_state(self.state, [States.Idle, States.Stationary_Graph, States.Measuring_start]):
             cd_outputfile_raw = open(cd_parameters['filename'], 'w', 1)
-            cd_outputfile_raw.write("Elapsed time(s)\tPotential(V)\tCurrent(A)\n")
+            cd_outputfile_raw.write(
+                "Elapsed time(s)\tPotential(V)\tCurrent(A)\n")
             base, extension = os.path.splitext(cd_parameters['filename'])
-            cd_outputfile_capacities = open(base+'_capacities'+extension, 'w', 1)
+            cd_outputfile_capacities = open(
+                base+'_capacities'+extension, 'w', 1)
             cd_outputfile_capacities.write(
                 "Cycle number\tCharge capacity (Ah)\tDischarge capacity (Ah)\n")
             cd_currentcycle = 1
@@ -377,7 +376,8 @@ class Device():
             cd_currentsetpoint = cd_parameters['chargecurrent']
             self.set_current_range()
             self.set_output(1, cd_currentsetpoint)  # Set current to setpoint
-            set_control_mode(self.dev, self.main_window, True)  # Galvanostatic control
+            set_control_mode(self.dev, self.main_window,
+                             True)  # Galvanostatic control
             time.sleep(.2)  # Allow DAC some time to settle
             cd_starttime = timeit.default_timer()
             # Holds averaged data for elapsed time
@@ -395,10 +395,10 @@ class Device():
             self.main_window.dynamicPlt.enableAutoRange()
             self.main_window.dynamicPlt.setLabel(
                 'bottom', 'Inserted/extracted charge', units="Ah")
-            self.main_window.dynamicPlt.setLabel('left', 'Potential', units="V")
+            self.main_window.dynamicPlt.setLabel(
+                'left', 'Potential', units="V")
             cd_plot_curves.append(self.main_window.dynamicPlt.plot(pen='y'))
             self.state = States.Measuring_CD
-
 
     def cd_update(self, cd_parameters):
         """Add a new data point to the charge/discharge measurement (should be called regularly)."""
@@ -420,7 +420,7 @@ class Device():
                                                             cd_time_data.averagebuffer, initial=0.)/3600.)  # Cumulative charge in Ah
                 # Update the graph
                 cd_plot_curves[cd_currentcycle -
-                            1].setData(charge, cd_potential_data.averagebuffer)
+                               1].setData(charge, cd_potential_data.averagebuffer)
             # A potential cut-off has been reached
             if (cd_currentsetpoint > 0 and potential > cd_parameters['ubound']) or (cd_currentsetpoint < 0 and potential < cd_parameters['lbound']):
                 # Switch from the discharge phase to the charge phase or vice versa
@@ -429,9 +429,11 @@ class Device():
                 else:
                     cd_currentsetpoint = cd_parameters['chargecurrent']
                 self.set_current_range()  # Set new current range
-                self.set_output(1, cd_currentsetpoint)  # Set current to setpoint
+                # Set current to setpoint
+                self.set_output(1, cd_currentsetpoint)
                 # Start a new plot curve and append it to the plot area (keeping the old ones as well)
-                cd_plot_curves.append(self.main_window.dynamicPlt.plot(pen='y'))
+                cd_plot_curves.append(
+                    self.main_window.dynamicPlt.plot(pen='y'))
                 cd_charges.append(numpy.abs(numpy.trapz(
                     cd_current_data.averagebuffer, cd_time_data.averagebuffer)/3600.))  # Cumulative charge in Ah
                 # Write out the charge and discharge capacities after both a charge and discharge phase (i.e. after cycle 2, 4, 6...)
@@ -442,7 +444,6 @@ class Device():
                 for data in [cd_time_data, cd_potential_data, cd_current_data]:
                     data.clear()
                 cd_currentcycle += 1  # Next cycle
-
 
     def cd_stop(self, interrupted=True):
         """Finish the charge/discharge measurement."""
@@ -455,7 +456,6 @@ class Device():
             cd_outputfile_capacities.close()
             self.state = States.Measuring_start
             # preview_cancel_button.show()
-
 
     def cv_sweep(self, time_elapsed, ustart, ustop, ubound, lbound, scanrate, n):
         """Generate the potential profile for a cyclic voltammetry sweep.
@@ -498,7 +498,6 @@ class Device():
         else:
             return None  # CV finished
 
-
     def charge_from_cv(self, time_arr, current_arr):
         """Integrate current as a function of time to calculate charge between zero crossings."""
         zero_crossing_indices = []
@@ -528,7 +527,6 @@ class Device():
             charge_arr.append(numpy.trapz(
                 current_arr[zc_index1:zc_index2], time_arr[zc_index1:zc_index2])*1000./3.6)
         return charge_arr
-
 
     def cv_start(self, cv_parameters):
         """Initialize the CV measurement."""
@@ -564,7 +562,8 @@ class Device():
                 pass
             self.main_window.dynamicPlt.clear()
             self.main_window.dynamicPlt.enableAutoRange()
-            self.main_window.dynamicPlt.setLabel('bottom', 'Potential', units="V")
+            self.main_window.dynamicPlt.setLabel(
+                'bottom', 'Potential', units="V")
             self.main_window.dynamicPlt.setLabel('left', 'Current', units="A")
             cv_plot_curve = self.main_window.dynamicPlt.plot(
                 pen='y')  # Plot CV in yellow
@@ -572,13 +571,12 @@ class Device():
             skipcounter = 2  # Skip first two data points to suppress artifacts
             cv_parameters['starttime'] = timeit.default_timer()
 
-
     def cv_update(self, cv_parameters):
         """Add a new data point to the CV measurement (should be called regularly)."""
         global skipcounter
         elapsed_time = timeit.default_timer()-cv_parameters['starttime']
         cv_output = self.cv_sweep(elapsed_time, cv_parameters['startpot'], cv_parameters['stoppot'],
-                            cv_parameters['ubound'], cv_parameters['lbound'], cv_parameters['scanrate'], cv_parameters['numcycles'])
+                                  cv_parameters['ubound'], cv_parameters['lbound'], cv_parameters['scanrate'], cv_parameters['numcycles'])
         if cv_output == None:  # This signifies the end of the CV scan
             self.cv_stop(interrupted=False)
         else:
@@ -587,7 +585,8 @@ class Device():
             if skipcounter == 0:  # Process new measurements
                 cv_time_data.add_sample(elapsed_time)
                 cv_potential_data.add_sample(potential)
-                cv_current_data.add_sample(1e-3*current)  # Convert from mA to A
+                cv_current_data.add_sample(
+                    1e-3*current)  # Convert from mA to A
                 # Check if a new average was just calculated
                 if len(cv_time_data.samples) == 0 and len(cv_time_data.averagebuffer) > 0:
                     cv_outputfile.write("%e\t%e\t%e\n" % (
@@ -598,7 +597,6 @@ class Device():
             else:  # Wait until the required number of data points is skipped
                 skipcounter -= 1
 
-
     def cv_stop(self, interrupted=True):
         """Finish the CV measurement."""
         if check_state(self.state, [States.Measuring_CV]):
@@ -606,7 +604,8 @@ class Device():
             # Integrate current between zero crossings to produce list of inserted/extracted charges
             self.main_window.dynamicPlt2.clear()
             self.main_window.dynamicPlt2.enableAutoRange()
-            self.main_window.dynamicPlt2.setLabel('bottom', 'Potential', units="V")
+            self.main_window.dynamicPlt2.setLabel(
+                'bottom', 'Potential', units="V")
             self.main_window.dynamicPlt2.setLabel('left', 'Current', units="A")
             cv_plot_curve2 = self.main_window.dynamicPlt2.plot(
                 pen='y')  # Plot CV in yellow
@@ -616,7 +615,6 @@ class Device():
                 cv_time_data.averagebuffer, cv_current_data.averagebuffer)
             # Keep displaying the last plot until the user clicks a button
             self.state = States.Measuring_start
-
 
     def rate_start(self, rate_parameters):
         """Initialize the rate testing measurement."""
@@ -633,14 +631,16 @@ class Device():
                 "Elapsed time(s)\tPotential(V)\tCurrent(A)\n")
             base, extension = os.path.splitext(rate_parameters['filename'])
             # This file will contain capacity data for each C-rate
-            rate_outputfile_capacities = open(base+'_capacities'+extension, 'w', 1)
+            rate_outputfile_capacities = open(
+                base+'_capacities'+extension, 'w', 1)
             rate_outputfile_capacities.write(
                 "C-rate\tCharge capacity (Ah)\tDischarge capacity (Ah)\n")
             rate_current = rate_parameters['currents'][crate_index] if rate_halfcycle_countdown % 2 == 0 else - \
                 rate_parameters['currents'][crate_index]
             self.set_current_range()  # Set new current range
             self.set_output(1, rate_current)  # Set current to setpoint
-            set_control_mode(self.dev, self.main_window, True)  # Galvanostatic control
+            set_control_mode(self.dev, self.main_window,
+                             True)  # Galvanostatic control
             time.sleep(.2)  # Allow DAC some time to settle
             rate_starttime = timeit.default_timer()
             numsamples = max(
@@ -670,7 +670,6 @@ class Device():
             rate_plot_scatter_dis = self.main_window.dynamicPlt.plot(symbol='o', pen=None, symbolPen=(100, 100, 255), symbolBrush=(
                 100, 100, 255), name='Discharge')  # Plot discharge capacity as a function of C-rate with blue circles
             self.state = States.Measuring_Rate
-
 
     def rate_update(self, rate_parameters):
         """Add a new data point to the rate testing measurement (should be called regularly)."""
@@ -724,7 +723,6 @@ class Device():
             for data in [rate_time_data, rate_potential_data, rate_current_data]:
                 data.clear()
 
-
     def rate_stop(self, interrupted=True):
         """Finish the rate testing measurement."""
         if check_state(self.state, [States.Measuring_Rate]):
@@ -733,7 +731,6 @@ class Device():
             rate_outputfile_raw.close()
             rate_outputfile_capacities.close()
             self.state = States.Measuring_start
-
 
     def start(self):
         global start_stop, stop
@@ -751,7 +748,6 @@ class Device():
             self.main_window.button_start.setText('Start')
             stop = 1
             # start_stop = 1
-
 
     def refresh(self):
         global start_stop, stop

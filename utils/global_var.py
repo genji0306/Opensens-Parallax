@@ -6,13 +6,6 @@ from pathlib import Path
     STATIC VARIABLE
 '''
 
-# path save file result
-base_dir = os.path.dirname(os.path.realpath(__file__))
-SAVE_PATH = os.path.join(base_dir, 'save')
-# Create save path for each technique
-Path(SAVE_PATH).mkdir(parents=True, exist_ok=True)
-
-
 ADD_TABLE_SIZE = [4, 3]  # Size of album table
 COLOR_TABLE = [
     '#b18484',

@@ -4,6 +4,7 @@ from PyQt5.QtCore import *
 from PyQt5 import uic, QtOpenGL, QtGui
 import yaml
 
+
 def validate_file(main_window, filename):
     """Check if a filename can be written to. If so, return True."""
     main_window.setStyleSheet("color: white;  background-color: black")
@@ -22,7 +23,7 @@ def validate_file(main_window, filename):
         main_window.setStyleSheet("color: black;  background-color: black")
         return False
 
+
 def get_config(config_path):
     with open(config_path, 'r') as stream:
         return yaml.load(stream, Loader=yaml.FullLoader)
-
