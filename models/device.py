@@ -25,7 +25,6 @@ Create attributes and methods for each device
 
 class Device():
     def __init__(self, main_window):
-
         if platform.system() != "Windows":
             # On Linux/OSX, use the Qt timer
             self.busyloop_interval = 0
@@ -38,6 +37,8 @@ class Device():
         self.state = States.NotConnected  # Initial state
         self.main_window = main_window
         self.dev = None
+        self.potential = potential
+        self.current = current
 
     def connect_disconnect_usb(self):
         """Toggle the USB device between connected and disconnected states."""
@@ -328,6 +329,8 @@ class Device():
                         len(last_potential_values), last_potential_values.maxlen)
         potential_plot_curve.setData(xvalues, list(last_potential_values))
         current_plot_curve.setData(xvalues, list(last_current_values))
+        self.potential = potential
+        self.current = current
 
 
     def auto_current_range(self):

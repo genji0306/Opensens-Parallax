@@ -17,7 +17,7 @@ from ui.model.create import Create
 from ui.model.frame import Frame
 
 pg.setConfigOptions(foreground="#e5e5e5", background="#00304f")
-
+CONFIG = get_config('./config/config.yml')
 
 class main(QMainWindow):
     def __init__(self):
@@ -52,7 +52,7 @@ class main(QMainWindow):
         self.button_start.clicked.connect(self.new_device.start)
 
         self.calibration_window.auto_zero.clicked.connect(
-            self.new_device.zero_offset)
+            button_zero_offset)
         self.calibration_window.auto_calibrate.clicked.connect(
             self.new_device.dac_calibrate)
         self.calibration_window.load_from_device.clicked.connect(
@@ -113,25 +113,32 @@ class main(QMainWindow):
             self.new_device.rate_update(para_run)
         elif self.new_device.state == States.Measuring_start and stop == 0:
             if queue_measure:
+                check_auto_zero = CONFIG['para']['pot_offs_zero'][0] < self.new_device.potential < self.CONFIG['para']['pot_offs_zero'][1] and self.CONFIG['para']['cur_offs_zero'][0] < self.new_device.current < self.CONFIG['para']['cur_offs_zero'][1]
                 if queue_measure[0]["type"] == "cd":
-                    self.new_device.zero_offset_()
+                    while not check_auto_zero:
+                        self.new_device.zero_offset_()
                     self.new_device.cd_start(queue_measure[0]['value'])
                     para_run = queue_measure[0]['value']
                     queue_measure.pop(0)
                 elif queue_measure[0]["type"] == "cv":
-                    self.new_device.zero_offset_()
+                    while not check_auto_zero:
+                        self.new_device.zero_offset_()
                     self.new_device.cv_start(queue_measure[0]['value'])
                     para_run = queue_measure[0]['value']
                     queue_measure.pop(0)
                 elif queue_measure[0]["type"] == "rate":
-                    self.new_device.zero_offset_()
+                    while not check_auto_zero:
+                        self.new_device.zero_offset_()
                     self.new_device.rate_start(queue_measure[0]['value'])
                     para_run = queue_measure[0]['value']
                     queue_measure.pop(0)
             else:
                 self.new_device.state = States.Stationary_Graph
                 self.button_start.setText('Start')
-
+    def button_zero_offset(self):
+        check_auto_zero = CONFIG['para']['pot_offs_zero'][0] < self.new_device.potential < self.CONFIG['para']['pot_offs_zero'][1] and self.CONFIG['para']['cur_offs_zero'][0] < self.new_device.current < self.CONFIG['para']['cur_offs_zero'][1]
+        while not check_auto_zero:
+            self.new_device.zero_offset_()
     def refresh(self):
         global queue_measure
         self.new_device.refresh()
