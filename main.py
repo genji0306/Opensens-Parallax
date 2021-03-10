@@ -60,7 +60,7 @@ class main(QMainWindow):
         self.button_start.clicked.connect(self.new_device.start)
 
         self.calibration_window.auto_zero.clicked.connect(
-            self.new_device.zero_offset)
+            self.button_zero_offset)
         self.calibration_window.auto_calibrate.clicked.connect(
             self.new_device.dac_calibrate)
         self.calibration_window.load_from_device.clicked.connect(
