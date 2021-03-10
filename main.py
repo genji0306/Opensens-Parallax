@@ -121,42 +121,18 @@ class main(QMainWindow):
             self.new_device.rate_update(para_run)
         elif self.new_device.state == States.Measuring_start and stop == 0:
             if queue_measure:
-                check_auto_zero = 0
                 if queue_measure[0]["type"] == "cd":
-                    while not check_auto_zero:
-                        self.new_device.zero_offset_()
-                        self.new_device.read_potential_current()
-                        self.new_device.update_live_graph()
-                        time.sleep(0.3)
-                        print(self.new_device.potential,
-                              self.new_device.current)
-                        check_auto_zero = CONFIG['para']['pot_offs_zero'][0] < self.new_device.potential < CONFIG['para']['pot_offs_zero'][
-                            1] and CONFIG['para']['cur_offs_zero'][0] < self.new_device.current < CONFIG['para']['cur_offs_zero'][1]
+                    self.button_zero_offset()
+                    self.new_device.cd_start(queue_measure[0]['value'])
+                    para_run = queue_measure[0]['value']
+                    queue_measure.pop(0)
                 elif queue_measure[0]["type"] == "cv":
-                    while not check_auto_zero:
-                        self.new_device.zero_offset_()
-                        self.new_device.read_potential_current()
-                        self.new_device.update_live_graph()
-                        time.sleep(0.3)
-                        print(self.new_device.potential,
-                              self.new_device.current)
-                        check_auto_zero = CONFIG['para']['pot_offs_zero'][0] < self.new_device.potential < CONFIG['para']['pot_offs_zero'][
-                            1] and CONFIG['para']['cur_offs_zero'][0] < self.new_device.current < CONFIG['para']['cur_offs_zero'][1]
-                    self.new_device.zero_offset_()
+                    self.button_zero_offset()
                     self.new_device.cv_start(queue_measure[0]['value'])
                     para_run = queue_measure[0]['value']
                     queue_measure.pop(0)
                 elif queue_measure[0]["type"] == "rate":
-                    while not check_auto_zero:
-                        self.new_device.zero_offset_()
-                        self.new_device.read_potential_current()
-                        self.new_device.update_live_graph()
-                        time.sleep(0.3)
-                        print(self.new_device.potential,
-                              self.new_device.current)
-                        check_auto_zero = CONFIG['para']['pot_offs_zero'][0] < self.new_device.potential < CONFIG['para']['pot_offs_zero'][
-                            1] and CONFIG['para']['cur_offs_zero'][0] < self.new_device.current < CONFIG['para']['cur_offs_zero'][1]
-                    self.new_device.zero_offset_()
+                    self.button_zero_offset()
                     self.new_device.rate_start(queue_measure[0]['value'])
                     para_run = queue_measure[0]['value']
                     queue_measure.pop(0)
