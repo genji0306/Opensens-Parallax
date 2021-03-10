@@ -147,7 +147,8 @@ class main(QMainWindow):
             self.new_device.read_potential_current()
             self.new_device.update_live_graph()
             time.sleep(0.3)
-            print(self.new_device.potential, self.new_device.current)
+            print(self.new_device.potential,
+                  self.new_device.current, check_auto_zero)
             check_auto_zero = CONFIG['para']['pot_offs_zero'][0] < self.new_device.potential < CONFIG['para']['pot_offs_zero'][
                 1] and CONFIG['para']['cur_offs_zero'][0] < self.new_device.current < CONFIG['para']['cur_offs_zero'][1]
 
