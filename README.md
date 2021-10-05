@@ -5,8 +5,7 @@
 <hr>
 <b>Description</b>  <br><br>
 
-  The project has 13 folders: <br><br>
-fdfs
+  The project has 7 folders: <br><br>
   - <b> config : </b> Contains config for auto zero stop range when start new measure <br>
   - <b> models : </b> Device class, in scenario multiple devices, we could create multiple class<br>
   - <b> save :</b> Contains results of measure<br>
