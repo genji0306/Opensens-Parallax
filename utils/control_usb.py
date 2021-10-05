@@ -1,66 +1,6 @@
 import collections
-import os
-import numpy
 from PyQt5 import QtGui
-
-'''
-    STATIC VARIABLE
-'''
-
-ADD_TABLE_SIZE = [4, 3]  # Size of album table
-COLOR_TABLE = [
-    '#b18484',
-    '#eababa',
-    '#c4c7ff',
-    '#d67676',
-    '#86a9dc',
-    '#feff57',
-    '#5700ff',
-]
-INDEX_TECHNIQUES = [1, 1, 1]
-LIST_TECHNIQUES = [
-    "Charge/disch",
-    "Rate testing",
-    "Cyclic voltammetry"
-]
-
-usb_vid_ = "0xa0a0"  # Default USB vendor ID, can also be adjusted in the GUI
-usb_pid_ = "0x0002"  # Default USB product ID, can also be adjusted in the GUI
-current_range_list = ["20 mA", u"200 µA", u"2 µA"]
-
-# Fine adjustment for shunt resistors, containing values of R1/10ohm, R2/1kohm, R3/100kohm (can also be adjusted in the GUI)
-shunt_calibration = [1., 1., 1.]
-
-# Default current range (expressed as index in current_range_list)
-currentrange = 0
-units_list = ["Potential (V)", "Current (mA)", "DAC Code"]
-dev = None  # Global object which is reserved for the USB device
-current_offset = 0.  # Current offset in DAC counts
-potential_offset = 0.  # Potential offset in DAC counts
-potential = 0.  # Measured potential in V
-current = 0.  # Measured current in mA
-last_potential_values = collections.deque(maxlen=200)
-last_current_values = collections.deque(maxlen=200)
-raw_potential = 0  # Measured potential in ADC counts
-raw_current = 0  # Measured current in ADC counts
-last_raw_potential_values = collections.deque(maxlen=200)
-last_raw_current_values = collections.deque(maxlen=200)
-
-# Global counters used for automatic current ranging
-overcounter, undercounter, skipcounter = 0, 0, 0
-time_of_last_adcread = 0.
-adcread_interval = 0.09  # ADC sampling interval (in seconds)
-
-# Enable logging of potential and current in idle mode (can be adjusted in the GUI)
-logging_enabled = False
-
-# usb_connected = False
-start_stop = 1
-stop = 0
-
-# path save file result
-base_dir = os.path.dirname(os.path.realpath(__file__))
-SAVE_PATH = os.path.join(base_dir, 'save')
+from .calculate import *
 
 
 class AverageBuffer:
@@ -94,59 +34,6 @@ def check_state(state_value, desired_states):
         return False
     else:
         return True
-
-
-def twobytes_to_float(bytes_in):
-    """Convert two bytes to a number ranging from -2^15 to 2^15-1."""
-    code = 2**8*bytes_in[0]+bytes_in[1]
-    return float(code - 2**15)
-
-
-def decimal_to_dac_bytes(value):
-    """Convert a floating-point number, ranging from -2**19 to 2**19-1, to three data bytes in the proper format for the DAC1220."""
-    code = 2**19 + \
-        int(round(value))  # Convert the (signed) input value to an unsigned 20-bit integer with zero at midway
-    # If the input exceeds the boundaries of the 20-bit integer, clip it
-    code = numpy.clip(code, 0, 2**20 - 1)
-    byte1 = code // 2**12
-    byte2 = (code % 2**12) // 2**4
-    byte3 = (code - byte1*2**12 - byte2*2**4)*2**4
-    return bytes([byte1, byte2, byte3])
-
-
-def float_to_twobytes(value):
-    """Convert a floating-point number ranging from -2^15 to 2^15-1 to a 16-bit representation stored in two bytes."""
-    code = 2**15 + int(round(value))
-    # If the code exceeds the boundaries of a 16-bit integer, clip it
-    code = numpy.clip(code, 0, 2**16 - 1)
-    byte1 = code // 2**8
-    byte2 = code % 2**8
-    return bytes([byte1, byte2])
-
-
-def twocomplement_to_decimal(msb, middlebyte, lsb):
-    """Convert a 22-bit two-complement ADC value consisting of three bytes to a signed integer (see MCP3550 datasheet for details)."""
-    ovh = (msb > 63) and (msb < 128)  # Check for overflow high (B22 set)
-    ovl = (msb > 127)  # Check for overflow low (B23 set)
-    combined_value = (msb % 64)*2**16+middlebyte*2**8 + \
-        lsb  # Get rid of overflow bits
-    if not ovh and not ovl:
-        if msb > 31:  # B21 set -> negative number
-            answer = combined_value - 2**22
-        else:
-            answer = combined_value
-    else:  # overflow
-        if msb > 127:  # B23 set -> negative number
-            answer = combined_value - 2**22
-        else:
-            answer = combined_value
-    return answer
-
-
-def dac_bytes_to_decimal(dac_bytes):
-    """Convert three data bytes in the DAC1220 format to a 20-bit number ranging from -2**19 to 2**19-1."""
-    code = 2**12*dac_bytes[0]+2**4*dac_bytes[1]+dac_bytes[2]/2**4
-    return code - 2**19
 
 
 def send_command(dev, main_window, command_string, expected_response, log_msg=None):

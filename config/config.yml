@@ -1,0 +1,6 @@
+para:
+  # range to stop auto zero offset funtion
+  # Use in button_zero_offset funtion in main file
+  pot_offs_zero: [-0.5,0.5]
+  cur_offs_zero: [-0.5,0.5]
+

@@ -2,7 +2,6 @@
 .vim/*
 .vscode/*
 __pycache__/*
-config/*
 logs/*
 save/*
 
@@ -144,3 +143,4 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
