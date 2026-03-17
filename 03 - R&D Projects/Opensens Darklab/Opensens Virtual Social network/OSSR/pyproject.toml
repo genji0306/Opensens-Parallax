@@ -1,0 +1,23 @@
+[project]
+name = "ossr"
+version = "0.1.0"
+description = "Opensens Socialnetwork Simulation for Research"
+requires-python = ">=3.10"
+dependencies = [
+    "flask>=3.0.0",
+    "flask-cors>=4.0.0",
+    "requests>=2.31.0",
+    "opensens-common",
+    "networkx>=3.0",
+    "python-louvain>=0.16",
+    "python-pptx>=1.0.0",
+    "openai>=1.0.0",
+]
+
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["backend"]
+include = ["app*"]

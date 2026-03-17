@@ -1,0 +1,60 @@
+{
+  "setup": {
+    "title": "Create Research Debate",
+    "ossrUrl": "OSSR Backend URL",
+    "connect": "Connect",
+    "format": "Discussion Format",
+    "topic": "Debate Topic",
+    "topicPlaceholder": "e.g., The role of AI in drug discovery...",
+    "rounds": "Max Rounds",
+    "agents": "Select Agents",
+    "selectAll": "Select All",
+    "noAgents": "No agents found. Generate agents in OSSR first.",
+    "start": "Start Visual Debate",
+    "starting": "Starting Debate..."
+  },
+  "transcript": {
+    "title": "Transcript",
+    "turns": "turns",
+    "waiting": "Waiting for first turn...",
+    "empty": "No transcript yet",
+    "chatWith": "Chat with this agent"
+  },
+  "controls": {
+    "back": "Back to setup",
+    "pause": "Pause debate",
+    "resume": "Resume debate",
+    "speed": "Speed",
+    "injectPlaceholder": "Inject a question or topic...",
+    "inject": "Inject",
+    "whatIf": "What If?",
+    "share": "Share",
+    "report": "AI Report"
+  },
+  "chat": {
+    "prompt": "Ask this agent about the debate...",
+    "placeholder": "Type a message...",
+    "debateOngoing": "Debate in progress"
+  },
+  "fork": {
+    "title": "Fork Debate — \"What If?\"",
+    "format": "Format",
+    "topic": "Topic",
+    "fromRound": "Fork from round",
+    "topicOverride": "Modify topic (optional)",
+    "cancel": "Cancel",
+    "start": "Start Forked Debate",
+    "starting": "Forking..."
+  },
+  "status": {
+    "paused": "PAUSED"
+  },
+  "view": {
+    "loading": "Loading debate...",
+    "loading3d": "Loading 3D scene...",
+    "switchTo3d": "Switch to 3D view",
+    "switchTo2d": "Switch to 2D view"
+  },
+  "completed": "Debate Completed",
+  "waiting": "Waiting to start..."
+}

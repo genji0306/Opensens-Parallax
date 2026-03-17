@@ -1,0 +1,158 @@
+/* ── OSSR Theme System ─────────────────────────────────────────────
+   Brand: Opensens teal #1EA88E
+   Supports light (default) and dark modes via [data-theme="dark"]
+   ─────────────────────────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  /* ── Brand ── */
+  --os-brand: #1EA88E;
+  --os-brand-hover: #179B82;
+  --os-brand-light: #E6F7F3;
+  --os-brand-subtle: #B8E6DA;
+  --os-brand-rgb: 30, 168, 142;
+
+  /* ── Light Theme (default) ── */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F7F9FA;
+  --bg-tertiary: #EEF1F4;
+  --bg-elevated: #FFFFFF;
+  --bg-hover: #F0F3F5;
+  --bg-active: #E6F7F3;
+
+  --border-primary: #E0E5EA;
+  --border-secondary: #EBF0F4;
+  --border-accent: var(--os-brand);
+
+  --text-primary: #1A2332;
+  --text-secondary: #5A6B7B;
+  --text-tertiary: #8B99A8;
+  --text-on-brand: #FFFFFF;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
+
+  /* ── Semantic ── */
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --error: #EF4444;
+  --info: #3B82F6;
+
+  /* ── Graph D3 ── */
+  --graph-domain: var(--os-brand);
+  --graph-subfield: #5CBFA9;
+  --graph-thread: #96D4C6;
+  --graph-paper: #D1E9E3;
+  --graph-edge: #C8D5DE;
+  --graph-hierarchy: var(--os-brand);
+  --graph-gap: #EF4444;
+  --graph-bg: var(--bg-primary);
+  --graph-label: var(--text-primary);
+
+  /* ── Agent roles ── */
+  --role-professor: #1EA88E;
+  --role-assoc-professor: #2E7D68;
+  --role-postdoc: #3B82F6;
+  --role-phd: #8B5CF6;
+  --role-industry: #F59E0B;
+  --role-reviewer: #EF4444;
+
+  /* ── Typography ── */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+
+  /* ── Radius ── */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-pill: 100px;
+
+  /* ── Transitions ── */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
+}
+
+/* ── Dark Theme ── */
+[data-theme="dark"] {
+  --bg-primary: #0D1117;
+  --bg-secondary: #161B22;
+  --bg-tertiary: #1C2333;
+  --bg-elevated: #1C2333;
+  --bg-hover: #21293A;
+  --bg-active: #12322A;
+
+  --border-primary: #2A3544;
+  --border-secondary: #1E2A38;
+  --border-accent: var(--os-brand);
+
+  --text-primary: #E6ECF1;
+  --text-secondary: #8B9DB3;
+  --text-tertiary: #5A6F84;
+  --text-on-brand: #FFFFFF;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  --os-brand: #2DBFA3;
+  --os-brand-hover: #3FCDB2;
+  --os-brand-light: #12322A;
+  --os-brand-subtle: #1A4038;
+  --os-brand-rgb: 45, 191, 163;
+
+  --graph-domain: #2DBFA3;
+  --graph-subfield: #5CBFA9;
+  --graph-thread: #3A7D6E;
+  --graph-paper: #2A4A42;
+  --graph-edge: #2A3544;
+  --graph-hierarchy: #2DBFA3;
+  --graph-bg: var(--bg-primary);
+  --graph-label: var(--text-primary);
+
+  --success: #34D399;
+  --warning: #FBBF24;
+  --error: #F87171;
+  --info: #60A5FA;
+}
+
+/* ── Global Reset ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background var(--transition-normal), color var(--transition-normal);
+}
+
+/* ── Scrollbar theming ── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-primary);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+/* ── Selection ── */
+::selection {
+  background: rgba(var(--os-brand-rgb), 0.25);
+}
