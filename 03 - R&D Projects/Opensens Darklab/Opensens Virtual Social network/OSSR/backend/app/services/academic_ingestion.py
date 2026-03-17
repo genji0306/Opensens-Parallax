@@ -756,6 +756,228 @@ class OpenAlexSource(AcademicSourceAdapter):
         return " ".join(w for _, w in word_positions)
 
 
+# ── OpenReview Source ────────────────────────────────────────────────
+
+
+class OpenReviewSource(AcademicSourceAdapter):
+    """
+    OpenReview adapter using the V2 REST API.
+    Fetches conference submissions + peer review metadata from venues
+    like ICLR, NeurIPS, ICML, EMNLP, etc.
+
+    API docs: https://docs.openreview.net/
+    """
+
+    API_V2 = "https://api2.openreview.net"
+
+    # Major ML/AI venues with their OpenReview group IDs
+    VENUES = [
+        "ICLR.cc/2025/Conference",
+        "ICLR.cc/2024/Conference",
+        "NeurIPS.cc/2024/Conference",
+        "NeurIPS.cc/2023/Conference",
+        "ICML.cc/2024/Conference",
+        "ICML.cc/2023/Conference",
+        "EMNLP/2024/Conference",
+        "aclweb.org/ACL/2024/Conference",
+    ]
+
+    def __init__(self):
+        self.session = requests.Session()
+        self.session.headers.update({"User-Agent": "OSSR/1.0 (academic research)"})
+        self._token = None
+
+    def _get_token(self) -> Optional[str]:
+        """Obtain a guest access token for the OpenReview API."""
+        if self._token:
+            return self._token
+        try:
+            resp = self.session.post(
+                f"{self.API_V2}/login/guest",
+                json={},
+                timeout=10,
+            )
+            if resp.status_code == 200:
+                self._token = resp.json().get("token")
+                if self._token:
+                    self.session.headers["Authorization"] = f"Bearer {self._token}"
+                return self._token
+        except Exception as e:
+            logger.warning(f"OpenReview guest login failed: {e}")
+        return None
+
+    def search(
+        self,
+        query: str,
+        date_from: Optional[str] = None,
+        date_to: Optional[str] = None,
+        max_results: int = 50,
+    ) -> List[PaperMetadata]:
+        self._get_token()
+        results = []
+
+        # Search across relevant venues using the notes search endpoint
+        try:
+            params = {
+                "query": query,
+                "limit": min(max_results, 100),
+                "offset": 0,
+            }
+            resp = self.session.get(
+                f"{self.API_V2}/notes/search",
+                params=params,
+                timeout=20,
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                notes = data.get("notes", [])
+                for note in notes:
+                    pm = self._note_to_paper(note)
+                    if pm:
+                        if date_from and pm.publication_date < date_from:
+                            continue
+                        if date_to and pm.publication_date > date_to:
+                            continue
+                        results.append(pm)
+        except Exception as e:
+            logger.warning(f"OpenReview search failed: {e}")
+
+        # If search returned few results, also try venue-specific queries
+        if len(results) < max_results:
+            query_lower = query.lower()
+            for venue in self.VENUES[:4]:  # Limit venue scans
+                if len(results) >= max_results:
+                    break
+                try:
+                    params = {
+                        "content.venue": venue,
+                        "limit": min(max_results - len(results), 50),
+                        "offset": 0,
+                    }
+                    resp = self.session.get(
+                        f"{self.API_V2}/notes",
+                        params=params,
+                        timeout=15,
+                    )
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        for note in data.get("notes", []):
+                            pm = self._note_to_paper(note)
+                            if pm and self._matches_query(pm, query_lower):
+                                if date_from and pm.publication_date < date_from:
+                                    continue
+                                if date_to and pm.publication_date > date_to:
+                                    continue
+                                results.append(pm)
+                except Exception as e:
+                    logger.debug(f"OpenReview venue scan failed for {venue}: {e}")
+
+        # Deduplicate by DOI
+        seen = set()
+        unique = []
+        for r in results:
+            if r.doi not in seen:
+                seen.add(r.doi)
+                unique.append(r)
+        results = unique[:max_results]
+
+        logger.info(f"OpenReview: found {len(results)} papers for '{query}'")
+        return results
+
+    def get_paper(self, identifier: str) -> Optional[PaperMetadata]:
+        self._get_token()
+        try:
+            resp = self.session.get(
+                f"{self.API_V2}/notes",
+                params={"id": identifier},
+                timeout=10,
+            )
+            if resp.status_code == 200:
+                notes = resp.json().get("notes", [])
+                if notes:
+                    return self._note_to_paper(notes[0])
+        except Exception as e:
+            logger.warning(f"OpenReview get_paper error for {identifier}: {e}")
+        return None
+
+    def get_citations(self, doi: str) -> List[str]:
+        # OpenReview doesn't provide citation graphs
+        return []
+
+    def _note_to_paper(self, note: Dict[str, Any]) -> Optional[PaperMetadata]:
+        """Convert an OpenReview note to PaperMetadata."""
+        content = note.get("content", {})
+        note_id = note.get("id", "")
+
+        # V2 content fields are wrapped in {"value": ...}
+        def val(field):
+            v = content.get(field, {})
+            return v.get("value", v) if isinstance(v, dict) else v
+
+        title = val("title") or ""
+        abstract = val("abstract") or ""
+
+        if not title:
+            return None
+
+        # Authors — may be in content.authors or note.signatures
+        authors_raw = val("authors") or []
+        if isinstance(authors_raw, list):
+            authors = [{"name": a} if isinstance(a, str) else a for a in authors_raw]
+        else:
+            authors = []
+
+        # Venue / date
+        venue = val("venue") or val("venueid") or ""
+        cdate = note.get("cdate") or note.get("tcdate") or note.get("odate")
+        if cdate and isinstance(cdate, (int, float)):
+            pub_date = datetime.fromtimestamp(cdate / 1000).strftime("%Y-%m-%d")
+        elif cdate and isinstance(cdate, str):
+            pub_date = cdate[:10]
+        else:
+            pub_date = ""
+
+        # Keywords
+        keywords_raw = val("keywords") or []
+        keywords = keywords_raw if isinstance(keywords_raw, list) else []
+
+        # DOI — use note ID as fallback identifier
+        doi = val("doi") or f"openreview:{note_id}" if note_id else ""
+        if not doi:
+            return None
+
+        # PDF URL
+        pdf = val("pdf") or ""
+        pdf_url = f"https://openreview.net{pdf}" if pdf and pdf.startswith("/") else pdf
+
+        # Decision (if available — unique to OpenReview)
+        decision = val("decision") or ""
+
+        return PaperMetadata(
+            doi=doi,
+            title=title,
+            abstract=abstract,
+            authors=authors,
+            publication_date=pub_date,
+            source=AcademicSource.OPENREVIEW,
+            keywords=keywords,
+            full_text_url=pdf_url,
+            metadata={
+                "openreview_id": note_id,
+                "venue": venue,
+                "decision": decision,
+                "forum": note.get("forum", ""),
+            },
+        )
+
+    @staticmethod
+    def _matches_query(paper: PaperMetadata, query_lower: str) -> bool:
+        """Basic keyword match against title and abstract."""
+        text = f"{paper.title} {paper.abstract}".lower()
+        terms = query_lower.split()
+        return any(t in text for t in terms if len(t) > 2)
+
+
 # ── Source Registry ───────────────────────────────────────────────────
 
 
@@ -765,6 +987,7 @@ SOURCES: Dict[AcademicSource, type] = {
     AcademicSource.ARXIV: ArXivSource,
     AcademicSource.SEMANTIC_SCHOLAR: SemanticScholarSource,
     AcademicSource.OPENALEX: OpenAlexSource,
+    AcademicSource.OPENREVIEW: OpenReviewSource,
 }
 
 

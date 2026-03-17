@@ -23,6 +23,7 @@ class AcademicSource(str, Enum):
     SEMANTIC_SCHOLAR = "semantic_scholar"
     PUBMED = "pubmed"
     OPENALEX = "openalex"
+    OPENREVIEW = "openreview"
 
 
 class TopicLevel(int, Enum):
