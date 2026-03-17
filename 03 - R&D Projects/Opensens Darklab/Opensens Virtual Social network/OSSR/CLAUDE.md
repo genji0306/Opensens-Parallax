@@ -28,15 +28,23 @@
 | **Post-sim agent chat** | **90%** | Chat with any agent after simulation via stored system prompts |
 | **Report agent chat** | **90%** | Ask follow-up questions to the report agent |
 | **Simulation forking** | **85%** | Fork from any round with modified parameters |
+| **Parallel ingestion** | **95%** | ThreadPoolExecutor, per-source timeout, partial result handling |
+| **Ingestion caching** | **95%** | SQLite cache with TTL expiration, high-water mark incremental fetching |
+| **PPTX export** | **90%** | PowerPoint export with title + section slides via python-pptx |
+| **TTS audio summary** | **90%** | OpenAI TTS API (tts-1, alloy voice), condensed report narration |
+| **Gemini infographic** | **85%** | Structured JSON infographic data via LLM with fallback |
+| **API key auth** | **90%** | SHA256-hashed keys, before_request middleware, key management endpoints |
+| **3D debate viz** | **85%** | React Three Fiber scene in Agent Office — agents, arena, camera follow |
+| **Social AI service** | **40%** | Flask microservice (:5003) with stub adapters (Twitter/Reddit/YouTube/Instagram) |
 
 ### Architecture Overview
 
 ```
-backend/run.py → app/__init__.py (create_app) → Flask + CORS + init_db() + research_bp
+backend/run.py → app/__init__.py (create_app) → Flask + CORS + init_db() + blueprints
 ```
 
-- **Single blueprint:** `research_bp` at `/api/research/` — 35 endpoints (29 original + 3 chat + 1 fork + 2 misc)
-- **SQLite persistence:** WAL mode, thread-local connections, 7 tables in `backend/data/ossr.db`
+- **3 blueprints:** `research_data_bp`, `research_sim_bp`, `research_report_bp` at `/api/research/` + `auth_bp` at `/api/auth/`
+- **SQLite persistence:** WAL mode, thread-local connections, 8 tables in `backend/data/ossr.db`
 - **Async tasks:** `opensens_common.task.TaskManager` (thread-based)
 - **Multi-provider LLM:** via `opensens_common.llm_client.LLMClient`
 - **Vite proxy:** `/api` → `http://localhost:5002`
@@ -50,8 +58,9 @@ backend/run.py → app/__init__.py (create_app) → Flask + CORS + init_db() + r
 | ResearchMapper | `services/research_mapper.py` | Topic extraction, Louvain clustering, citation graph, gap analysis |
 | ResearcherProfileGenerator | `services/researcher_profile_gen.py` | AI agent personas with auto-scaling, dedup, LLM config |
 | ResearchSimulationRunner | `services/research_simulation_runner.py` | 5 formats + hybrid persistence + agent chat + forking |
-| ResearchReportGenerator | `services/research_report_service.py` | Evolution + comparative reports; LLM-powered section writing |
+| ResearchReportGenerator | `services/research_report_service.py` | Evolution + comparative + infographic reports; PPTX/TTS/infographic export |
 | SkillLoader | `services/skill_loader.py` | 175 scientific skills from K-Dense-AI |
+| Auth middleware | `app/auth.py` | API key validation, SHA256 hashing, master key management |
 
 ### Agent Generation — Auto-Scaling & Deduplication
 
@@ -64,12 +73,12 @@ backend/run.py → app/__init__.py (create_app) → Flask + CORS + init_db() + r
 
 - ~~**No persistence** — all data lost on restart~~ **RESOLVED** — SQLite persistence layer added
 - ~~**Duplicate agents** — coauthors across clusters created duplicates~~ **RESOLVED** — name-based dedup + merge
-- **No authentication** — endpoints fully open
+- ~~**No authentication** — endpoints fully open~~ **RESOLVED** — API key auth with SHA256 hashing (REQUIRE_AUTH=true)
 - **Shallow clustering** — keyword-only assignment after first 100 papers
 - **Static agent personas** — agents don't evolve during discussions (but post-sim chat is now available)
 - **bioRxiv bottleneck** — 30-60s per batch
 - **No full-text access** — abstracts only
-- **No caching** — every map rebuild recomputes from scratch
+- ~~**No caching** — every map rebuild recomputes from scratch~~ **RESOLVED** — SQLite ingestion cache with TTL + HWM incremental
 
 ---
 
@@ -405,8 +414,18 @@ All 35 endpoints: `/api/research/`. Responses: `{"success": bool, "data": ...}`.
 | GET | `/report/<sim_id>/status` | `?task_id` | Poll report |
 | GET | `/report/<report_id>/view` | `?format=json\|markdown` | View report |
 | GET | `/reports` | — | List reports |
+| GET | `/report/<id>/export/<fmt>` | fmt: pptx\|audio\|markdown\|json | Export report |
+| POST | `/report/<id>/infographic` | — | Generate infographic data |
 
-### Deep Interaction (NEW)
+### Authentication (at `/api/auth/`)
+
+| Method | Path | Body/Params | Description |
+|--------|------|-------------|-------------|
+| POST | `/api/auth/keys` | `{name, expires_at?}` | Create API key (requires MASTER_API_KEY) |
+| GET | `/api/auth/keys` | — | List keys (metadata only) |
+| DELETE | `/api/auth/keys/<name>` | — | Revoke key |
+
+### Deep Interaction
 
 | Method | Path | Body/Params | Description |
 |--------|------|-------------|-------------|
@@ -427,11 +446,16 @@ OSSR/
 │   │   ├── .gitkeep                        # Ensures data dir exists in git
 │   │   └── ossr.db                         # SQLite database (WAL mode, auto-created)
 │   └── app/
-│       ├── __init__.py                     # Flask factory + CORS + init_db() + blueprint
-│       ├── db.py                           # SQLite connection factory, schema, WAL config
+│       ├── __init__.py                     # Flask factory + CORS + init_db() + blueprints + auth hook
+│       ├── db.py                           # SQLite connection factory, schema (8 tables), WAL config
+│       ├── auth.py                         # API key middleware (SHA256, require_api_key, master key)
 │       ├── api/
-│       │   ├── __init__.py                 # Exports research_bp
-│       │   └── research.py                 # 35 API endpoints (incl. chat + fork)
+│       │   ├── __init__.py                 # Exports research_blueprints list
+│       │   ├── research_data_routes.py     # Data pipeline endpoints (ingest, papers, topics, gaps)
+│       │   ├── research_sim_routes.py      # Simulation endpoints (agents, simulate, chat, fork)
+│       │   ├── research_report_routes.py   # Report endpoints (generate, export, infographic, chat)
+│       │   ├── research_legacy.py          # Legacy combined routes (backward compat)
+│       │   └── auth_routes.py              # Key management (create/list/revoke)
 │       ├── models/
 │       │   └── research.py                 # Paper, Topic, Citation, ResearchDataStore (SQLite)
 │       └── services/
@@ -439,8 +463,15 @@ OSSR/
 │           ├── research_mapper.py          # NetworkX + Louvain + gap analysis + enriched nodes
 │           ├── researcher_profile_gen.py   # LLM agent generation + SQLite store
 │           ├── research_simulation_runner.py # 5 formats + hybrid persistence + chat + fork
-│           ├── research_report_service.py  # Reports + SQLite store + report chat
+│           ├── research_report_service.py  # Reports + PPTX/TTS/infographic export + chat
 │           └── skill_loader.py             # 175 skills from K-Dense-AI
+├── social-ai-service/                      # Separate Flask microservice (:5003)
+│   ├── app.py                              # Entry point
+│   ├── social_ai_service/
+│   │   ├── app.py                          # Routes: post, schedule, list_status
+│   │   ├── store.py                        # SQLite job store (thread-local)
+│   │   └── adapters.py                     # Platform adapter stubs
+│   └── tests/test_app.py                   # Basic endpoint tests
 ├── frontend/
 │   ├── package.json                        # Vue 3, Axios, D3, vue-router
 │   ├── vite.config.js                      # Port 3001, proxy /api → :5002
@@ -503,7 +534,7 @@ kill -9 $(lsof -ti :3001)
 - **Async pattern:** POST → `task_id` → poll `/<task_id>/status` → `pending→running→completed|failed`
 - **Polling interval:** 2-3 seconds
 - **Frontend:** SPA at `/` — ResearchDashboard is the main view
-- **No auth:** All endpoints open
+- **Auth:** Optional API key auth (REQUIRE_AUTH=true); key management via MASTER_API_KEY
 - **SQLite persistence:** All data persists in `backend/data/ossr.db` (WAL mode, thread-local connections)
 - **Hybrid sim storage:** Running simulations in memory (`_active` dict), all states persisted to DB
 - **Post-sim interaction:** Agent chat, report chat, and simulation forking available after completion

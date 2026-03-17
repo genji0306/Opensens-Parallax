@@ -201,6 +201,45 @@ export const pollSimulation = (simulationId, onUpdate, interval = 3000) => {
  * @param {Function} onProgress
  * @param {number} interval
  */
+// ── Report Export ───────────────────────────────────────────────────
+
+/**
+ * Export a report in a specified format.
+ * @param {string} reportId
+ * @param {string} format - 'pptx', 'audio', 'markdown', 'json'
+ */
+export const exportReport = (reportId, format = 'json') => {
+  return service.get(`/api/research/report/${reportId}/export/${format}`, {
+    responseType: format === 'json' ? 'json' : 'blob',
+  })
+}
+
+/**
+ * Generate structured infographic data for a report.
+ * @param {string} reportId
+ */
+export const generateInfographic = (reportId) => {
+  return service.post(`/api/research/report/${reportId}/infographic`)
+}
+
+/**
+ * Trigger a file download from a Blob or string data.
+ * @param {Blob|string} data
+ * @param {string} filename
+ * @param {string} mimeType
+ */
+export const downloadFile = (data, filename, mimeType = 'application/octet-stream') => {
+  const blob = data instanceof Blob ? data : new Blob([data], { type: mimeType })
+  const url = window.URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  window.URL.revokeObjectURL(url)
+}
+
 // ── Reports ─────────────────────────────────────────────────────────
 
 /**

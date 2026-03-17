@@ -294,6 +294,17 @@
             <span class="report-title">{{ report.title }}</span>
             <div class="report-header-actions">
               <button class="btn-sm" @click="openReportChat(report.report_id || reportTask?.result?.report_id)">Chat</button>
+              <div class="export-dropdown">
+                <button class="btn-sm" @click="toggleExportMenu" :disabled="exportLoading">
+                  {{ exportLoading ? 'Exporting...' : 'Export' }}
+                </button>
+                <div v-if="exportMenuOpen" class="export-menu">
+                  <button class="export-item" @click="downloadReport('pptx')">PowerPoint</button>
+                  <button class="export-item" @click="downloadReport('audio')">Audio (MP3)</button>
+                  <button class="export-item" @click="downloadReport('markdown')">Markdown</button>
+                  <button class="export-item" @click="downloadReport('json')">JSON</button>
+                </div>
+              </div>
               <button class="btn-sm" @click="report = null">Close</button>
             </div>
           </div>
@@ -352,6 +363,8 @@ import {
   chatWithAgent,
   chatWithReport,
   forkSimulation,
+  exportReport,
+  downloadFile,
 } from '../api/simulation.js'
 
 const props = defineProps({
@@ -375,6 +388,8 @@ const turnsList = ref(null)
 const generatingReport = ref(false)
 const reportTask = ref(null)
 const report = ref(null)
+const exportMenuOpen = ref(false)
+const exportLoading = ref(false)
 
 // Chat panel state
 const chatOpen = ref(false)
@@ -775,6 +790,37 @@ async function generateEvolutionReport() {
     reportTask.value = { message: `Error: ${e.message}`, progress: 0 }
   } finally {
     generatingReport.value = false
+  }
+}
+
+function toggleExportMenu() {
+  exportMenuOpen.value = !exportMenuOpen.value
+}
+
+async function downloadReport(format) {
+  const reportId = report.value?.report_id || reportTask.value?.result?.report_id
+  if (!reportId) return
+
+  exportMenuOpen.value = false
+  exportLoading.value = true
+
+  try {
+    const res = await exportReport(reportId, format)
+
+    if (format === 'json') {
+      const jsonStr = JSON.stringify(res.data?.data || res.data, null, 2)
+      downloadFile(jsonStr, `${reportId}.json`, 'application/json')
+    } else if (format === 'markdown') {
+      downloadFile(res.data, `${reportId}.md`, 'text/markdown')
+    } else {
+      const ext = format === 'pptx' ? 'pptx' : 'mp3'
+      downloadFile(res.data, `${reportId}.${ext}`)
+    }
+  } catch (e) {
+    console.error(`Export ${format} failed:`, e)
+    alert(`Export failed: ${e.message || 'Unknown error'}`)
+  } finally {
+    exportLoading.value = false
   }
 }
 
@@ -1697,6 +1743,51 @@ onMounted(async () => {
   display: flex;
   gap: 6px;
   align-items: center;
+  position: relative;
+}
+
+.export-dropdown {
+  position: relative;
+}
+
+.export-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: var(--bg-secondary, #fff);
+  border: 1px solid var(--border-primary, #ddd);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  min-width: 140px;
+  margin-top: 4px;
+}
+
+.export-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-primary, #333);
+  font-size: 11px;
+  font-family: var(--font-sans, inherit);
+  transition: background 0.15s;
+}
+
+.export-item:hover {
+  background: var(--bg-hover, #f0f0f0);
+  color: var(--os-brand, #4f8ef7);
+}
+
+.export-item:first-child {
+  border-radius: 6px 6px 0 0;
+}
+
+.export-item:last-child {
+  border-radius: 0 0 6px 6px;
 }
 
 /* Clickable agent name in transcript */
