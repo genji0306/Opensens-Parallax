@@ -1,0 +1,60 @@
+{
+  "setup": {
+    "title": "创建研究辩论",
+    "ossrUrl": "OSSR 后端地址",
+    "connect": "连接",
+    "format": "讨论格式",
+    "topic": "辩论主题",
+    "topicPlaceholder": "例如：AI在药物发现中的作用...",
+    "rounds": "最大轮数",
+    "agents": "选择智能体",
+    "selectAll": "全选",
+    "noAgents": "未找到智能体。请先在OSSR中生成智能体。",
+    "start": "开始可视化辩论",
+    "starting": "正在启动辩论..."
+  },
+  "transcript": {
+    "title": "讨论记录",
+    "turns": "轮次",
+    "waiting": "等待第一轮发言...",
+    "empty": "暂无讨论记录",
+    "chatWith": "与此智能体对话"
+  },
+  "controls": {
+    "back": "返回设置",
+    "pause": "暂停辩论",
+    "resume": "继续辩论",
+    "speed": "速度",
+    "injectPlaceholder": "注入问题或话题...",
+    "inject": "注入",
+    "whatIf": "假设分析",
+    "share": "分享",
+    "report": "AI报告"
+  },
+  "chat": {
+    "prompt": "向此智能体询问辩论内容...",
+    "placeholder": "输入消息...",
+    "debateOngoing": "辩论进行中"
+  },
+  "fork": {
+    "title": "分支辩论 — \"假设分析\"",
+    "format": "格式",
+    "topic": "主题",
+    "fromRound": "从第几轮分支",
+    "topicOverride": "修改主题（可选）",
+    "cancel": "取消",
+    "start": "开始分支辩论",
+    "starting": "正在创建分支..."
+  },
+  "status": {
+    "paused": "已暂停"
+  },
+  "view": {
+    "loading": "加载辩论中...",
+    "loading3d": "加载3D场景...",
+    "switchTo3d": "切换到3D视图",
+    "switchTo2d": "切换到2D视图"
+  },
+  "completed": "辩论已完成",
+  "waiting": "等待开始..."
+}

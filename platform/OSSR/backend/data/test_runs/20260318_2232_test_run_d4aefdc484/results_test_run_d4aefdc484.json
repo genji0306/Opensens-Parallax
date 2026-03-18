@@ -1,0 +1,1409 @@
+{
+  "run_id": "test_run_d4aefdc484",
+  "query": "Electrical Impedance Tomography with Machine Learning",
+  "debate": {
+    "query": "Electrical Impedance Tomography with Machine Learning",
+    "agent_count": 20,
+    "rounds": 5,
+    "total_turns": 100,
+    "transcript": [
+      {
+        "agent_id": "test_agent_6cd61826",
+        "agent_name": "Dr. Wei Patel",
+        "role": "Engineer",
+        "round": 1,
+        "content": "In my initial assessment, What if we approached Electrical Impedance Tomography with Machine Learning from a different angle? My engineer background suggests unexplored connections. Cross-disciplinary integration with clinical studies shows promise.",
+        "stance_score": -0.25,
+        "confidence": 0.93,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.810414"
+      },
+      {
+        "agent_id": "test_agent_692f770b",
+        "agent_name": "Dr. Lucas Ali",
+        "role": "Skeptic",
+        "round": 1,
+        "content": "In my initial assessment, The evidence for Electrical Impedance Tomography with Machine Learning is mixed. As a skeptic, I'd highlight both opportunities and risks. Cross-disciplinary integration with simulation shows promise.",
+        "stance_score": 0.83,
+        "confidence": 0.86,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.809960"
+      },
+      {
+        "agent_id": "test_agent_f0722d7b",
+        "agent_name": "Dr. Henrik Lindstr\u00f6m",
+        "role": "Futurist",
+        "round": 1,
+        "content": "In my initial assessment, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a futurist perspective. Key limitation: generalization remains unresolved.",
+        "stance_score": 0.16,
+        "confidence": 0.86,
+        "cited_papers": 0,
+        "timestamp": "2026-03-18T22:32:47.810299"
+      },
+      {
+        "agent_id": "test_agent_0bc2f69f",
+        "agent_name": "Dr. Zara Nakamura",
+        "role": "Domain Expert",
+        "round": 1,
+        "content": "In my initial assessment, Building on previous insights, I see strong potential in Electrical Impedance Tomography with Machine Learning for domain expert applications. The accuracy of Electrical Impedance Tomography with Machine Learning-based approaches has improved 5x in recent years.",
+        "stance_score": 0.38,
+        "confidence": 0.79,
+        "cited_papers": 2,
+        "timestamp": "2026-03-18T22:32:47.809905"
+      },
+      {
+        "agent_id": "test_agent_fc913f51",
+        "agent_name": "Dr. Yuki Petrov",
+        "role": "Historian",
+        "round": 1,
+        "content": "In my initial assessment, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a historian perspective. Cross-disciplinary integration with materials science shows promise.",
+        "stance_score": 0.74,
+        "confidence": 0.79,
+        "cited_papers": 0,
+        "timestamp": "2026-03-18T22:32:47.810104"
+      },
+      {
+        "agent_id": "test_agent_3fbf5cac",
+        "agent_name": "Dr. Lucas Zhang",
+        "role": "Policy Analyst",
+        "round": 1,
+        "content": "In my initial assessment, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a policy analyst perspective. The efficiency of Electrical Impedance Tomography with Machine Learning-based approaches has improved 10x in recent years.",
+        "stance_score": 0.7,
+        "confidence": 0.77,
+        "cited_papers": 2,
+        "timestamp": "2026-03-18T22:32:47.810737"
+      },
+      {
+        "agent_id": "test_agent_e493c0b1",
+        "agent_name": "Dr. Henrik Okafor",
+        "role": "Theoretician",
+        "round": 1,
+        "content": "In my initial assessment, The evidence for Electrical Impedance Tomography with Machine Learning is mixed. As a theoretician, I'd highlight both opportunities and risks. Key limitation: data availability remains unresolved.",
+        "stance_score": -0.29,
+        "confidence": 0.75,
+        "cited_papers": 0,
+        "timestamp": "2026-03-18T22:32:47.809781"
+      },
+      {
+        "agent_id": "test_agent_35fd8e2a",
+        "agent_name": "Dr. Carlos Kim",
+        "role": "Data Scientist",
+        "round": 1,
+        "content": "In my initial assessment, The evidence for Electrical Impedance Tomography with Machine Learning is mixed. As a data scientist, I'd highlight both opportunities and risks. The efficiency of Electrical Impedance Tomography with Machine Learning-based approaches has improved 10x in recent years.",
+        "stance_score": 0.72,
+        "confidence": 0.73,
+        "cited_papers": 0,
+        "timestamp": "2026-03-18T22:32:47.809741"
+      },
+      {
+        "agent_id": "test_agent_96db449c",
+        "agent_name": "Dr. Sarah Patel",
+        "role": "Methodologist",
+        "round": 1,
+        "content": "In my initial assessment, Building on previous insights, I see strong potential in Electrical Impedance Tomography with Machine Learning for methodologist applications. Cross-disciplinary integration with ML shows promise.",
+        "stance_score": 0.65,
+        "confidence": 0.72,
+        "cited_papers": 2,
+        "timestamp": "2026-03-18T22:32:47.810346"
+      },
+      {
+        "agent_id": "test_agent_9053ccd2",
+        "agent_name": "Dr. Olga Thompson",
+        "role": "Statistician",
+        "round": 1,
+        "content": "In my initial assessment, What if we approached Electrical Impedance Tomography with Machine Learning from a different angle? My statistician background suggests unexplored connections. The efficiency of Electrical Impedance Tomography with Machine Learning-based approaches has improved 10x in recent years.",
+        "stance_score": 0.19,
+        "confidence": 0.71,
+        "cited_papers": 0,
+        "timestamp": "2026-03-18T22:32:47.810319"
+      },
+      {
+        "agent_id": "test_agent_20475098",
+        "agent_name": "Dr. Kenji Okafor",
+        "role": "Bioinformatician",
+        "round": 1,
+        "content": "In my initial assessment, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a bioinformatician perspective. Cross-disciplinary integration with simulation shows promise.",
+        "stance_score": 0.9,
+        "confidence": 0.7,
+        "cited_papers": 3,
+        "timestamp": "2026-03-18T22:32:47.810597"
+      },
+      {
+        "agent_id": "test_agent_4f89e70e",
+        "agent_name": "Dr. Amara Nakamura",
+        "role": "Ethicist",
+        "round": 1,
+        "content": "In my initial assessment, What if we approached Electrical Impedance Tomography with Machine Learning from a different angle? My ethicist background suggests unexplored connections. Key limitation: data availability remains unresolved.",
+        "stance_score": -0.23,
+        "confidence": 0.67,
+        "cited_papers": 0,
+        "timestamp": "2026-03-18T22:32:47.810134"
+      },
+      {
+        "agent_id": "test_agent_c0db5ae5",
+        "agent_name": "Dr. Tom\u00e1s Kim",
+        "role": "Economist",
+        "round": 1,
+        "content": "In my initial assessment, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a economist perspective. Key limitation: reproducibility remains unresolved.",
+        "stance_score": -0.78,
+        "confidence": 0.66,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.810709"
+      },
+      {
+        "agent_id": "test_agent_e7de77cb",
+        "agent_name": "Dr. Fatima Chen",
+        "role": "Clinician",
+        "round": 1,
+        "content": "In my initial assessment, What if we approached Electrical Impedance Tomography with Machine Learning from a different angle? My clinician background suggests unexplored connections. Cross-disciplinary integration with ML shows promise.",
+        "stance_score": -0.25,
+        "confidence": 0.64,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.810378"
+      },
+      {
+        "agent_id": "test_agent_44b1281e",
+        "agent_name": "Dr. Elena Hassan",
+        "role": "Materials Scientist",
+        "round": 1,
+        "content": "In my initial assessment, Building on previous insights, I see strong potential in Electrical Impedance Tomography with Machine Learning for materials scientist applications. The scalability of Electrical Impedance Tomography with Machine Learning-based approaches has improved 10x in recent years.",
+        "stance_score": 0.35,
+        "confidence": 0.58,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.810637"
+      },
+      {
+        "agent_id": "test_agent_03f399ac",
+        "agent_name": "Dr. Zara Suzuki",
+        "role": "Neuroscientist",
+        "round": 1,
+        "content": "In my initial assessment, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a neuroscientist perspective. Key limitation: reproducibility remains unresolved.",
+        "stance_score": 0.84,
+        "confidence": 0.58,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.810673"
+      },
+      {
+        "agent_id": "test_agent_a05bd227",
+        "agent_name": "Dr. Dmitri Zhang",
+        "role": "Synthesizer",
+        "round": 1,
+        "content": "In my initial assessment, What if we approached Electrical Impedance Tomography with Machine Learning from a different angle? My synthesizer background suggests unexplored connections. The efficiency of Electrical Impedance Tomography with Machine Learning-based approaches has improved 5x in recent years.",
+        "stance_score": 0.35,
+        "confidence": 0.56,
+        "cited_papers": 3,
+        "timestamp": "2026-03-18T22:32:47.809927"
+      },
+      {
+        "agent_id": "test_agent_527698e9",
+        "agent_name": "Dr. Amara Ivanova",
+        "role": "Experimentalist",
+        "round": 1,
+        "content": "In my initial assessment, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a experimentalist perspective. The scalability of Electrical Impedance Tomography with Machine Learning-based approaches has improved 10x in recent years.",
+        "stance_score": -0.81,
+        "confidence": 0.55,
+        "cited_papers": 3,
+        "timestamp": "2026-03-18T22:32:47.809601"
+      },
+      {
+        "agent_id": "test_agent_854583fc",
+        "agent_name": "Dr. Marcus Rossi",
+        "role": "Industry Practitioner",
+        "round": 1,
+        "content": "In my initial assessment, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a industry practitioner perspective. The scalability of Electrical Impedance Tomography with Machine Learning-based approaches has improved 5x in recent years.",
+        "stance_score": -0.72,
+        "confidence": 0.55,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.810172"
+      },
+      {
+        "agent_id": "test_agent_c657d181",
+        "agent_name": "Dr. Wei Nakamura",
+        "role": "Systems Thinker",
+        "round": 1,
+        "content": "In my initial assessment, Building on previous insights, I see strong potential in Electrical Impedance Tomography with Machine Learning for systems thinker applications. Cross-disciplinary integration with clinical studies shows promise.",
+        "stance_score": 0.01,
+        "confidence": 0.52,
+        "cited_papers": 2,
+        "timestamp": "2026-03-18T22:32:47.810089"
+      },
+      {
+        "agent_id": "test_agent_9053ccd2",
+        "agent_name": "Dr. Olga Thompson",
+        "role": "Statistician",
+        "round": 2,
+        "content": "Responding to earlier points, What if we approached Electrical Impedance Tomography with Machine Learning from a different angle? My statistician background suggests unexplored connections. Key limitation: reproducibility remains unresolved.",
+        "stance_score": 0.82,
+        "confidence": 0.97,
+        "cited_papers": 2,
+        "timestamp": "2026-03-18T22:32:47.811921"
+      },
+      {
+        "agent_id": "test_agent_c0db5ae5",
+        "agent_name": "Dr. Tom\u00e1s Kim",
+        "role": "Economist",
+        "round": 2,
+        "content": "Responding to earlier points, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a economist perspective. The scalability of Electrical Impedance Tomography with Machine Learning-based approaches has improved 10x in recent years.",
+        "stance_score": -0.85,
+        "confidence": 0.97,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.812255"
+      },
+      {
+        "agent_id": "test_agent_fc913f51",
+        "agent_name": "Dr. Yuki Petrov",
+        "role": "Historian",
+        "round": 2,
+        "content": "Responding to earlier points, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a historian perspective. The accuracy of Electrical Impedance Tomography with Machine Learning-based approaches has improved 5x in recent years.",
+        "stance_score": -0.47,
+        "confidence": 0.92,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.811695"
+      },
+      {
+        "agent_id": "test_agent_3fbf5cac",
+        "agent_name": "Dr. Lucas Zhang",
+        "role": "Policy Analyst",
+        "round": 2,
+        "content": "Responding to earlier points, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a policy analyst perspective. The efficiency of Electrical Impedance Tomography with Machine Learning-based approaches has improved 10x in recent years.",
+        "stance_score": 0.55,
+        "confidence": 0.87,
+        "cited_papers": 2,
+        "timestamp": "2026-03-18T22:32:47.812288"
+      },
+      {
+        "agent_id": "test_agent_03f399ac",
+        "agent_name": "Dr. Zara Suzuki",
+        "role": "Neuroscientist",
+        "round": 2,
+        "content": "Responding to earlier points, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a neuroscientist perspective. Cross-disciplinary integration with materials science shows promise.",
+        "stance_score": 0.12,
+        "confidence": 0.86,
+        "cited_papers": 2,
+        "timestamp": "2026-03-18T22:32:47.812228"
+      },
+      {
+        "agent_id": "test_agent_527698e9",
+        "agent_name": "Dr. Amara Ivanova",
+        "role": "Experimentalist",
+        "round": 2,
+        "content": "Responding to earlier points, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a experimentalist perspective. Cross-disciplinary integration with materials science shows promise.",
+        "stance_score": -0.76,
+        "confidence": 0.85,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.811189"
+      },
+      {
+        "agent_id": "test_agent_a05bd227",
+        "agent_name": "Dr. Dmitri Zhang",
+        "role": "Synthesizer",
+        "round": 2,
+        "content": "Responding to earlier points, What if we approached Electrical Impedance Tomography with Machine Learning from a different angle? My synthesizer background suggests unexplored connections. The scalability of Electrical Impedance Tomography with Machine Learning-based approaches has improved 5x in recent years.",
+        "stance_score": 0.01,
+        "confidence": 0.85,
+        "cited_papers": 2,
+        "timestamp": "2026-03-18T22:32:47.811415"
+      },
+      {
+        "agent_id": "test_agent_f0722d7b",
+        "agent_name": "Dr. Henrik Lindstr\u00f6m",
+        "role": "Futurist",
+        "round": 2,
+        "content": "Responding to earlier points, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a futurist perspective. The accuracy of Electrical Impedance Tomography with Machine Learning-based approaches has improved 2x in recent years.",
+        "stance_score": -0.0,
+        "confidence": 0.81,
+        "cited_papers": 2,
+        "timestamp": "2026-03-18T22:32:47.811907"
+      },
+      {
+        "agent_id": "test_agent_e493c0b1",
+        "agent_name": "Dr. Henrik Okafor",
+        "role": "Theoretician",
+        "round": 2,
+        "content": "Responding to earlier points, The evidence for Electrical Impedance Tomography with Machine Learning is mixed. As a theoretician, I'd highlight both opportunities and risks. Cross-disciplinary integration with ML shows promise.",
+        "stance_score": 0.41,
+        "confidence": 0.8,
+        "cited_papers": 3,
+        "timestamp": "2026-03-18T22:32:47.811314"
+      },
+      {
+        "agent_id": "test_agent_0bc2f69f",
+        "agent_name": "Dr. Zara Nakamura",
+        "role": "Domain Expert",
+        "round": 2,
+        "content": "Responding to earlier points, Building on previous insights, I see strong potential in Electrical Impedance Tomography with Machine Learning for domain expert applications. The cost of Electrical Impedance Tomography with Machine Learning-based approaches has improved 5x in recent years.",
+        "stance_score": 0.86,
+        "confidence": 0.77,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.811400"
+      },
+      {
+        "agent_id": "test_agent_20475098",
+        "agent_name": "Dr. Kenji Okafor",
+        "role": "Bioinformatician",
+        "round": 2,
+        "content": "Responding to earlier points, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a bioinformatician perspective. The scalability of Electrical Impedance Tomography with Machine Learning-based approaches has improved 2x in recent years.",
+        "stance_score": 0.24,
+        "confidence": 0.77,
+        "cited_papers": 0,
+        "timestamp": "2026-03-18T22:32:47.812169"
+      },
+      {
+        "agent_id": "test_agent_96db449c",
+        "agent_name": "Dr. Sarah Patel",
+        "role": "Methodologist",
+        "round": 2,
+        "content": "Responding to earlier points, Building on previous insights, I see strong potential in Electrical Impedance Tomography with Machine Learning for methodologist applications. Cross-disciplinary integration with materials science shows promise.",
+        "stance_score": 0.72,
+        "confidence": 0.74,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.811948"
+      },
+      {
+        "agent_id": "test_agent_44b1281e",
+        "agent_name": "Dr. Elena Hassan",
+        "role": "Materials Scientist",
+        "round": 2,
+        "content": "Responding to earlier points, Building on previous insights, I see strong potential in Electrical Impedance Tomography with Machine Learning for materials scientist applications. Cross-disciplinary integration with ML shows promise.",
+        "stance_score": 0.51,
+        "confidence": 0.73,
+        "cited_papers": 2,
+        "timestamp": "2026-03-18T22:32:47.812200"
+      },
+      {
+        "agent_id": "test_agent_4f89e70e",
+        "agent_name": "Dr. Amara Nakamura",
+        "role": "Ethicist",
+        "round": 2,
+        "content": "Responding to earlier points, What if we approached Electrical Impedance Tomography with Machine Learning from a different angle? My ethicist background suggests unexplored connections. The scalability of Electrical Impedance Tomography with Machine Learning-based approaches has improved 5x in recent years.",
+        "stance_score": -0.55,
+        "confidence": 0.71,
+        "cited_papers": 0,
+        "timestamp": "2026-03-18T22:32:47.811733"
+      },
+      {
+        "agent_id": "test_agent_854583fc",
+        "agent_name": "Dr. Marcus Rossi",
+        "role": "Industry Practitioner",
+        "round": 2,
+        "content": "Responding to earlier points, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a industry practitioner perspective. The scalability of Electrical Impedance Tomography with Machine Learning-based approaches has improved 5x in recent years.",
+        "stance_score": 0.71,
+        "confidence": 0.69,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.811766"
+      },
+      {
+        "agent_id": "test_agent_e7de77cb",
+        "agent_name": "Dr. Fatima Chen",
+        "role": "Clinician",
+        "round": 2,
+        "content": "Responding to earlier points, What if we approached Electrical Impedance Tomography with Machine Learning from a different angle? My clinician background suggests unexplored connections. Cross-disciplinary integration with simulation shows promise.",
+        "stance_score": -0.92,
+        "confidence": 0.68,
+        "cited_papers": 3,
+        "timestamp": "2026-03-18T22:32:47.811974"
+      },
+      {
+        "agent_id": "test_agent_35fd8e2a",
+        "agent_name": "Dr. Carlos Kim",
+        "role": "Data Scientist",
+        "round": 2,
+        "content": "Responding to earlier points, The evidence for Electrical Impedance Tomography with Machine Learning is mixed. As a data scientist, I'd highlight both opportunities and risks. The scalability of Electrical Impedance Tomography with Machine Learning-based approaches has improved 2x in recent years.",
+        "stance_score": -0.3,
+        "confidence": 0.67,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.811282"
+      },
+      {
+        "agent_id": "test_agent_692f770b",
+        "agent_name": "Dr. Lucas Ali",
+        "role": "Skeptic",
+        "round": 2,
+        "content": "Responding to earlier points, The evidence for Electrical Impedance Tomography with Machine Learning is mixed. As a skeptic, I'd highlight both opportunities and risks. Cross-disciplinary integration with simulation shows promise.",
+        "stance_score": 0.98,
+        "confidence": 0.66,
+        "cited_papers": 0,
+        "timestamp": "2026-03-18T22:32:47.811454"
+      },
+      {
+        "agent_id": "test_agent_c657d181",
+        "agent_name": "Dr. Wei Nakamura",
+        "role": "Systems Thinker",
+        "round": 2,
+        "content": "Responding to earlier points, Building on previous insights, I see strong potential in Electrical Impedance Tomography with Machine Learning for systems thinker applications. Key limitation: data availability remains unresolved.",
+        "stance_score": 0.6,
+        "confidence": 0.62,
+        "cited_papers": 0,
+        "timestamp": "2026-03-18T22:32:47.811674"
+      },
+      {
+        "agent_id": "test_agent_6cd61826",
+        "agent_name": "Dr. Wei Patel",
+        "role": "Engineer",
+        "round": 2,
+        "content": "Responding to earlier points, What if we approached Electrical Impedance Tomography with Machine Learning from a different angle? My engineer background suggests unexplored connections. Cross-disciplinary integration with ML shows promise.",
+        "stance_score": 0.32,
+        "confidence": 0.58,
+        "cited_papers": 0,
+        "timestamp": "2026-03-18T22:32:47.811999"
+      },
+      {
+        "agent_id": "test_agent_6cd61826",
+        "agent_name": "Dr. Wei Patel",
+        "role": "Engineer",
+        "round": 3,
+        "content": "Digging deeper into the evidence, What if we approached Electrical Impedance Tomography with Machine Learning from a different angle? My engineer background suggests unexplored connections. Cross-disciplinary integration with materials science shows promise.",
+        "stance_score": 0.77,
+        "confidence": 1.0,
+        "cited_papers": 2,
+        "timestamp": "2026-03-18T22:32:47.813501"
+      },
+      {
+        "agent_id": "test_agent_527698e9",
+        "agent_name": "Dr. Amara Ivanova",
+        "role": "Experimentalist",
+        "round": 3,
+        "content": "Digging deeper into the evidence, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a experimentalist perspective. The cost of Electrical Impedance Tomography with Machine Learning-based approaches has improved 10x in recent years.",
+        "stance_score": 0.61,
+        "confidence": 0.98,
+        "cited_papers": 2,
+        "timestamp": "2026-03-18T22:32:47.812721"
+      },
+      {
+        "agent_id": "test_agent_c657d181",
+        "agent_name": "Dr. Wei Nakamura",
+        "role": "Systems Thinker",
+        "round": 3,
+        "content": "Digging deeper into the evidence, Building on previous insights, I see strong potential in Electrical Impedance Tomography with Machine Learning for systems thinker applications. Cross-disciplinary integration with materials science shows promise.",
+        "stance_score": 0.9,
+        "confidence": 0.93,
+        "cited_papers": 3,
+        "timestamp": "2026-03-18T22:32:47.813166"
+      },
+      {
+        "agent_id": "test_agent_03f399ac",
+        "agent_name": "Dr. Zara Suzuki",
+        "role": "Neuroscientist",
+        "round": 3,
+        "content": "Digging deeper into the evidence, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a neuroscientist perspective. The efficiency of Electrical Impedance Tomography with Machine Learning-based approaches has improved 2x in recent years.",
+        "stance_score": 0.04,
+        "confidence": 0.92,
+        "cited_papers": 0,
+        "timestamp": "2026-03-18T22:32:47.814058"
+      },
+      {
+        "agent_id": "test_agent_e493c0b1",
+        "agent_name": "Dr. Henrik Okafor",
+        "role": "Theoretician",
+        "round": 3,
+        "content": "Digging deeper into the evidence, The evidence for Electrical Impedance Tomography with Machine Learning is mixed. As a theoretician, I'd highlight both opportunities and risks. The cost of Electrical Impedance Tomography with Machine Learning-based approaches has improved 2x in recent years.",
+        "stance_score": -0.39,
+        "confidence": 0.9,
+        "cited_papers": 0,
+        "timestamp": "2026-03-18T22:32:47.812835"
+      },
+      {
+        "agent_id": "test_agent_96db449c",
+        "agent_name": "Dr. Sarah Patel",
+        "role": "Methodologist",
+        "round": 3,
+        "content": "Digging deeper into the evidence, Building on previous insights, I see strong potential in Electrical Impedance Tomography with Machine Learning for methodologist applications. Key limitation: generalization remains unresolved.",
+        "stance_score": 0.83,
+        "confidence": 0.89,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.813435"
+      },
+      {
+        "agent_id": "test_agent_4f89e70e",
+        "agent_name": "Dr. Amara Nakamura",
+        "role": "Ethicist",
+        "round": 3,
+        "content": "Digging deeper into the evidence, What if we approached Electrical Impedance Tomography with Machine Learning from a different angle? My ethicist background suggests unexplored connections. Cross-disciplinary integration with materials science shows promise.",
+        "stance_score": -0.6,
+        "confidence": 0.88,
+        "cited_papers": 3,
+        "timestamp": "2026-03-18T22:32:47.813215"
+      },
+      {
+        "agent_id": "test_agent_20475098",
+        "agent_name": "Dr. Kenji Okafor",
+        "role": "Bioinformatician",
+        "round": 3,
+        "content": "Digging deeper into the evidence, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a bioinformatician perspective. Key limitation: reproducibility remains unresolved.",
+        "stance_score": -0.5,
+        "confidence": 0.88,
+        "cited_papers": 2,
+        "timestamp": "2026-03-18T22:32:47.813967"
+      },
+      {
+        "agent_id": "test_agent_0bc2f69f",
+        "agent_name": "Dr. Zara Nakamura",
+        "role": "Domain Expert",
+        "round": 3,
+        "content": "Digging deeper into the evidence, Building on previous insights, I see strong potential in Electrical Impedance Tomography with Machine Learning for domain expert applications. Key limitation: reproducibility remains unresolved.",
+        "stance_score": 0.78,
+        "confidence": 0.85,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.812974"
+      },
+      {
+        "agent_id": "test_agent_c0db5ae5",
+        "agent_name": "Dr. Tom\u00e1s Kim",
+        "role": "Economist",
+        "round": 3,
+        "content": "Digging deeper into the evidence, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a economist perspective. Key limitation: data availability remains unresolved.",
+        "stance_score": 0.46,
+        "confidence": 0.83,
+        "cited_papers": 0,
+        "timestamp": "2026-03-18T22:32:47.814096"
+      },
+      {
+        "agent_id": "test_agent_a05bd227",
+        "agent_name": "Dr. Dmitri Zhang",
+        "role": "Synthesizer",
+        "round": 3,
+        "content": "Digging deeper into the evidence, What if we approached Electrical Impedance Tomography with Machine Learning from a different angle? My synthesizer background suggests unexplored connections. Cross-disciplinary integration with simulation shows promise.",
+        "stance_score": -0.27,
+        "confidence": 0.81,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.812990"
+      },
+      {
+        "agent_id": "test_agent_e7de77cb",
+        "agent_name": "Dr. Fatima Chen",
+        "role": "Clinician",
+        "round": 3,
+        "content": "Digging deeper into the evidence, What if we approached Electrical Impedance Tomography with Machine Learning from a different angle? My clinician background suggests unexplored connections. Cross-disciplinary integration with simulation shows promise.",
+        "stance_score": -0.08,
+        "confidence": 0.81,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.813468"
+      },
+      {
+        "agent_id": "test_agent_3fbf5cac",
+        "agent_name": "Dr. Lucas Zhang",
+        "role": "Policy Analyst",
+        "round": 3,
+        "content": "Digging deeper into the evidence, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a policy analyst perspective. The scalability of Electrical Impedance Tomography with Machine Learning-based approaches has improved 10x in recent years.",
+        "stance_score": 0.57,
+        "confidence": 0.81,
+        "cited_papers": 2,
+        "timestamp": "2026-03-18T22:32:47.814126"
+      },
+      {
+        "agent_id": "test_agent_9053ccd2",
+        "agent_name": "Dr. Olga Thompson",
+        "role": "Statistician",
+        "round": 3,
+        "content": "Digging deeper into the evidence, What if we approached Electrical Impedance Tomography with Machine Learning from a different angle? My statistician background suggests unexplored connections. Key limitation: data availability remains unresolved.",
+        "stance_score": 0.65,
+        "confidence": 0.76,
+        "cited_papers": 2,
+        "timestamp": "2026-03-18T22:32:47.813396"
+      },
+      {
+        "agent_id": "test_agent_854583fc",
+        "agent_name": "Dr. Marcus Rossi",
+        "role": "Industry Practitioner",
+        "round": 3,
+        "content": "Digging deeper into the evidence, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a industry practitioner perspective. The scalability of Electrical Impedance Tomography with Machine Learning-based approaches has improved 2x in recent years.",
+        "stance_score": -0.67,
+        "confidence": 0.75,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.813254"
+      },
+      {
+        "agent_id": "test_agent_35fd8e2a",
+        "agent_name": "Dr. Carlos Kim",
+        "role": "Data Scientist",
+        "round": 3,
+        "content": "Digging deeper into the evidence, The evidence for Electrical Impedance Tomography with Machine Learning is mixed. As a data scientist, I'd highlight both opportunities and risks. The scalability of Electrical Impedance Tomography with Machine Learning-based approaches has improved 10x in recent years.",
+        "stance_score": -0.67,
+        "confidence": 0.72,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.812856"
+      },
+      {
+        "agent_id": "test_agent_fc913f51",
+        "agent_name": "Dr. Yuki Petrov",
+        "role": "Historian",
+        "round": 3,
+        "content": "Digging deeper into the evidence, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a historian perspective. The cost of Electrical Impedance Tomography with Machine Learning-based approaches has improved 10x in recent years.",
+        "stance_score": 0.34,
+        "confidence": 0.65,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.813185"
+      },
+      {
+        "agent_id": "test_agent_44b1281e",
+        "agent_name": "Dr. Elena Hassan",
+        "role": "Materials Scientist",
+        "round": 3,
+        "content": "Digging deeper into the evidence, Building on previous insights, I see strong potential in Electrical Impedance Tomography with Machine Learning for materials scientist applications. The scalability of Electrical Impedance Tomography with Machine Learning-based approaches has improved 2x in recent years.",
+        "stance_score": 0.06,
+        "confidence": 0.64,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.814014"
+      },
+      {
+        "agent_id": "test_agent_692f770b",
+        "agent_name": "Dr. Lucas Ali",
+        "role": "Skeptic",
+        "round": 3,
+        "content": "Digging deeper into the evidence, The evidence for Electrical Impedance Tomography with Machine Learning is mixed. As a skeptic, I'd highlight both opportunities and risks. Cross-disciplinary integration with ML shows promise.",
+        "stance_score": 0.36,
+        "confidence": 0.53,
+        "cited_papers": 2,
+        "timestamp": "2026-03-18T22:32:47.813023"
+      },
+      {
+        "agent_id": "test_agent_f0722d7b",
+        "agent_name": "Dr. Henrik Lindstr\u00f6m",
+        "role": "Futurist",
+        "round": 3,
+        "content": "Digging deeper into the evidence, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a futurist perspective. Cross-disciplinary integration with simulation shows promise.",
+        "stance_score": 0.53,
+        "confidence": 0.51,
+        "cited_papers": 3,
+        "timestamp": "2026-03-18T22:32:47.813382"
+      },
+      {
+        "agent_id": "test_agent_96db449c",
+        "agent_name": "Dr. Sarah Patel",
+        "role": "Methodologist",
+        "round": 4,
+        "content": "Synthesizing our discussion, Building on previous insights, I see strong potential in Electrical Impedance Tomography with Machine Learning for methodologist applications. The cost of Electrical Impedance Tomography with Machine Learning-based approaches has improved 10x in recent years.",
+        "stance_score": 0.23,
+        "confidence": 1.0,
+        "cited_papers": 0,
+        "timestamp": "2026-03-18T22:32:47.815502"
+      },
+      {
+        "agent_id": "test_agent_527698e9",
+        "agent_name": "Dr. Amara Ivanova",
+        "role": "Experimentalist",
+        "round": 4,
+        "content": "Synthesizing our discussion, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a experimentalist perspective. Cross-disciplinary integration with simulation shows promise.",
+        "stance_score": 0.97,
+        "confidence": 0.98,
+        "cited_papers": 0,
+        "timestamp": "2026-03-18T22:32:47.814613"
+      },
+      {
+        "agent_id": "test_agent_3fbf5cac",
+        "agent_name": "Dr. Lucas Zhang",
+        "role": "Policy Analyst",
+        "round": 4,
+        "content": "Synthesizing our discussion, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a policy analyst perspective. The scalability of Electrical Impedance Tomography with Machine Learning-based approaches has improved 5x in recent years.",
+        "stance_score": -0.98,
+        "confidence": 0.96,
+        "cited_papers": 3,
+        "timestamp": "2026-03-18T22:32:47.815890"
+      },
+      {
+        "agent_id": "test_agent_9053ccd2",
+        "agent_name": "Dr. Olga Thompson",
+        "role": "Statistician",
+        "round": 4,
+        "content": "Synthesizing our discussion, What if we approached Electrical Impedance Tomography with Machine Learning from a different angle? My statistician background suggests unexplored connections. The scalability of Electrical Impedance Tomography with Machine Learning-based approaches has improved 5x in recent years.",
+        "stance_score": 0.81,
+        "confidence": 0.95,
+        "cited_papers": 2,
+        "timestamp": "2026-03-18T22:32:47.815475"
+      },
+      {
+        "agent_id": "test_agent_c0db5ae5",
+        "agent_name": "Dr. Tom\u00e1s Kim",
+        "role": "Economist",
+        "round": 4,
+        "content": "Synthesizing our discussion, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a economist perspective. Key limitation: generalization remains unresolved.",
+        "stance_score": 0.69,
+        "confidence": 0.88,
+        "cited_papers": 0,
+        "timestamp": "2026-03-18T22:32:47.815849"
+      },
+      {
+        "agent_id": "test_agent_692f770b",
+        "agent_name": "Dr. Lucas Ali",
+        "role": "Skeptic",
+        "round": 4,
+        "content": "Synthesizing our discussion, The evidence for Electrical Impedance Tomography with Machine Learning is mixed. As a skeptic, I'd highlight both opportunities and risks. Cross-disciplinary integration with clinical studies shows promise.",
+        "stance_score": -0.4,
+        "confidence": 0.87,
+        "cited_papers": 3,
+        "timestamp": "2026-03-18T22:32:47.815023"
+      },
+      {
+        "agent_id": "test_agent_fc913f51",
+        "agent_name": "Dr. Yuki Petrov",
+        "role": "Historian",
+        "round": 4,
+        "content": "Synthesizing our discussion, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a historian perspective. Key limitation: data availability remains unresolved.",
+        "stance_score": 0.18,
+        "confidence": 0.84,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.815216"
+      },
+      {
+        "agent_id": "test_agent_03f399ac",
+        "agent_name": "Dr. Zara Suzuki",
+        "role": "Neuroscientist",
+        "round": 4,
+        "content": "Synthesizing our discussion, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a neuroscientist perspective. Cross-disciplinary integration with simulation shows promise.",
+        "stance_score": 0.84,
+        "confidence": 0.84,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.815803"
+      },
+      {
+        "agent_id": "test_agent_e7de77cb",
+        "agent_name": "Dr. Fatima Chen",
+        "role": "Clinician",
+        "round": 4,
+        "content": "Synthesizing our discussion, What if we approached Electrical Impedance Tomography with Machine Learning from a different angle? My clinician background suggests unexplored connections. Key limitation: computational cost remains unresolved.",
+        "stance_score": -0.42,
+        "confidence": 0.83,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.815526"
+      },
+      {
+        "agent_id": "test_agent_e493c0b1",
+        "agent_name": "Dr. Henrik Okafor",
+        "role": "Theoretician",
+        "round": 4,
+        "content": "Synthesizing our discussion, The evidence for Electrical Impedance Tomography with Machine Learning is mixed. As a theoretician, I'd highlight both opportunities and risks. Cross-disciplinary integration with simulation shows promise.",
+        "stance_score": 0.8,
+        "confidence": 0.75,
+        "cited_papers": 0,
+        "timestamp": "2026-03-18T22:32:47.814753"
+      },
+      {
+        "agent_id": "test_agent_4f89e70e",
+        "agent_name": "Dr. Amara Nakamura",
+        "role": "Ethicist",
+        "round": 4,
+        "content": "Synthesizing our discussion, What if we approached Electrical Impedance Tomography with Machine Learning from a different angle? My ethicist background suggests unexplored connections. Cross-disciplinary integration with materials science shows promise.",
+        "stance_score": 0.93,
+        "confidence": 0.71,
+        "cited_papers": 2,
+        "timestamp": "2026-03-18T22:32:47.815253"
+      },
+      {
+        "agent_id": "test_agent_35fd8e2a",
+        "agent_name": "Dr. Carlos Kim",
+        "role": "Data Scientist",
+        "round": 4,
+        "content": "Synthesizing our discussion, The evidence for Electrical Impedance Tomography with Machine Learning is mixed. As a data scientist, I'd highlight both opportunities and risks. Key limitation: reproducibility remains unresolved.",
+        "stance_score": -0.59,
+        "confidence": 0.71,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.814717"
+      },
+      {
+        "agent_id": "test_agent_c657d181",
+        "agent_name": "Dr. Wei Nakamura",
+        "role": "Systems Thinker",
+        "round": 4,
+        "content": "Synthesizing our discussion, Building on previous insights, I see strong potential in Electrical Impedance Tomography with Machine Learning for systems thinker applications. Key limitation: reproducibility remains unresolved.",
+        "stance_score": 0.58,
+        "confidence": 0.69,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.815198"
+      },
+      {
+        "agent_id": "test_agent_f0722d7b",
+        "agent_name": "Dr. Henrik Lindstr\u00f6m",
+        "role": "Futurist",
+        "round": 4,
+        "content": "Synthesizing our discussion, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a futurist perspective. Key limitation: generalization remains unresolved.",
+        "stance_score": -0.53,
+        "confidence": 0.65,
+        "cited_papers": 3,
+        "timestamp": "2026-03-18T22:32:47.815458"
+      },
+      {
+        "agent_id": "test_agent_854583fc",
+        "agent_name": "Dr. Marcus Rossi",
+        "role": "Industry Practitioner",
+        "round": 4,
+        "content": "Synthesizing our discussion, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a industry practitioner perspective. The accuracy of Electrical Impedance Tomography with Machine Learning-based approaches has improved 2x in recent years.",
+        "stance_score": 0.85,
+        "confidence": 0.62,
+        "cited_papers": 0,
+        "timestamp": "2026-03-18T22:32:47.815295"
+      },
+      {
+        "agent_id": "test_agent_6cd61826",
+        "agent_name": "Dr. Wei Patel",
+        "role": "Engineer",
+        "round": 4,
+        "content": "Synthesizing our discussion, What if we approached Electrical Impedance Tomography with Machine Learning from a different angle? My engineer background suggests unexplored connections. The scalability of Electrical Impedance Tomography with Machine Learning-based approaches has improved 2x in recent years.",
+        "stance_score": -0.26,
+        "confidence": 0.6,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.815548"
+      },
+      {
+        "agent_id": "test_agent_20475098",
+        "agent_name": "Dr. Kenji Okafor",
+        "role": "Bioinformatician",
+        "round": 4,
+        "content": "Synthesizing our discussion, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a bioinformatician perspective. Key limitation: computational cost remains unresolved.",
+        "stance_score": 0.0,
+        "confidence": 0.6,
+        "cited_papers": 3,
+        "timestamp": "2026-03-18T22:32:47.815744"
+      },
+      {
+        "agent_id": "test_agent_0bc2f69f",
+        "agent_name": "Dr. Zara Nakamura",
+        "role": "Domain Expert",
+        "round": 4,
+        "content": "Synthesizing our discussion, Building on previous insights, I see strong potential in Electrical Impedance Tomography with Machine Learning for domain expert applications. Cross-disciplinary integration with clinical studies shows promise.",
+        "stance_score": -0.07,
+        "confidence": 0.56,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.814873"
+      },
+      {
+        "agent_id": "test_agent_a05bd227",
+        "agent_name": "Dr. Dmitri Zhang",
+        "role": "Synthesizer",
+        "round": 4,
+        "content": "Synthesizing our discussion, What if we approached Electrical Impedance Tomography with Machine Learning from a different angle? My synthesizer background suggests unexplored connections. The scalability of Electrical Impedance Tomography with Machine Learning-based approaches has improved 2x in recent years.",
+        "stance_score": 0.72,
+        "confidence": 0.52,
+        "cited_papers": 0,
+        "timestamp": "2026-03-18T22:32:47.814894"
+      },
+      {
+        "agent_id": "test_agent_44b1281e",
+        "agent_name": "Dr. Elena Hassan",
+        "role": "Materials Scientist",
+        "round": 4,
+        "content": "Synthesizing our discussion, Building on previous insights, I see strong potential in Electrical Impedance Tomography with Machine Learning for materials scientist applications. The cost of Electrical Impedance Tomography with Machine Learning-based approaches has improved 5x in recent years.",
+        "stance_score": 0.82,
+        "confidence": 0.5,
+        "cited_papers": 3,
+        "timestamp": "2026-03-18T22:32:47.815931"
+      },
+      {
+        "agent_id": "test_agent_527698e9",
+        "agent_name": "Dr. Amara Ivanova",
+        "role": "Experimentalist",
+        "round": 5,
+        "content": "In my final position, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a experimentalist perspective. Key limitation: generalization remains unresolved.",
+        "stance_score": -0.25,
+        "confidence": 0.91,
+        "cited_papers": 2,
+        "timestamp": "2026-03-18T22:32:47.816389"
+      },
+      {
+        "agent_id": "test_agent_692f770b",
+        "agent_name": "Dr. Lucas Ali",
+        "role": "Skeptic",
+        "round": 5,
+        "content": "In my final position, The evidence for Electrical Impedance Tomography with Machine Learning is mixed. As a skeptic, I'd highlight both opportunities and risks. Cross-disciplinary integration with materials science shows promise.",
+        "stance_score": 0.34,
+        "confidence": 0.91,
+        "cited_papers": 2,
+        "timestamp": "2026-03-18T22:32:47.816682"
+      },
+      {
+        "agent_id": "test_agent_0bc2f69f",
+        "agent_name": "Dr. Zara Nakamura",
+        "role": "Domain Expert",
+        "round": 5,
+        "content": "In my final position, Building on previous insights, I see strong potential in Electrical Impedance Tomography with Machine Learning for domain expert applications. Cross-disciplinary integration with materials science shows promise.",
+        "stance_score": 0.43,
+        "confidence": 0.9,
+        "cited_papers": 3,
+        "timestamp": "2026-03-18T22:32:47.816717"
+      },
+      {
+        "agent_id": "test_agent_44b1281e",
+        "agent_name": "Dr. Elena Hassan",
+        "role": "Materials Scientist",
+        "round": 5,
+        "content": "In my final position, Building on previous insights, I see strong potential in Electrical Impedance Tomography with Machine Learning for materials scientist applications. Cross-disciplinary integration with materials science shows promise.",
+        "stance_score": -0.74,
+        "confidence": 0.9,
+        "cited_papers": 0,
+        "timestamp": "2026-03-18T22:32:47.817677"
+      },
+      {
+        "agent_id": "test_agent_f0722d7b",
+        "agent_name": "Dr. Henrik Lindstr\u00f6m",
+        "role": "Futurist",
+        "round": 5,
+        "content": "In my final position, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a futurist perspective. The efficiency of Electrical Impedance Tomography with Machine Learning-based approaches has improved 5x in recent years.",
+        "stance_score": 0.98,
+        "confidence": 0.87,
+        "cited_papers": 2,
+        "timestamp": "2026-03-18T22:32:47.817223"
+      },
+      {
+        "agent_id": "test_agent_4f89e70e",
+        "agent_name": "Dr. Amara Nakamura",
+        "role": "Ethicist",
+        "round": 5,
+        "content": "In my final position, What if we approached Electrical Impedance Tomography with Machine Learning from a different angle? My ethicist background suggests unexplored connections. Key limitation: computational cost remains unresolved.",
+        "stance_score": 1.0,
+        "confidence": 0.86,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.816982"
+      },
+      {
+        "agent_id": "test_agent_35fd8e2a",
+        "agent_name": "Dr. Carlos Kim",
+        "role": "Data Scientist",
+        "round": 5,
+        "content": "In my final position, The evidence for Electrical Impedance Tomography with Machine Learning is mixed. As a data scientist, I'd highlight both opportunities and risks. Key limitation: generalization remains unresolved.",
+        "stance_score": -0.03,
+        "confidence": 0.86,
+        "cited_papers": 2,
+        "timestamp": "2026-03-18T22:32:47.816493"
+      },
+      {
+        "agent_id": "test_agent_20475098",
+        "agent_name": "Dr. Kenji Okafor",
+        "role": "Bioinformatician",
+        "round": 5,
+        "content": "In my final position, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a bioinformatician perspective. Cross-disciplinary integration with simulation shows promise.",
+        "stance_score": 0.89,
+        "confidence": 0.79,
+        "cited_papers": 2,
+        "timestamp": "2026-03-18T22:32:47.817614"
+      },
+      {
+        "agent_id": "test_agent_03f399ac",
+        "agent_name": "Dr. Zara Suzuki",
+        "role": "Neuroscientist",
+        "round": 5,
+        "content": "In my final position, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a neuroscientist perspective. Cross-disciplinary integration with clinical studies shows promise.",
+        "stance_score": 0.4,
+        "confidence": 0.78,
+        "cited_papers": 2,
+        "timestamp": "2026-03-18T22:32:47.817769"
+      },
+      {
+        "agent_id": "test_agent_6cd61826",
+        "agent_name": "Dr. Wei Patel",
+        "role": "Engineer",
+        "round": 5,
+        "content": "In my final position, What if we approached Electrical Impedance Tomography with Machine Learning from a different angle? My engineer background suggests unexplored connections. Cross-disciplinary integration with materials science shows promise.",
+        "stance_score": 0.87,
+        "confidence": 0.77,
+        "cited_papers": 3,
+        "timestamp": "2026-03-18T22:32:47.817313"
+      },
+      {
+        "agent_id": "test_agent_fc913f51",
+        "agent_name": "Dr. Yuki Petrov",
+        "role": "Historian",
+        "round": 5,
+        "content": "In my final position, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a historian perspective. The cost of Electrical Impedance Tomography with Machine Learning-based approaches has improved 10x in recent years.",
+        "stance_score": 0.08,
+        "confidence": 0.73,
+        "cited_papers": 0,
+        "timestamp": "2026-03-18T22:32:47.816935"
+      },
+      {
+        "agent_id": "test_agent_3fbf5cac",
+        "agent_name": "Dr. Lucas Zhang",
+        "role": "Policy Analyst",
+        "round": 5,
+        "content": "In my final position, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a policy analyst perspective. Cross-disciplinary integration with materials science shows promise.",
+        "stance_score": 0.5,
+        "confidence": 0.73,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.817811"
+      },
+      {
+        "agent_id": "test_agent_e493c0b1",
+        "agent_name": "Dr. Henrik Okafor",
+        "role": "Theoretician",
+        "round": 5,
+        "content": "In my final position, The evidence for Electrical Impedance Tomography with Machine Learning is mixed. As a theoretician, I'd highlight both opportunities and risks. The accuracy of Electrical Impedance Tomography with Machine Learning-based approaches has improved 2x in recent years.",
+        "stance_score": -0.12,
+        "confidence": 0.72,
+        "cited_papers": 2,
+        "timestamp": "2026-03-18T22:32:47.816530"
+      },
+      {
+        "agent_id": "test_agent_9053ccd2",
+        "agent_name": "Dr. Olga Thompson",
+        "role": "Statistician",
+        "round": 5,
+        "content": "In my final position, What if we approached Electrical Impedance Tomography with Machine Learning from a different angle? My statistician background suggests unexplored connections. Cross-disciplinary integration with ML shows promise.",
+        "stance_score": -0.08,
+        "confidence": 0.71,
+        "cited_papers": 2,
+        "timestamp": "2026-03-18T22:32:47.817245"
+      },
+      {
+        "agent_id": "test_agent_e7de77cb",
+        "agent_name": "Dr. Fatima Chen",
+        "role": "Clinician",
+        "round": 5,
+        "content": "In my final position, What if we approached Electrical Impedance Tomography with Machine Learning from a different angle? My clinician background suggests unexplored connections. The cost of Electrical Impedance Tomography with Machine Learning-based approaches has improved 5x in recent years.",
+        "stance_score": -0.54,
+        "confidence": 0.66,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.817282"
+      },
+      {
+        "agent_id": "test_agent_854583fc",
+        "agent_name": "Dr. Marcus Rossi",
+        "role": "Industry Practitioner",
+        "round": 5,
+        "content": "In my final position, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a industry practitioner perspective. Key limitation: computational cost remains unresolved.",
+        "stance_score": 0.01,
+        "confidence": 0.64,
+        "cited_papers": 2,
+        "timestamp": "2026-03-18T22:32:47.817022"
+      },
+      {
+        "agent_id": "test_agent_c0db5ae5",
+        "agent_name": "Dr. Tom\u00e1s Kim",
+        "role": "Economist",
+        "round": 5,
+        "content": "In my final position, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a economist perspective. Key limitation: generalization remains unresolved.",
+        "stance_score": 0.54,
+        "confidence": 0.58,
+        "cited_papers": 1,
+        "timestamp": "2026-03-18T22:32:47.817726"
+      },
+      {
+        "agent_id": "test_agent_c657d181",
+        "agent_name": "Dr. Wei Nakamura",
+        "role": "Systems Thinker",
+        "round": 5,
+        "content": "In my final position, Building on previous insights, I see strong potential in Electrical Impedance Tomography with Machine Learning for systems thinker applications. Cross-disciplinary integration with materials science shows promise.",
+        "stance_score": -0.08,
+        "confidence": 0.55,
+        "cited_papers": 3,
+        "timestamp": "2026-03-18T22:32:47.817055"
+      },
+      {
+        "agent_id": "test_agent_96db449c",
+        "agent_name": "Dr. Sarah Patel",
+        "role": "Methodologist",
+        "round": 5,
+        "content": "In my final position, Building on previous insights, I see strong potential in Electrical Impedance Tomography with Machine Learning for methodologist applications. Cross-disciplinary integration with clinical studies shows promise.",
+        "stance_score": -0.73,
+        "confidence": 0.54,
+        "cited_papers": 3,
+        "timestamp": "2026-03-18T22:32:47.817339"
+      },
+      {
+        "agent_id": "test_agent_a05bd227",
+        "agent_name": "Dr. Dmitri Zhang",
+        "role": "Synthesizer",
+        "round": 5,
+        "content": "In my final position, What if we approached Electrical Impedance Tomography with Machine Learning from a different angle? My synthesizer background suggests unexplored connections. Cross-disciplinary integration with materials science shows promise.",
+        "stance_score": -0.04,
+        "confidence": 0.52,
+        "cited_papers": 2,
+        "timestamp": "2026-03-18T22:32:47.816652"
+      }
+    ],
+    "round_summaries": [
+      {
+        "round": 1,
+        "turns": 20,
+        "avg_stance": 0.174,
+        "avg_confidence": 0.696,
+        "supportive_count": 10,
+        "critical_count": 3,
+        "neutral_count": 7
+      },
+      {
+        "round": 2,
+        "turns": 20,
+        "avg_stance": 0.15,
+        "avg_confidence": 0.776,
+        "supportive_count": 10,
+        "critical_count": 5,
+        "neutral_count": 5
+      },
+      {
+        "round": 3,
+        "turns": 20,
+        "avg_stance": 0.186,
+        "avg_confidence": 0.802,
+        "supportive_count": 11,
+        "critical_count": 5,
+        "neutral_count": 4
+      },
+      {
+        "round": 4,
+        "turns": 20,
+        "avg_stance": 0.259,
+        "avg_confidence": 0.753,
+        "supportive_count": 10,
+        "critical_count": 5,
+        "neutral_count": 5
+      },
+      {
+        "round": 5,
+        "turns": 20,
+        "avg_stance": 0.172,
+        "avg_confidence": 0.746,
+        "supportive_count": 9,
+        "critical_count": 3,
+        "neutral_count": 8
+      }
+    ],
+    "agents": [
+      {
+        "agent_id": "test_agent_527698e9",
+        "name": "Dr. Amara Ivanova",
+        "role": "Experimentalist",
+        "description": "Designs and validates experiments",
+        "stance": "critical",
+        "expertise_score": 0.74
+      },
+      {
+        "agent_id": "test_agent_e493c0b1",
+        "name": "Dr. Henrik Okafor",
+        "role": "Theoretician",
+        "description": "Develops mathematical frameworks",
+        "stance": "neutral",
+        "expertise_score": 0.86
+      },
+      {
+        "agent_id": "test_agent_35fd8e2a",
+        "name": "Dr. Carlos Kim",
+        "role": "Data Scientist",
+        "description": "Applies ML and statistical methods",
+        "stance": "neutral",
+        "expertise_score": 0.8
+      },
+      {
+        "agent_id": "test_agent_0bc2f69f",
+        "name": "Dr. Zara Nakamura",
+        "role": "Domain Expert",
+        "description": "Deep knowledge in the target field",
+        "stance": "supportive",
+        "expertise_score": 0.79
+      },
+      {
+        "agent_id": "test_agent_692f770b",
+        "name": "Dr. Lucas Ali",
+        "role": "Skeptic",
+        "description": "Challenges assumptions and methodology",
+        "stance": "neutral",
+        "expertise_score": 0.99
+      },
+      {
+        "agent_id": "test_agent_a05bd227",
+        "name": "Dr. Dmitri Zhang",
+        "role": "Synthesizer",
+        "description": "Connects ideas across disciplines",
+        "stance": "exploratory",
+        "expertise_score": 0.81
+      },
+      {
+        "agent_id": "test_agent_c657d181",
+        "name": "Dr. Wei Nakamura",
+        "role": "Systems Thinker",
+        "description": "Considers scalability and integration",
+        "stance": "supportive",
+        "expertise_score": 0.72
+      },
+      {
+        "agent_id": "test_agent_4f89e70e",
+        "name": "Dr. Amara Nakamura",
+        "role": "Ethicist",
+        "description": "Evaluates societal impact and safety",
+        "stance": "exploratory",
+        "expertise_score": 0.66
+      },
+      {
+        "agent_id": "test_agent_854583fc",
+        "name": "Dr. Marcus Rossi",
+        "role": "Industry Practitioner",
+        "description": "Focuses on real-world applications",
+        "stance": "critical",
+        "expertise_score": 0.9
+      },
+      {
+        "agent_id": "test_agent_fc913f51",
+        "name": "Dr. Yuki Petrov",
+        "role": "Historian",
+        "description": "Contextualizes within prior research",
+        "stance": "critical",
+        "expertise_score": 0.61
+      },
+      {
+        "agent_id": "test_agent_f0722d7b",
+        "name": "Dr. Henrik Lindstr\u00f6m",
+        "role": "Futurist",
+        "description": "Projects long-term implications",
+        "stance": "critical",
+        "expertise_score": 0.69
+      },
+      {
+        "agent_id": "test_agent_96db449c",
+        "name": "Dr. Sarah Patel",
+        "role": "Methodologist",
+        "description": "Evaluates research design rigor",
+        "stance": "supportive",
+        "expertise_score": 0.8
+      },
+      {
+        "agent_id": "test_agent_e7de77cb",
+        "name": "Dr. Fatima Chen",
+        "role": "Clinician",
+        "description": "Assesses translational potential",
+        "stance": "exploratory",
+        "expertise_score": 0.82
+      },
+      {
+        "agent_id": "test_agent_6cd61826",
+        "name": "Dr. Wei Patel",
+        "role": "Engineer",
+        "description": "Focuses on implementation feasibility",
+        "stance": "exploratory",
+        "expertise_score": 0.71
+      },
+      {
+        "agent_id": "test_agent_9053ccd2",
+        "name": "Dr. Olga Thompson",
+        "role": "Statistician",
+        "description": "Validates quantitative claims",
+        "stance": "exploratory",
+        "expertise_score": 0.74
+      },
+      {
+        "agent_id": "test_agent_20475098",
+        "name": "Dr. Kenji Okafor",
+        "role": "Bioinformatician",
+        "description": "Applies computational biology",
+        "stance": "critical",
+        "expertise_score": 0.82
+      },
+      {
+        "agent_id": "test_agent_44b1281e",
+        "name": "Dr. Elena Hassan",
+        "role": "Materials Scientist",
+        "description": "Evaluates physical feasibility",
+        "stance": "supportive",
+        "expertise_score": 0.89
+      },
+      {
+        "agent_id": "test_agent_03f399ac",
+        "name": "Dr. Zara Suzuki",
+        "role": "Neuroscientist",
+        "description": "Applies brain-inspired approaches",
+        "stance": "critical",
+        "expertise_score": 0.72
+      },
+      {
+        "agent_id": "test_agent_c0db5ae5",
+        "name": "Dr. Tom\u00e1s Kim",
+        "role": "Economist",
+        "description": "Assesses cost-benefit and market fit",
+        "stance": "critical",
+        "expertise_score": 0.93
+      },
+      {
+        "agent_id": "test_agent_3fbf5cac",
+        "name": "Dr. Lucas Zhang",
+        "role": "Policy Analyst",
+        "description": "Considers regulatory landscape",
+        "stance": "critical",
+        "expertise_score": 0.83
+      }
+    ]
+  },
+  "future_discussion": {
+    "title": "Future of \"Electrical Impedance Tomography with Machine Learning\" Application",
+    "summary": "Based on a structured 5-round debate among 20 expert agents, the outlook for Electrical Impedance Tomography with Machine Learning applications is uncertain.",
+    "consensus_level": 0.17,
+    "sentiment": "uncertain",
+    "key_directions": [
+      "AI-driven optimization of electrical impedance tomography with machine learning parameters and configurations",
+      "Ethical frameworks and regulatory pathways for electrical impedance tomography with machine learning applications",
+      "Cross-disciplinary collaboration platforms centered on electrical impedance tomography with machine learning",
+      "Integration of electrical impedance tomography with machine learning with autonomous laboratory platforms",
+      "Scalable deployment of electrical impedance tomography with machine learning in resource-constrained environments"
+    ],
+    "challenges": [
+      "Training the next generation of researchers at the intersection of domains",
+      "Bridging the gap between laboratory demonstrations and field deployment",
+      "Long-term stability and drift compensation",
+      "Reproducibility across diverse experimental conditions"
+    ],
+    "opportunities": [
+      "Open-source hardware and software ecosystems can accelerate adoption",
+      "Patient/user-centered design can ensure electrical impedance tomography with machine learning solutions meet real needs",
+      "International collaboration networks can pool resources for large-scale validation"
+    ],
+    "agent_perspectives": [
+      {
+        "name": "Dr. Amara Ivanova",
+        "role": "Experimentalist",
+        "final_position": "In my final position, While promising, Electrical Impedance Tomography with Machine Learning faces significant challenges from a experimentalist perspective. Key limitation: generalization remains unresolved."
+      },
+      {
+        "name": "Dr. Henrik Okafor",
+        "role": "Theoretician",
+        "final_position": "In my final position, The evidence for Electrical Impedance Tomography with Machine Learning is mixed. As a theoretician, I'd highlight both opportunities and risks. The accuracy of Electrical Impedance Tomography with Machine Learning-based approaches has improved 2x in recent years."
+      },
+      {
+        "name": "Dr. Carlos Kim",
+        "role": "Data Scientist",
+        "final_position": "In my final position, The evidence for Electrical Impedance Tomography with Machine Learning is mixed. As a data scientist, I'd highlight both opportunities and risks. Key limitation: generalization remains unresolved."
+      },
+      {
+        "name": "Dr. Zara Nakamura",
+        "role": "Domain Expert",
+        "final_position": "In my final position, Building on previous insights, I see strong potential in Electrical Impedance Tomography with Machine Learning for domain expert applications. Cross-disciplinary integration with materials science shows promise."
+      },
+      {
+        "name": "Dr. Lucas Ali",
+        "role": "Skeptic",
+        "final_position": "In my final position, The evidence for Electrical Impedance Tomography with Machine Learning is mixed. As a skeptic, I'd highlight both opportunities and risks. Cross-disciplinary integration with materials science shows promise."
+      }
+    ],
+    "recommendation": "Priority research should focus on integration of electrical impedance tomography with machine learning with autonomous laboratory platforms, with 18-month milestones for validation."
+  },
+  "ideas": [
+    {
+      "idea_id": "test_idea_9bdad441",
+      "title": "Adaptive Electrical Impedance Tomography with Machine Learning Framework",
+      "hypothesis": "A novel approach to electrical impedance tomography with machine learning can achieve 5x improvement through physics-informed ML.",
+      "methodology": "Implement a end-to-end system combining electrical impedance tomography with machine learning with reinforcement learning.",
+      "expected_contribution": "First scalable implementation for electrical impedance tomography with machine learning applications.",
+      "interestingness": 10,
+      "feasibility": 6,
+      "novelty": 6,
+      "composite_score": 7.2
+    },
+    {
+      "idea_id": "test_idea_0549d3c8",
+      "title": "Scalable Electrical Impedance Tomography with Machine Learning Framework",
+      "hypothesis": "A novel approach to electrical impedance tomography with machine learning can achieve 5x improvement through multi-agent optimization.",
+      "methodology": "Implement a hybrid system combining electrical impedance tomography with machine learning with diffusion models.",
+      "expected_contribution": "First validated implementation for electrical impedance tomography with machine learning applications.",
+      "interestingness": 7,
+      "feasibility": 5,
+      "novelty": 10,
+      "composite_score": 7.1
+    },
+    {
+      "idea_id": "test_idea_a9be2c52",
+      "title": "Autonomous Electrical Impedance Tomography with Machine Learning Framework",
+      "hypothesis": "A novel approach to electrical impedance tomography with machine learning can achieve 10x improvement through multi-agent optimization.",
+      "methodology": "Implement a hybrid system combining electrical impedance tomography with machine learning with graph neural networks.",
+      "expected_contribution": "First validated implementation for electrical impedance tomography with machine learning applications.",
+      "interestingness": 8,
+      "feasibility": 6,
+      "novelty": 7,
+      "composite_score": 6.9
+    }
+  ],
+  "timestamp": "2026-03-18T22:32:47.820391"
+}

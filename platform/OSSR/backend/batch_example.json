@@ -1,0 +1,30 @@
+{
+  "defaults": {
+    "format": "conference",
+    "max_rounds": 5,
+    "orchestrated": true
+  },
+  "output_dir": "results",
+  "runs": [
+    {
+      "label": "crispr_ethics",
+      "topic": "Should CRISPR gene editing be applied to human germline modifications?",
+      "agent_ids": ["agent_id_1", "agent_id_2", "agent_id_3"],
+      "format": "adversarial",
+      "max_rounds": 4
+    },
+    {
+      "label": "llm_reasoning",
+      "topic": "Can large language models achieve genuine reasoning or are they sophisticated pattern matchers?",
+      "agent_ids": ["agent_id_1", "agent_id_2"],
+      "format": "conference"
+    },
+    {
+      "label": "quantum_advantage",
+      "topic": "When will quantum computers achieve practical advantage over classical computers for real-world problems?",
+      "agent_ids": ["agent_id_2", "agent_id_3", "agent_id_4"],
+      "format": "workshop",
+      "max_rounds": 6
+    }
+  ]
+}

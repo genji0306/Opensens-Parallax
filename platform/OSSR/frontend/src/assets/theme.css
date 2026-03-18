@@ -1,0 +1,229 @@
+/* ── OSSR Theme System ─────────────────────────────────────────────
+   Brand: Opensens teal #1EA88E
+   Supports light (default) and dark modes via [data-theme="dark"]
+   ─────────────────────────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  /* ── Brand ── */
+  --os-brand: #1EA88E;
+  --os-brand-hover: #179B82;
+  --os-brand-light: #E6F7F3;
+  --os-brand-subtle: #B8E6DA;
+  --os-brand-rgb: 30, 168, 142;
+
+  /* ── Light Theme (default) ── */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F7F9FA;
+  --bg-tertiary: #EEF1F4;
+  --bg-elevated: #FFFFFF;
+  --bg-hover: #F0F3F5;
+  --bg-active: #E6F7F3;
+
+  --border-primary: #E0E5EA;
+  --border-secondary: #EBF0F4;
+  --border-accent: var(--os-brand);
+
+  --text-primary: #1A2332;
+  --text-secondary: #5A6B7B;
+  --text-tertiary: #8B99A8;
+  --text-on-brand: #FFFFFF;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
+
+  /* ── Semantic ── */
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --error: #EF4444;
+  --info: #3B82F6;
+
+  /* ── Graph D3 ── */
+  --graph-domain: var(--os-brand);
+  --graph-subfield: #5CBFA9;
+  --graph-thread: #96D4C6;
+  --graph-paper: #D1E9E3;
+  --graph-edge: #C8D5DE;
+  --graph-hierarchy: var(--os-brand);
+  --graph-gap: #EF4444;
+  --graph-bg: var(--bg-primary);
+  --graph-label: var(--text-primary);
+
+  /* ── Neural Graph (Phase 3 visual concept) ── */
+  --neural-bg: #F5F0E8;
+  --neural-bg-grid: rgba(160, 140, 110, 0.08);
+  --neural-domain-glow: rgba(30, 168, 142, 0.35);
+  --neural-subfield-core: #5CBFA9;
+  --neural-subfield-nucleus: #2A7D6E;
+  --neural-thread-fill: rgba(150, 212, 198, 0.45);
+  --neural-thread-stroke: rgba(150, 212, 198, 0.7);
+  --neural-paper-fill: rgba(209, 233, 227, 0.6);
+  --neural-dendrite: rgba(30, 168, 142, 0.6);
+  --neural-synapse: rgba(92, 191, 169, 0.4);
+  --neural-pulse-dot: #1EA88E;
+  --neural-gap-dormant: rgba(239, 68, 68, 0.5);
+  --neural-csf-particle: rgba(160, 140, 110, 0.12);
+  --neural-label: rgba(26, 35, 50, 0.8);
+
+  /* ── Agent roles ── */
+  --role-professor: #1EA88E;
+  --role-assoc-professor: #2E7D68;
+  --role-postdoc: #3B82F6;
+  --role-phd: #8B5CF6;
+  --role-industry: #F59E0B;
+  --role-reviewer: #EF4444;
+
+  /* ── Mirofish Knowledge Graph ── */
+  --mf-paper: #4A90D9;
+  --mf-author: #7B68EE;
+  --mf-institution: #708090;
+  --mf-method: #9B59B6;
+  --mf-claim: #2ECC71;
+  --mf-dataset: #E67E22;
+  --mf-experiment: #1ABC9C;
+  --mf-critique: #E74C3C;
+  --mf-open-question: #F39C12;
+  --mf-agent: var(--os-brand);
+  --mf-evidence: #95A5A6;
+  --mf-option: #3498DB;
+
+  --mf-edge-supports: #2ECC71;
+  --mf-edge-contradicts: #E74C3C;
+  --mf-edge-extends: #3498DB;
+  --mf-edge-critiques: #E67E22;
+  --mf-edge-default: #BDC3C7;
+
+  /* ── Typography ── */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+
+  /* ── Radius ── */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-pill: 100px;
+
+  /* ── Transitions ── */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
+}
+
+/* ── Dark Theme ── */
+[data-theme="dark"] {
+  --bg-primary: #0D1117;
+  --bg-secondary: #161B22;
+  --bg-tertiary: #1C2333;
+  --bg-elevated: #1C2333;
+  --bg-hover: #21293A;
+  --bg-active: #12322A;
+
+  --border-primary: #2A3544;
+  --border-secondary: #1E2A38;
+  --border-accent: var(--os-brand);
+
+  --text-primary: #E6ECF1;
+  --text-secondary: #8B9DB3;
+  --text-tertiary: #5A6F84;
+  --text-on-brand: #FFFFFF;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  --os-brand: #2DBFA3;
+  --os-brand-hover: #3FCDB2;
+  --os-brand-light: #12322A;
+  --os-brand-subtle: #1A4038;
+  --os-brand-rgb: 45, 191, 163;
+
+  --graph-domain: #2DBFA3;
+  --graph-subfield: #5CBFA9;
+  --graph-thread: #3A7D6E;
+  --graph-paper: #2A4A42;
+  --graph-edge: #2A3544;
+  --graph-hierarchy: #2DBFA3;
+  --graph-bg: var(--bg-primary);
+  --graph-label: var(--text-primary);
+
+  /* ── Neural Graph (dark) ── */
+  --neural-bg: #0A0E1A;
+  --neural-bg-grid: rgba(30, 60, 100, 0.06);
+  --neural-domain-glow: rgba(45, 191, 163, 0.4);
+  --neural-subfield-core: #5CBFA9;
+  --neural-subfield-nucleus: #3FCDB2;
+  --neural-thread-fill: rgba(58, 125, 110, 0.35);
+  --neural-thread-stroke: rgba(58, 125, 110, 0.6);
+  --neural-paper-fill: rgba(42, 74, 66, 0.5);
+  --neural-dendrite: rgba(45, 191, 163, 0.5);
+  --neural-synapse: rgba(92, 191, 169, 0.3);
+  --neural-pulse-dot: #3FCDB2;
+  --neural-gap-dormant: rgba(248, 113, 113, 0.5);
+  --neural-csf-particle: rgba(40, 70, 120, 0.1);
+  --neural-label: rgba(230, 236, 241, 0.75);
+
+  --mf-paper: #5B9BD5;
+  --mf-author: #9B8AFF;
+  --mf-institution: #8899AA;
+  --mf-method: #B07DD6;
+  --mf-claim: #34D399;
+  --mf-dataset: #F0A050;
+  --mf-experiment: #2DD4BF;
+  --mf-critique: #F87171;
+  --mf-open-question: #FBBF24;
+  --mf-agent: var(--os-brand);
+  --mf-evidence: #8899AA;
+  --mf-option: #60A5FA;
+
+  --mf-edge-supports: #34D399;
+  --mf-edge-contradicts: #F87171;
+  --mf-edge-extends: #60A5FA;
+  --mf-edge-critiques: #F0A050;
+  --mf-edge-default: #3A4A5A;
+
+  --success: #34D399;
+  --warning: #FBBF24;
+  --error: #F87171;
+  --info: #60A5FA;
+}
+
+/* ── Global Reset ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background var(--transition-normal), color var(--transition-normal);
+}
+
+/* ── Scrollbar theming ── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-primary);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+/* ── Selection ── */
+::selection {
+  background: rgba(var(--os-brand-rgb), 0.25);
+}

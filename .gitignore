@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+.venv/
+venv/
+env/
+
+# Data / DB
+*.db
+*.db-journal
+*.db-wal
+
+# Large files
+*.zip
+*.gz
+*.ckpt
+*.hdf5
+*.h5
+*.pt
+*.pth
+*.pkl
+*.bin
+
+# IDE
+.idea/
+.vscode/
+*.code-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets
+.env
+*.key
+
+# Temp
+*.tmp
+*.log
+~$*
+
+# Node
+node_modules/
+.next/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+platform/OSSR/skills
