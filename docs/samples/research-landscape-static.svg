@@ -1,0 +1,537 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800">
+<style>
+
+      .domain { font: bold 14px sans-serif; fill: #fff; }
+      .subfield { font: 11px sans-serif; fill: #e0e0e0; }
+      .thread { font: 9px sans-serif; fill: #aaa; }
+      .edge { stroke-opacity: 0.3; fill: none; }
+      .gap-edge { stroke: #ff4444; stroke-dasharray: 6,4; stroke-opacity: 0.5; }
+      text { pointer-events: none; }
+    
+
+      @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+      @keyframes drift { 0% { transform: translate(0, 0); } 50% { transform: translate(2px, -2px); } 100% { transform: translate(0, 0); } }
+      @keyframes glow-travel {
+        0% { stroke-dashoffset: 40; }
+        100% { stroke-dashoffset: 0; }
+      }
+      .domain-node { animation: pulse 3s ease-in-out infinite; }
+      .thread-node { animation: drift 5s ease-in-out infinite; }
+      .synapse { stroke-dasharray: 8,4; animation: glow-travel 2s linear infinite; }
+      .particle {
+        animation: drift 4s ease-in-out infinite;
+        opacity: 0.7;
+      }
+    
+</style>
+<defs>
+  <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <radialGradient id="neuron-grad"><stop offset="0%" stop-color="#fff" stop-opacity="0.3"/><stop offset="100%" stop-color="#fff" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="1200" height="800" fill="#0a0a1a" rx="12"/>
+<text x="600" y="30" text-anchor="middle" fill="#fff" font-size="18" font-family="sans-serif" font-weight="bold">OSSR Research Landscape</text>
+<line x1="600" y1="200" x2="506" y2="125" stroke="#1ea88e" stroke-width="2" class="edge synapse"/>
+<line x1="773" y1="300" x2="791" y2="181" stroke="#e8725a" stroke-width="2" class="edge synapse"/>
+<line x1="773" y1="500" x2="893" y2="491" stroke="#5b8def" stroke-width="2" class="edge synapse"/>
+<line x1="600" y1="600" x2="668" y2="699" stroke="#f0a030" stroke-width="2" class="edge synapse"/>
+<line x1="600" y1="200" x2="565" y2="85" stroke="#1ea88e" stroke-width="2" class="edge synapse"/>
+<line x1="773" y1="300" x2="855" y2="212" stroke="#e8725a" stroke-width="2" class="edge synapse"/>
+<line x1="427" y1="500" x2="409" y2="619" stroke="#9b59b6" stroke-width="2" class="edge synapse"/>
+<line x1="427" y1="300" x2="315" y2="344" stroke="#1ea88e" stroke-width="2" class="edge synapse"/>
+<line x1="427" y1="500" x2="345" y2="588" stroke="#9b59b6" stroke-width="2" class="edge synapse"/>
+<line x1="427" y1="300" x2="310" y2="273" stroke="#1ea88e" stroke-width="2" class="edge synapse"/>
+<line x1="427" y1="500" x2="310" y2="527" stroke="#9b59b6" stroke-width="2" class="edge synapse"/>
+<line x1="427" y1="300" x2="345" y2="212" stroke="#1ea88e" stroke-width="2" class="edge synapse"/>
+<line x1="773" y1="500" x2="877" y2="560" stroke="#5b8def" stroke-width="2" class="edge synapse"/>
+<line x1="600" y1="600" x2="600" y2="720" stroke="#f0a030" stroke-width="2" class="edge synapse"/>
+<line x1="600" y1="200" x2="635" y2="85" stroke="#1ea88e" stroke-width="2" class="edge synapse"/>
+<line x1="773" y1="300" x2="890" y2="273" stroke="#e8725a" stroke-width="2" class="edge synapse"/>
+<line x1="573" y1="517" x2="621" y2="503" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="643" y1="288" x2="693" y2="291" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="512" y1="481" x2="508" y2="431" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="565" y1="85" x2="614" y2="83" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="855" y1="212" x2="873" y2="259" stroke="#e8725a" stroke-width="1" class="edge"/>
+<line x1="310" y1="527" x2="260" y2="521" stroke="#9b59b6" stroke-width="1" class="edge"/>
+<line x1="345" y1="212" x2="308" y2="245" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="565" y1="85" x2="598" y2="18" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="855" y1="212" x2="883" y2="282" stroke="#e8725a" stroke-width="1" class="edge"/>
+<line x1="643" y1="512" x2="617" y2="554" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="512" y1="319" x2="557" y2="340" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="720" y1="400" x2="759" y2="432" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="573" y1="517" x2="547" y2="587" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="481" y1="383" x2="526" y2="360" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="310" y1="527" x2="238" y2="549" stroke="#9b59b6" stroke-width="1" class="edge"/>
+<line x1="345" y1="212" x2="415" y2="185" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="720" y1="400" x2="661" y2="447" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="573" y1="517" x2="667" y2="551" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="635" y1="85" x2="682" y2="68" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="890" y1="273" x2="895" y2="323" stroke="#e8725a" stroke-width="1" class="edge"/>
+<line x1="573" y1="283" x2="540" y2="321" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="512" y1="319" x2="548" y2="385" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="643" y1="288" x2="585" y2="336" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="643" y1="288" x2="700" y2="371" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="573" y1="517" x2="448" y2="511" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="893" y1="491" x2="942" y2="498" stroke="#5b8def" stroke-width="1" class="edge"/>
+<line x1="668" y1="699" x2="623" y2="677" stroke="#f0a030" stroke-width="1" class="edge"/>
+<line x1="635" y1="85" x2="612" y2="14" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="890" y1="273" x2="878" y2="199" stroke="#e8725a" stroke-width="1" class="edge"/>
+<line x1="699" y1="468" x2="730" y2="507" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="409" y1="619" x2="455" y2="599" stroke="#9b59b6" stroke-width="1" class="edge"/>
+<line x1="315" y1="344" x2="266" y2="355" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="720" y1="400" x2="813" y2="438" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="573" y1="283" x2="639" y2="248" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="345" y1="588" x2="303" y2="562" stroke="#9b59b6" stroke-width="1" class="edge"/>
+<line x1="310" y1="273" x2="314" y2="323" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="506" y1="125" x2="514" y2="175" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="791" y1="181" x2="787" y2="131" stroke="#e8725a" stroke-width="1" class="edge"/>
+<line x1="877" y1="560" x2="858" y2="606" stroke="#5b8def" stroke-width="1" class="edge"/>
+<line x1="600" y1="720" x2="551" y2="731" stroke="#f0a030" stroke-width="1" class="edge"/>
+<line x1="345" y1="588" x2="413" y2="621" stroke="#9b59b6" stroke-width="1" class="edge"/>
+<line x1="310" y1="273" x2="377" y2="239" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="512" y1="319" x2="412" y2="316" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="720" y1="400" x2="802" y2="494" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="699" y1="468" x2="648" y2="413" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="481" y1="383" x2="510" y2="452" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="506" y1="125" x2="581" y2="128" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="791" y1="181" x2="720" y2="156" stroke="#e8725a" stroke-width="1" class="edge"/>
+<line x1="481" y1="383" x2="556" y2="449" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="643" y1="512" x2="708" y2="474" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="345" y1="588" x2="438" y2="550" stroke="#9b59b6" stroke-width="1" class="edge"/>
+<line x1="310" y1="273" x2="389" y2="334" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="409" y1="619" x2="383" y2="689" stroke="#9b59b6" stroke-width="1" class="edge"/>
+<line x1="315" y1="344" x2="317" y2="269" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="512" y1="319" x2="496" y2="443" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="512" y1="481" x2="559" y2="539" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="877" y1="560" x2="823" y2="612" stroke="#5b8def" stroke-width="1" class="edge"/>
+<line x1="600" y1="720" x2="611" y2="794" stroke="#f0a030" stroke-width="1" class="edge"/>
+<line x1="699" y1="332" x2="696" y2="282" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="573" y1="283" x2="480" y2="321" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="310" y1="527" x2="406" y2="555" stroke="#9b59b6" stroke-width="1" class="edge"/>
+<line x1="345" y1="212" x2="296" y2="299" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="512" y1="481" x2="561" y2="568" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="643" y1="288" x2="525" y2="249" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="893" y1="491" x2="918" y2="420" stroke="#5b8def" stroke-width="1" class="edge"/>
+<line x1="668" y1="699" x2="622" y2="639" stroke="#f0a030" stroke-width="1" class="edge"/>
+<line x1="720" y1="400" x2="869" y2="383" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="512" y1="319" x2="362" y2="302" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="635" y1="85" x2="733" y2="106" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="890" y1="273" x2="800" y2="229" stroke="#e8725a" stroke-width="1" class="edge"/>
+<line x1="573" y1="517" x2="576" y2="667" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="512" y1="319" x2="599" y2="470" stroke="#1ea88e" stroke-width="1" class="edge"/>
+<line x1="614" y1="83" x2="648" y2="413" class="gap-edge"/>
+<line x1="873" y1="259" x2="800" y2="229" class="gap-edge"/>
+<line x1="308" y1="245" x2="496" y2="443" class="gap-edge"/>
+<line x1="598" y1="18" x2="942" y2="498" class="gap-edge"/>
+<line x1="238" y1="549" x2="581" y2="128" class="gap-edge"/>
+<line x1="682" y1="68" x2="238" y2="549" class="gap-edge"/>
+<line x1="942" y1="498" x2="813" y2="438" class="gap-edge"/>
+<line x1="623" y1="677" x2="878" y2="199" class="gap-edge"/>
+<line x1="612" y1="14" x2="667" y2="551" class="gap-edge"/>
+<line x1="878" y1="199" x2="873" y2="259" class="gap-edge"/>
+<line x1="455" y1="599" x2="496" y2="443" class="gap-edge"/>
+<line x1="303" y1="562" x2="526" y2="360" class="gap-edge"/>
+<line x1="787" y1="131" x2="696" y2="282" class="gap-edge"/>
+<line x1="413" y1="621" x2="576" y2="667" class="gap-edge"/>
+<line x1="581" y1="128" x2="526" y2="360" class="gap-edge"/>
+<line x1="720" y1="156" x2="540" y2="321" class="gap-edge"/>
+<line x1="389" y1="334" x2="661" y2="447" class="gap-edge"/>
+<line x1="383" y1="689" x2="415" y2="185" class="gap-edge"/>
+<line x1="406" y1="555" x2="455" y2="599" class="gap-edge"/>
+<line x1="918" y1="420" x2="639" y2="248" class="gap-edge"/>
+<line x1="733" y1="106" x2="648" y2="413" class="gap-edge"/>
+<circle cx="600" cy="200" r="40" fill="#1ea88e" fill-opacity="0.25" stroke="#1ea88e" stroke-width="2" filter="url(#glow)" class="domain-node"/>
+<circle cx="600" cy="200" r="24" fill="url(#neuron-grad)"/>
+<text x="600" y="204" text-anchor="middle" class="domain">AI for Science</text>
+<circle cx="773" cy="300" r="40" fill="#e8725a" fill-opacity="0.25" stroke="#e8725a" stroke-width="2" filter="url(#glow)" class="domain-node"/>
+<circle cx="773" cy="300" r="24" fill="url(#neuron-grad)"/>
+<text x="773" y="304" text-anchor="middle" class="domain">AI for Science</text>
+<circle cx="773" cy="500" r="36" fill="#5b8def" fill-opacity="0.25" stroke="#5b8def" stroke-width="2" filter="url(#glow)" class="domain-node"/>
+<circle cx="773" cy="500" r="22" fill="url(#neuron-grad)"/>
+<text x="773" y="504" text-anchor="middle" class="domain">Biosensor Design</text>
+<circle cx="600" cy="600" r="36" fill="#f0a030" fill-opacity="0.25" stroke="#f0a030" stroke-width="2" filter="url(#glow)" class="domain-node"/>
+<circle cx="600" cy="600" r="22" fill="url(#neuron-grad)"/>
+<text x="600" y="604" text-anchor="middle" class="domain">Biosensor Design</text>
+<circle cx="427" cy="500" r="42" fill="#9b59b6" fill-opacity="0.25" stroke="#9b59b6" stroke-width="2" filter="url(#glow)" class="domain-node"/>
+<circle cx="427" cy="500" r="25" fill="url(#neuron-grad)"/>
+<text x="427" y="504" text-anchor="middle" class="domain">Electrochemical Sensing</text>
+<circle cx="427" cy="300" r="42" fill="#1ea88e" fill-opacity="0.25" stroke="#1ea88e" stroke-width="2" filter="url(#glow)" class="domain-node"/>
+<circle cx="427" cy="300" r="25" fill="url(#neuron-grad)"/>
+<text x="427" y="304" text-anchor="middle" class="domain">Electrochemical Sensing</text>
+<circle cx="506" cy="125" r="14" fill="#1ea88e" fill-opacity="0.4" stroke="#1ea88e" stroke-width="1"/>
+<text x="506" y="151" text-anchor="middle" class="subfield">AI-Driven Paper Generation</text>
+<circle cx="791" cy="181" r="14" fill="#e8725a" fill-opacity="0.4" stroke="#e8725a" stroke-width="1"/>
+<text x="791" y="207" text-anchor="middle" class="subfield">AI-Driven Paper Generation</text>
+<circle cx="893" cy="491" r="14" fill="#5b8def" fill-opacity="0.4" stroke="#5b8def" stroke-width="1"/>
+<text x="893" y="517" text-anchor="middle" class="subfield">Aptamer-based Sensors</text>
+<circle cx="668" cy="699" r="14" fill="#f0a030" fill-opacity="0.4" stroke="#f0a030" stroke-width="1"/>
+<text x="668" y="725" text-anchor="middle" class="subfield">Aptamer-based Sensors</text>
+<circle cx="565" cy="85" r="14" fill="#1ea88e" fill-opacity="0.4" stroke="#1ea88e" stroke-width="1"/>
+<text x="565" y="111" text-anchor="middle" class="subfield">Automated Experiment Design</text>
+<circle cx="855" cy="212" r="14" fill="#e8725a" fill-opacity="0.4" stroke="#e8725a" stroke-width="1"/>
+<text x="855" y="238" text-anchor="middle" class="subfield">Automated Experiment Design</text>
+<circle cx="481" cy="383" r="12" fill="#1ea88e" fill-opacity="0.4" stroke="#1ea88e" stroke-width="1"/>
+<text x="481" y="407" text-anchor="middle" class="subfield">Computer Science and AI</text>
+<circle cx="512" cy="319" r="12" fill="#1ea88e" fill-opacity="0.4" stroke="#1ea88e" stroke-width="1"/>
+<text x="512" y="343" text-anchor="middle" class="subfield">Condensed Matter Physics</text>
+<circle cx="409" cy="619" r="14" fill="#9b59b6" fill-opacity="0.4" stroke="#9b59b6" stroke-width="1"/>
+<text x="409" y="645" text-anchor="middle" class="subfield">Cyclic Voltammetry</text>
+<circle cx="315" cy="344" r="14" fill="#1ea88e" fill-opacity="0.4" stroke="#1ea88e" stroke-width="1"/>
+<text x="315" y="370" text-anchor="middle" class="subfield">Cyclic Voltammetry</text>
+<circle cx="573" cy="283" r="12" fill="#1ea88e" fill-opacity="0.4" stroke="#1ea88e" stroke-width="1"/>
+<text x="573" y="307" text-anchor="middle" class="subfield">Electrical Engineering</text>
+<circle cx="345" cy="588" r="15" fill="#9b59b6" fill-opacity="0.4" stroke="#9b59b6" stroke-width="1"/>
+<text x="345" y="615" text-anchor="middle" class="subfield">Electrical Impedance Tomograph</text>
+<circle cx="310" cy="273" r="15" fill="#1ea88e" fill-opacity="0.4" stroke="#1ea88e" stroke-width="1"/>
+<text x="310" y="300" text-anchor="middle" class="subfield">Electrical Impedance Tomograph</text>
+<circle cx="643" cy="288" r="12" fill="#1ea88e" fill-opacity="0.4" stroke="#1ea88e" stroke-width="1"/>
+<text x="643" y="312" text-anchor="middle" class="subfield">Energy Storage and Battery Tec</text>
+<circle cx="699" cy="332" r="12" fill="#1ea88e" fill-opacity="0.4" stroke="#1ea88e" stroke-width="1"/>
+<text x="699" y="356" text-anchor="middle" class="subfield">Finance and Economics</text>
+<circle cx="310" cy="527" r="15" fill="#9b59b6" fill-opacity="0.4" stroke="#9b59b6" stroke-width="1"/>
+<text x="310" y="554" text-anchor="middle" class="subfield">Impedance Spectroscopy (EIS)</text>
+<circle cx="345" cy="212" r="15" fill="#1ea88e" fill-opacity="0.4" stroke="#1ea88e" stroke-width="1"/>
+<text x="345" y="239" text-anchor="middle" class="subfield">Impedance Spectroscopy (EIS)</text>
+<circle cx="720" cy="400" r="12" fill="#1ea88e" fill-opacity="0.4" stroke="#1ea88e" stroke-width="1"/>
+<text x="720" y="424" text-anchor="middle" class="subfield">Materials Science</text>
+<circle cx="699" cy="468" r="12" fill="#1ea88e" fill-opacity="0.4" stroke="#1ea88e" stroke-width="1"/>
+<text x="699" y="492" text-anchor="middle" class="subfield">Mathematics and Physics</text>
+<circle cx="877" cy="560" r="14" fill="#5b8def" fill-opacity="0.4" stroke="#5b8def" stroke-width="1"/>
+<text x="877" y="586" text-anchor="middle" class="subfield">Microfluidic Integration</text>
+<circle cx="600" cy="720" r="14" fill="#f0a030" fill-opacity="0.4" stroke="#f0a030" stroke-width="1"/>
+<text x="600" y="746" text-anchor="middle" class="subfield">Microfluidic Integration</text>
+<circle cx="635" cy="85" r="15" fill="#1ea88e" fill-opacity="0.4" stroke="#1ea88e" stroke-width="1"/>
+<text x="635" y="112" text-anchor="middle" class="subfield">Neural Network Architectures</text>
+<circle cx="890" cy="273" r="15" fill="#e8725a" fill-opacity="0.4" stroke="#e8725a" stroke-width="1"/>
+<text x="890" y="300" text-anchor="middle" class="subfield">Neural Network Architectures</text>
+<circle cx="643" cy="512" r="12" fill="#1ea88e" fill-opacity="0.4" stroke="#1ea88e" stroke-width="1"/>
+<text x="643" y="536" text-anchor="middle" class="subfield">Neuroscience and Biomedical En</text>
+<circle cx="573" cy="517" r="12" fill="#1ea88e" fill-opacity="0.4" stroke="#1ea88e" stroke-width="1"/>
+<text x="573" y="541" text-anchor="middle" class="subfield">Physics</text>
+<circle cx="512" cy="481" r="12" fill="#1ea88e" fill-opacity="0.4" stroke="#1ea88e" stroke-width="1"/>
+<text x="512" y="505" text-anchor="middle" class="subfield">Specialized Physics</text>
+<circle cx="621" cy="503" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="630" y="506" class="thread">Accelerator and High-Ener</text>
+<circle cx="693" cy="291" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="702" y="294" class="thread">Advanced Battery Material</text>
+<circle cx="508" cy="431" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="517" y="434" class="thread">Atomic and Molecular Phys</text>
+<circle cx="614" cy="83" r="6" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="625" y="86" class="thread">Autonomous Lab Systems</text>
+<circle cx="873" cy="259" r="7" fill="#e8725a" fill-opacity="0.6" class="thread-node"/>
+<text x="884" y="262" class="thread">Autonomous Lab Systems</text>
+<circle cx="260" cy="521" r="7" fill="#9b59b6" fill-opacity="0.6" class="thread-node"/>
+<text x="272" y="524" class="thread">Battery State Estimation</text>
+<circle cx="308" cy="245" r="6" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="318" y="248" class="thread">Battery State Estimation</text>
+<circle cx="598" cy="18" r="6" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="608" y="21" class="thread">Bayesian Optimization</text>
+<circle cx="883" cy="282" r="6" fill="#e8725a" fill-opacity="0.6" class="thread-node"/>
+<text x="893" y="285" class="thread">Bayesian Optimization</text>
+<circle cx="617" cy="554" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="626" y="557" class="thread">Biomedical Signal Process</text>
+<circle cx="557" cy="340" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="566" y="343" class="thread">Charge and Stripe Order</text>
+<circle cx="759" cy="432" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="768" y="435" class="thread">Coated Conductors and Wir</text>
+<circle cx="547" cy="587" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="556" y="590" class="thread">Computational Electromagn</text>
+<circle cx="526" cy="360" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="535" y="363" class="thread">Computer Graphics and 3D </text>
+<circle cx="238" cy="549" r="6" fill="#9b59b6" fill-opacity="0.6" class="thread-node"/>
+<text x="248" y="552" class="thread">Corrosion Monitoring</text>
+<circle cx="415" cy="185" r="6" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="426" y="188" class="thread">Corrosion Monitoring</text>
+<circle cx="661" cy="447" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="670" y="450" class="thread">Crystal Structure and Syn</text>
+<circle cx="667" cy="551" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="676" y="554" class="thread">Data and Information Syst</text>
+<circle cx="682" cy="68" r="7" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="694" y="71" class="thread">Diffusion Models for Simu</text>
+<circle cx="895" cy="323" r="7" fill="#e8725a" fill-opacity="0.6" class="thread-node"/>
+<text x="905" y="326" class="thread">Diffusion Models for Simu</text>
+<circle cx="540" cy="321" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="549" y="324" class="thread">Electrical Machines and M</text>
+<circle cx="548" cy="385" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="557" y="388" class="thread">Electronic Structure and </text>
+<circle cx="585" cy="336" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="594" y="339" class="thread">Energy Storage Materials</text>
+<circle cx="700" cy="371" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="709" y="374" class="thread">Energy Systems Integratio</text>
+<circle cx="448" cy="511" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="457" y="514" class="thread">Experimental Techniques a</text>
+<circle cx="942" cy="498" r="6" fill="#5b8def" fill-opacity="0.6" class="thread-node"/>
+<text x="953" y="501" class="thread">Glucose Monitoring</text>
+<circle cx="623" cy="677" r="7" fill="#f0a030" fill-opacity="0.6" class="thread-node"/>
+<text x="634" y="680" class="thread">Glucose Monitoring</text>
+<circle cx="612" cy="14" r="7" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="623" y="17" class="thread">Graph Neural Networks for</text>
+<circle cx="878" cy="199" r="7" fill="#e8725a" fill-opacity="0.6" class="thread-node"/>
+<text x="890" y="202" class="thread">Graph Neural Networks for</text>
+<circle cx="730" cy="507" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="739" y="510" class="thread">Gravitational Physics</text>
+<circle cx="455" cy="599" r="6" fill="#9b59b6" fill-opacity="0.6" class="thread-node"/>
+<text x="466" y="602" class="thread">Heavy Metal Analysis</text>
+<circle cx="266" cy="355" r="7" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="278" y="358" class="thread">Heavy Metal Analysis</text>
+<circle cx="813" cy="438" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="822" y="441" class="thread">High-Pressure Superconduc</text>
+<circle cx="639" cy="248" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="648" y="251" class="thread">Industrial Heating and En</text>
+<circle cx="303" cy="562" r="6" fill="#9b59b6" fill-opacity="0.6" class="thread-node"/>
+<text x="312" y="565" class="thread">Industrial Process Tomogr</text>
+<circle cx="314" cy="323" r="7" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="325" y="326" class="thread">Industrial Process Tomogr</text>
+<circle cx="514" cy="175" r="6" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="524" y="178" class="thread">LLM Literature Synthesis</text>
+<circle cx="787" cy="131" r="6" fill="#e8725a" fill-opacity="0.6" class="thread-node"/>
+<text x="797" y="134" class="thread">LLM Literature Synthesis</text>
+<circle cx="858" cy="606" r="7" fill="#5b8def" fill-opacity="0.6" class="thread-node"/>
+<text x="869" y="609" class="thread">Lab-on-Chip Platforms</text>
+<circle cx="551" cy="731" r="7" fill="#f0a030" fill-opacity="0.6" class="thread-node"/>
+<text x="562" y="734" class="thread">Lab-on-Chip Platforms</text>
+<circle cx="413" cy="621" r="7" fill="#9b59b6" fill-opacity="0.6" class="thread-node"/>
+<text x="423" y="624" class="thread">Lung Ventilation Imaging</text>
+<circle cx="377" cy="239" r="6" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="387" y="242" class="thread">Lung Ventilation Imaging</text>
+<circle cx="412" cy="316" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="421" y="319" class="thread">Magnetic and Spin Propert</text>
+<circle cx="802" cy="494" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="811" y="497" class="thread">Materials Properties and </text>
+<circle cx="648" cy="413" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="657" y="416" class="thread">Mathematical Structures a</text>
+<circle cx="510" cy="452" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="519" y="455" class="thread">Medical AI and Vision-Lan</text>
+<circle cx="581" cy="128" r="7" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="592" y="131" class="thread">Multi-Agent Research Deba</text>
+<circle cx="720" cy="156" r="7" fill="#e8725a" fill-opacity="0.6" class="thread-node"/>
+<text x="731" y="159" class="thread">Multi-Agent Research Deba</text>
+<circle cx="556" cy="449" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="565" y="452" class="thread">Natural Language Processi</text>
+<circle cx="708" cy="474" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="717" y="477" class="thread">Neural Engineering</text>
+<circle cx="438" cy="550" r="7" fill="#9b59b6" fill-opacity="0.6" class="thread-node"/>
+<text x="449" y="553" class="thread">Neural Reconstruction</text>
+<circle cx="389" cy="334" r="7" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="400" y="337" class="thread">Neural Reconstruction</text>
+<circle cx="383" cy="689" r="6" fill="#9b59b6" fill-opacity="0.6" class="thread-node"/>
+<text x="393" y="692" class="thread">Neurotransmitter Detectio</text>
+<circle cx="317" cy="269" r="7" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="328" y="272" class="thread">Neurotransmitter Detectio</text>
+<circle cx="496" cy="443" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="505" y="446" class="thread">Novel Superconducting Sys</text>
+<circle cx="559" cy="539" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="568" y="542" class="thread">Particle Physics</text>
+<circle cx="823" cy="612" r="7" fill="#5b8def" fill-opacity="0.6" class="thread-node"/>
+<text x="834" y="615" class="thread">Point-of-Care Diagnostics</text>
+<circle cx="611" cy="794" r="7" fill="#f0a030" fill-opacity="0.6" class="thread-node"/>
+<text x="622" y="797" class="thread">Point-of-Care Diagnostics</text>
+<circle cx="696" cy="282" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="705" y="285" class="thread">Portfolio Theory and Risk</text>
+<circle cx="480" cy="321" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="489" y="324" class="thread">Power Systems and Grid Ap</text>
+<circle cx="406" cy="555" r="7" fill="#9b59b6" fill-opacity="0.6" class="thread-node"/>
+<text x="417" y="558" class="thread">Protein Binding Detection</text>
+<circle cx="296" cy="299" r="6" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="306" y="302" class="thread">Protein Binding Detection</text>
+<circle cx="561" cy="568" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="570" y="571" class="thread">Quantum Transport and Int</text>
+<circle cx="525" cy="249" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="534" y="252" class="thread">Redox Flow Batteries</text>
+<circle cx="918" cy="420" r="7" fill="#5b8def" fill-opacity="0.6" class="thread-node"/>
+<text x="929" y="423" class="thread">SARS-CoV-2 Detection</text>
+<circle cx="622" cy="639" r="6" fill="#f0a030" fill-opacity="0.6" class="thread-node"/>
+<text x="632" y="642" class="thread">SARS-CoV-2 Detection</text>
+<circle cx="869" cy="383" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="878" y="386" class="thread">Superconducting Devices a</text>
+<circle cx="362" cy="302" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="371" y="305" class="thread">Topological Superconducti</text>
+<circle cx="733" cy="106" r="7" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="744" y="109" class="thread">Transformer Probing</text>
+<circle cx="800" cy="229" r="6" fill="#e8725a" fill-opacity="0.6" class="thread-node"/>
+<text x="810" y="232" class="thread">Transformer Probing</text>
+<circle cx="576" cy="667" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="585" y="670" class="thread">Transportation Applicatio</text>
+<circle cx="599" cy="470" r="5" fill="#1ea88e" fill-opacity="0.6" class="thread-node"/>
+<text x="608" y="473" class="thread">Vortex Physics and Transp</text>
+<circle cx="622" cy="79" r="2" fill="#1ea88e" class="particle" style="animation-delay: 3.3s"/>
+<circle cx="605" cy="66" r="2" fill="#1ea88e" class="particle" style="animation-delay: 3.0s"/>
+<circle cx="628" cy="82" r="2" fill="#1ea88e" class="particle" style="animation-delay: 0.1s"/>
+<circle cx="627" cy="67" r="2" fill="#1ea88e" class="particle" style="animation-delay: 1.2s"/>
+<circle cx="875" cy="259" r="2" fill="#e8725a" class="particle" style="animation-delay: 2.9s"/>
+<circle cx="879" cy="264" r="2" fill="#e8725a" class="particle" style="animation-delay: 2.5s"/>
+<circle cx="875" cy="261" r="2" fill="#e8725a" class="particle" style="animation-delay: 2.6s"/>
+<circle cx="876" cy="278" r="2" fill="#e8725a" class="particle" style="animation-delay: 3.1s"/>
+<circle cx="890" cy="252" r="2" fill="#e8725a" class="particle" style="animation-delay: 3.8s"/>
+<circle cx="265" cy="531" r="2" fill="#9b59b6" class="particle" style="animation-delay: 0.2s"/>
+<circle cx="260" cy="506" r="2" fill="#9b59b6" class="particle" style="animation-delay: 1.4s"/>
+<circle cx="247" cy="539" r="2" fill="#9b59b6" class="particle" style="animation-delay: 0.8s"/>
+<circle cx="252" cy="524" r="2" fill="#9b59b6" class="particle" style="animation-delay: 3.9s"/>
+<circle cx="251" cy="504" r="2" fill="#9b59b6" class="particle" style="animation-delay: 1.5s"/>
+<circle cx="297" cy="225" r="2" fill="#1ea88e" class="particle" style="animation-delay: 1.2s"/>
+<circle cx="324" cy="255" r="2" fill="#1ea88e" class="particle" style="animation-delay: 1.6s"/>
+<circle cx="300" cy="249" r="2" fill="#1ea88e" class="particle" style="animation-delay: 3.3s"/>
+<circle cx="315" cy="234" r="2" fill="#1ea88e" class="particle" style="animation-delay: 1.2s"/>
+<circle cx="293" cy="256" r="2" fill="#1ea88e" class="particle" style="animation-delay: 1.9s"/>
+<circle cx="612" cy="26" r="2" fill="#1ea88e" class="particle" style="animation-delay: 2.7s"/>
+<circle cx="594" cy="5" r="2" fill="#1ea88e" class="particle" style="animation-delay: 3.6s"/>
+<circle cx="584" cy="4" r="2" fill="#1ea88e" class="particle" style="animation-delay: 0.1s"/>
+<circle cx="587" cy="12" r="2" fill="#1ea88e" class="particle" style="animation-delay: 1.1s"/>
+<circle cx="881" cy="292" r="2" fill="#e8725a" class="particle" style="animation-delay: 3.3s"/>
+<circle cx="889" cy="291" r="2" fill="#e8725a" class="particle" style="animation-delay: 3.4s"/>
+<circle cx="897" cy="275" r="2" fill="#e8725a" class="particle" style="animation-delay: 3.7s"/>
+<circle cx="889" cy="280" r="2" fill="#e8725a" class="particle" style="animation-delay: 3.4s"/>
+<circle cx="253" cy="533" r="2" fill="#9b59b6" class="particle" style="animation-delay: 0.0s"/>
+<circle cx="240" cy="539" r="2" fill="#9b59b6" class="particle" style="animation-delay: 0.8s"/>
+<circle cx="238" cy="545" r="2" fill="#9b59b6" class="particle" style="animation-delay: 2.2s"/>
+<circle cx="225" cy="533" r="2" fill="#9b59b6" class="particle" style="animation-delay: 2.9s"/>
+<circle cx="395" cy="178" r="2" fill="#1ea88e" class="particle" style="animation-delay: 2.9s"/>
+<circle cx="401" cy="171" r="2" fill="#1ea88e" class="particle" style="animation-delay: 0.5s"/>
+<circle cx="420" cy="192" r="2" fill="#1ea88e" class="particle" style="animation-delay: 2.7s"/>
+<circle cx="407" cy="203" r="2" fill="#1ea88e" class="particle" style="animation-delay: 0.3s"/>
+<circle cx="401" cy="197" r="2" fill="#1ea88e" class="particle" style="animation-delay: 1.5s"/>
+<circle cx="666" cy="71" r="2" fill="#1ea88e" class="particle" style="animation-delay: 0.8s"/>
+<circle cx="681" cy="65" r="2" fill="#1ea88e" class="particle" style="animation-delay: 1.5s"/>
+<circle cx="694" cy="70" r="2" fill="#1ea88e" class="particle" style="animation-delay: 1.9s"/>
+<circle cx="681" cy="83" r="2" fill="#1ea88e" class="particle" style="animation-delay: 3.6s"/>
+<circle cx="664" cy="80" r="2" fill="#1ea88e" class="particle" style="animation-delay: 3.9s"/>
+<circle cx="909" cy="312" r="2" fill="#e8725a" class="particle" style="animation-delay: 2.7s"/>
+<circle cx="914" cy="316" r="2" fill="#e8725a" class="particle" style="animation-delay: 1.2s"/>
+<circle cx="907" cy="319" r="2" fill="#e8725a" class="particle" style="animation-delay: 3.9s"/>
+<circle cx="902" cy="320" r="2" fill="#e8725a" class="particle" style="animation-delay: 3.3s"/>
+<circle cx="886" cy="323" r="2" fill="#e8725a" class="particle" style="animation-delay: 2.5s"/>
+<circle cx="960" cy="507" r="2" fill="#5b8def" class="particle" style="animation-delay: 2.9s"/>
+<circle cx="941" cy="515" r="2" fill="#5b8def" class="particle" style="animation-delay: 3.7s"/>
+<circle cx="935" cy="506" r="2" fill="#5b8def" class="particle" style="animation-delay: 3.3s"/>
+<circle cx="957" cy="488" r="2" fill="#5b8def" class="particle" style="animation-delay: 3.7s"/>
+<circle cx="640" cy="667" r="2" fill="#f0a030" class="particle" style="animation-delay: 3.9s"/>
+<circle cx="638" cy="658" r="2" fill="#f0a030" class="particle" style="animation-delay: 1.0s"/>
+<circle cx="614" cy="674" r="2" fill="#f0a030" class="particle" style="animation-delay: 2.2s"/>
+<circle cx="624" cy="663" r="2" fill="#f0a030" class="particle" style="animation-delay: 0.7s"/>
+<circle cx="629" cy="676" r="2" fill="#f0a030" class="particle" style="animation-delay: 0.7s"/>
+<circle cx="618" cy="19" r="2" fill="#1ea88e" class="particle" style="animation-delay: 0.1s"/>
+<circle cx="597" cy="-1" r="2" fill="#1ea88e" class="particle" style="animation-delay: 3.2s"/>
+<circle cx="603" cy="14" r="2" fill="#1ea88e" class="particle" style="animation-delay: 3.1s"/>
+<circle cx="615" cy="3" r="2" fill="#1ea88e" class="particle" style="animation-delay: 2.0s"/>
+<circle cx="617" cy="19" r="2" fill="#1ea88e" class="particle" style="animation-delay: 0.1s"/>
+<circle cx="877" cy="209" r="2" fill="#e8725a" class="particle" style="animation-delay: 0.1s"/>
+<circle cx="889" cy="182" r="2" fill="#e8725a" class="particle" style="animation-delay: 2.0s"/>
+<circle cx="897" cy="196" r="2" fill="#e8725a" class="particle" style="animation-delay: 2.3s"/>
+<circle cx="881" cy="195" r="2" fill="#e8725a" class="particle" style="animation-delay: 1.7s"/>
+<circle cx="872" cy="217" r="2" fill="#e8725a" class="particle" style="animation-delay: 3.8s"/>
+<circle cx="465" cy="581" r="2" fill="#9b59b6" class="particle" style="animation-delay: 0.4s"/>
+<circle cx="455" cy="581" r="2" fill="#9b59b6" class="particle" style="animation-delay: 0.5s"/>
+<circle cx="466" cy="589" r="2" fill="#9b59b6" class="particle" style="animation-delay: 2.6s"/>
+<circle cx="449" cy="582" r="2" fill="#9b59b6" class="particle" style="animation-delay: 0.9s"/>
+<circle cx="452" cy="593" r="2" fill="#9b59b6" class="particle" style="animation-delay: 3.4s"/>
+<circle cx="252" cy="370" r="2" fill="#1ea88e" class="particle" style="animation-delay: 1.7s"/>
+<circle cx="254" cy="340" r="2" fill="#1ea88e" class="particle" style="animation-delay: 3.3s"/>
+<circle cx="262" cy="348" r="2" fill="#1ea88e" class="particle" style="animation-delay: 0.9s"/>
+<circle cx="282" cy="370" r="2" fill="#1ea88e" class="particle" style="animation-delay: 4.0s"/>
+<circle cx="267" cy="357" r="2" fill="#1ea88e" class="particle" style="animation-delay: 2.3s"/>
+<circle cx="283" cy="549" r="2" fill="#9b59b6" class="particle" style="animation-delay: 3.1s"/>
+<circle cx="304" cy="557" r="2" fill="#9b59b6" class="particle" style="animation-delay: 1.2s"/>
+<circle cx="314" cy="549" r="2" fill="#9b59b6" class="particle" style="animation-delay: 2.3s"/>
+<circle cx="297" cy="325" r="2" fill="#1ea88e" class="particle" style="animation-delay: 4.0s"/>
+<circle cx="295" cy="305" r="2" fill="#1ea88e" class="particle" style="animation-delay: 2.5s"/>
+<circle cx="329" cy="310" r="2" fill="#1ea88e" class="particle" style="animation-delay: 1.1s"/>
+<circle cx="328" cy="312" r="2" fill="#1ea88e" class="particle" style="animation-delay: 1.2s"/>
+<circle cx="327" cy="338" r="2" fill="#1ea88e" class="particle" style="animation-delay: 2.4s"/>
+<circle cx="529" cy="176" r="2" fill="#1ea88e" class="particle" style="animation-delay: 0.2s"/>
+<circle cx="514" cy="187" r="2" fill="#1ea88e" class="particle" style="animation-delay: 1.8s"/>
+<circle cx="531" cy="188" r="2" fill="#1ea88e" class="particle" style="animation-delay: 3.4s"/>
+<circle cx="520" cy="169" r="2" fill="#1ea88e" class="particle" style="animation-delay: 0.6s"/>
+<circle cx="805" cy="127" r="2" fill="#e8725a" class="particle" style="animation-delay: 0.7s"/>
+<circle cx="782" cy="145" r="2" fill="#e8725a" class="particle" style="animation-delay: 1.6s"/>
+<circle cx="799" cy="124" r="2" fill="#e8725a" class="particle" style="animation-delay: 3.3s"/>
+<circle cx="787" cy="115" r="2" fill="#e8725a" class="particle" style="animation-delay: 3.1s"/>
+<circle cx="877" cy="591" r="2" fill="#5b8def" class="particle" style="animation-delay: 1.3s"/>
+<circle cx="854" cy="601" r="2" fill="#5b8def" class="particle" style="animation-delay: 0.5s"/>
+<circle cx="856" cy="617" r="2" fill="#5b8def" class="particle" style="animation-delay: 3.3s"/>
+<circle cx="858" cy="626" r="2" fill="#5b8def" class="particle" style="animation-delay: 1.0s"/>
+<circle cx="866" cy="606" r="2" fill="#5b8def" class="particle" style="animation-delay: 2.5s"/>
+<circle cx="549" cy="746" r="2" fill="#f0a030" class="particle" style="animation-delay: 1.7s"/>
+<circle cx="539" cy="718" r="2" fill="#f0a030" class="particle" style="animation-delay: 3.3s"/>
+<circle cx="551" cy="723" r="2" fill="#f0a030" class="particle" style="animation-delay: 0.5s"/>
+<circle cx="552" cy="740" r="2" fill="#f0a030" class="particle" style="animation-delay: 3.5s"/>
+<circle cx="534" cy="741" r="2" fill="#f0a030" class="particle" style="animation-delay: 1.5s"/>
+<circle cx="404" cy="626" r="2" fill="#9b59b6" class="particle" style="animation-delay: 1.6s"/>
+<circle cx="400" cy="631" r="2" fill="#9b59b6" class="particle" style="animation-delay: 1.7s"/>
+<circle cx="412" cy="601" r="2" fill="#9b59b6" class="particle" style="animation-delay: 1.0s"/>
+<circle cx="402" cy="621" r="2" fill="#9b59b6" class="particle" style="animation-delay: 1.5s"/>
+<circle cx="399" cy="620" r="2" fill="#9b59b6" class="particle" style="animation-delay: 0.1s"/>
+<circle cx="380" cy="255" r="2" fill="#1ea88e" class="particle" style="animation-delay: 1.5s"/>
+<circle cx="374" cy="236" r="2" fill="#1ea88e" class="particle" style="animation-delay: 3.7s"/>
+<circle cx="364" cy="259" r="2" fill="#1ea88e" class="particle" style="animation-delay: 1.2s"/>
+<circle cx="362" cy="233" r="2" fill="#1ea88e" class="particle" style="animation-delay: 1.0s"/>
+<circle cx="385" cy="228" r="2" fill="#1ea88e" class="particle" style="animation-delay: 0.3s"/>
+<circle cx="570" cy="132" r="2" fill="#1ea88e" class="particle" style="animation-delay: 3.9s"/>
+<circle cx="563" cy="142" r="2" fill="#1ea88e" class="particle" style="animation-delay: 0.3s"/>
+<circle cx="596" cy="118" r="2" fill="#1ea88e" class="particle" style="animation-delay: 0.4s"/>
+<circle cx="571" cy="145" r="2" fill="#1ea88e" class="particle" style="animation-delay: 3.0s"/>
+<circle cx="576" cy="122" r="2" fill="#1ea88e" class="particle" style="animation-delay: 4.0s"/>
+<circle cx="707" cy="173" r="2" fill="#e8725a" class="particle" style="animation-delay: 0.1s"/>
+<circle cx="705" cy="159" r="2" fill="#e8725a" class="particle" style="animation-delay: 0.6s"/>
+<circle cx="705" cy="175" r="2" fill="#e8725a" class="particle" style="animation-delay: 3.4s"/>
+<circle cx="701" cy="156" r="2" fill="#e8725a" class="particle" style="animation-delay: 1.4s"/>
+<circle cx="719" cy="137" r="2" fill="#e8725a" class="particle" style="animation-delay: 1.5s"/>
+<circle cx="436" cy="563" r="2" fill="#9b59b6" class="particle" style="animation-delay: 2.6s"/>
+<circle cx="429" cy="537" r="2" fill="#9b59b6" class="particle" style="animation-delay: 2.3s"/>
+<circle cx="436" cy="545" r="2" fill="#9b59b6" class="particle" style="animation-delay: 0.9s"/>
+<circle cx="419" cy="559" r="2" fill="#9b59b6" class="particle" style="animation-delay: 1.8s"/>
+<circle cx="452" cy="553" r="2" fill="#9b59b6" class="particle" style="animation-delay: 1.2s"/>
+<circle cx="394" cy="323" r="2" fill="#1ea88e" class="particle" style="animation-delay: 0.9s"/>
+<circle cx="375" cy="329" r="2" fill="#1ea88e" class="particle" style="animation-delay: 0.9s"/>
+<circle cx="396" cy="315" r="2" fill="#1ea88e" class="particle" style="animation-delay: 0.3s"/>
+<circle cx="395" cy="317" r="2" fill="#1ea88e" class="particle" style="animation-delay: 2.6s"/>
+<circle cx="376" cy="337" r="2" fill="#1ea88e" class="particle" style="animation-delay: 1.2s"/>
+<circle cx="393" cy="673" r="2" fill="#9b59b6" class="particle" style="animation-delay: 1.2s"/>
+<circle cx="392" cy="698" r="2" fill="#9b59b6" class="particle" style="animation-delay: 1.9s"/>
+<circle cx="366" cy="669" r="2" fill="#9b59b6" class="particle" style="animation-delay: 2.6s"/>
+<circle cx="391" cy="688" r="2" fill="#9b59b6" class="particle" style="animation-delay: 1.0s"/>
+<circle cx="301" cy="280" r="2" fill="#1ea88e" class="particle" style="animation-delay: 1.5s"/>
+<circle cx="301" cy="249" r="2" fill="#1ea88e" class="particle" style="animation-delay: 1.4s"/>
+<circle cx="303" cy="259" r="2" fill="#1ea88e" class="particle" style="animation-delay: 2.7s"/>
+<circle cx="306" cy="269" r="2" fill="#1ea88e" class="particle" style="animation-delay: 2.1s"/>
+<circle cx="326" cy="284" r="2" fill="#1ea88e" class="particle" style="animation-delay: 1.1s"/>
+<circle cx="811" cy="625" r="2" fill="#5b8def" class="particle" style="animation-delay: 1.1s"/>
+<circle cx="805" cy="608" r="2" fill="#5b8def" class="particle" style="animation-delay: 2.9s"/>
+<circle cx="815" cy="611" r="2" fill="#5b8def" class="particle" style="animation-delay: 3.3s"/>
+<circle cx="839" cy="624" r="2" fill="#5b8def" class="particle" style="animation-delay: 0.1s"/>
+<circle cx="824" cy="627" r="2" fill="#5b8def" class="particle" style="animation-delay: 2.6s"/>
+<circle cx="593" cy="794" r="2" fill="#f0a030" class="particle" style="animation-delay: 1.9s"/>
+<circle cx="616" cy="774" r="2" fill="#f0a030" class="particle" style="animation-delay: 3.4s"/>
+<circle cx="598" cy="782" r="2" fill="#f0a030" class="particle" style="animation-delay: 1.5s"/>
+<circle cx="604" cy="805" r="2" fill="#f0a030" class="particle" style="animation-delay: 1.1s"/>
+<circle cx="611" cy="776" r="2" fill="#f0a030" class="particle" style="animation-delay: 3.9s"/>
+<circle cx="400" cy="568" r="2" fill="#9b59b6" class="particle" style="animation-delay: 0.2s"/>
+<circle cx="413" cy="558" r="2" fill="#9b59b6" class="particle" style="animation-delay: 1.4s"/>
+<circle cx="416" cy="542" r="2" fill="#9b59b6" class="particle" style="animation-delay: 1.3s"/>
+<circle cx="415" cy="568" r="2" fill="#9b59b6" class="particle" style="animation-delay: 3.6s"/>
+<circle cx="398" cy="540" r="2" fill="#9b59b6" class="particle" style="animation-delay: 2.4s"/>
+<circle cx="299" cy="291" r="2" fill="#1ea88e" class="particle" style="animation-delay: 0.2s"/>
+<circle cx="297" cy="286" r="2" fill="#1ea88e" class="particle" style="animation-delay: 3.6s"/>
+<circle cx="292" cy="308" r="2" fill="#1ea88e" class="particle" style="animation-delay: 2.1s"/>
+<circle cx="902" cy="425" r="2" fill="#5b8def" class="particle" style="animation-delay: 3.8s"/>
+<circle cx="908" cy="413" r="2" fill="#5b8def" class="particle" style="animation-delay: 0.8s"/>
+<circle cx="901" cy="428" r="2" fill="#5b8def" class="particle" style="animation-delay: 0.1s"/>
+<circle cx="911" cy="426" r="2" fill="#5b8def" class="particle" style="animation-delay: 3.5s"/>
+<circle cx="903" cy="435" r="2" fill="#5b8def" class="particle" style="animation-delay: 0.9s"/>
+<circle cx="635" cy="648" r="2" fill="#f0a030" class="particle" style="animation-delay: 3.8s"/>
+<circle cx="615" cy="627" r="2" fill="#f0a030" class="particle" style="animation-delay: 2.7s"/>
+<circle cx="604" cy="653" r="2" fill="#f0a030" class="particle" style="animation-delay: 2.4s"/>
+<circle cx="746" cy="118" r="2" fill="#1ea88e" class="particle" style="animation-delay: 3.7s"/>
+<circle cx="739" cy="96" r="2" fill="#1ea88e" class="particle" style="animation-delay: 3.4s"/>
+<circle cx="747" cy="94" r="2" fill="#1ea88e" class="particle" style="animation-delay: 1.8s"/>
+<circle cx="717" cy="92" r="2" fill="#1ea88e" class="particle" style="animation-delay: 2.6s"/>
+<circle cx="744" cy="96" r="2" fill="#1ea88e" class="particle" style="animation-delay: 0.8s"/>
+<circle cx="818" cy="213" r="2" fill="#e8725a" class="particle" style="animation-delay: 1.8s"/>
+<circle cx="810" cy="210" r="2" fill="#e8725a" class="particle" style="animation-delay: 1.8s"/>
+<circle cx="807" cy="245" r="2" fill="#e8725a" class="particle" style="animation-delay: 0.6s"/>
+<rect x="20" y="720" width="200" height="70" fill="#111" fill-opacity="0.8" rx="6"/>
+<text x="30" y="738" fill="#fff" font-size="11" font-weight="bold">Legend</text>
+<circle cx="40" cy="754" r="8" fill="#1ea88e" fill-opacity="0.4" stroke="#1ea88e"/>
+<text x="55" y="758" fill="#aaa" font-size="10">Domain / Subfield / Thread</text>
+<line x1="30" y1="772" x2="50" y2="772" stroke="#ff4444" stroke-dasharray="4,3"/>
+<text x="55" y="776" fill="#aaa" font-size="10">Research Gap</text>
+<text x="1180" y="30" text-anchor="end" fill="#666" font-size="11" font-family="monospace">535 papers | 168 topics</text>
+</svg>
