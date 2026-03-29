@@ -79,14 +79,17 @@ async function handleViewFullDraft() {
   showDraftModal.value = true
   try {
     const res = await exportDraft(props.runId, 'markdown')
-    const md = res.data?.data
-    if (typeof md === 'string') {
+    // Backend may return {data: "string"} or {data: {content: "string"}}
+    const raw = res.data?.data
+    const md = typeof raw === 'string' ? raw : (raw as Record<string, unknown>)?.content as string
+    if (md && typeof md === 'string') {
       draftMarkdown.value = md
-      // Simple markdown → HTML conversion (headings, bold, italic, code, lists, paragraphs)
       draftHtml.value = renderMarkdown(md)
+    } else {
+      draftHtml.value = '<p style="color: var(--text-tertiary)">No draft content available — run the Draft stage first.</p>'
     }
   } catch (err) {
-    draftHtml.value = '<p style="color: var(--error)">Failed to load draft</p>'
+    draftHtml.value = '<p style="color: var(--error)">Failed to load draft. Make sure the pipeline has reached the Draft stage.</p>'
   } finally {
     draftLoading.value = false
   }
@@ -132,8 +135,9 @@ async function handleExportMarkdown() {
   if (!props.runId) return
   try {
     const res = await exportDraft(props.runId, 'markdown')
-    const markdown = res.data?.data
-    if (typeof markdown === 'string') {
+    const raw = res.data?.data
+    const markdown = typeof raw === 'string' ? raw : (raw as Record<string, unknown>)?.content as string
+    if (markdown && typeof markdown === 'string') {
       const blob = new Blob([markdown], { type: 'text/markdown' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -160,7 +164,8 @@ async function handleSendToPaperLab() {
   try {
     // Pre-check: verify the draft export works before navigating
     const res = await exportDraft(props.runId, 'markdown')
-    const md = res.data?.data
+    const raw = res.data?.data
+    const md = typeof raw === 'string' ? raw : (raw as Record<string, unknown>)?.content as string
     if (!md || typeof md !== 'string' || md.length < 50) {
       error.value = 'Draft content is empty or too short — generate a draft first'
       return
