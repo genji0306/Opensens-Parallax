@@ -2,8 +2,9 @@
 import { computed, ref, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import ActionButton from '@/components/shared/ActionButton.vue'
-import { exportDraft, runExperimentDesign, getPipelineStatus, exportLatex, exportBibtex, getDraftVersions } from '@/api/ais'
+import { exportDraft, runExperimentDesign, getPipelineStatus, getDraftVersions } from '@/api/ais'
 import type { ExperimentDesignResult, DraftVersion } from '@/api/ais'
+import service from '@/api/client'
 
 const props = defineProps<{
   result: Record<string, unknown>
@@ -147,23 +148,71 @@ async function handleExportMarkdown() {
   }
 }
 
-function handleSendToPaperLab() {
+const sendingToPaperLab = ref(false)
+
+async function handleSendToPaperLab() {
   if (!props.runId) {
     router.push({ name: 'paper-lab' })
     return
   }
-  router.push({ name: 'paper-lab', query: { run_id: props.runId } })
+  sendingToPaperLab.value = true
+  error.value = null
+  try {
+    // Pre-check: verify the draft export works before navigating
+    const res = await exportDraft(props.runId, 'markdown')
+    const md = res.data?.data
+    if (!md || typeof md !== 'string' || md.length < 50) {
+      error.value = 'Draft content is empty or too short — generate a draft first'
+      return
+    }
+    router.push({ name: 'paper-lab', query: { run_id: props.runId } })
+  } catch (err) {
+    error.value = 'Could not export draft for Paper Lab — try again after draft is generated'
+  } finally {
+    sendingToPaperLab.value = false
+  }
 }
 
 // ── LaTeX/BibTeX Export ───────────────────────────────────────────────
-function handleExportLatex() {
+const latexLoading = ref(false)
+const bibtexLoading = ref(false)
+
+async function handleExportLatex() {
   if (!props.runId) return
-  window.open(exportLatex(props.runId), '_blank')
+  latexLoading.value = true
+  try {
+    const res = await service.get(`/api/research/ais/${props.runId}/export/latex`, { responseType: 'text' })
+    const content = typeof res.data === 'string' ? res.data : (res.data?.data ?? JSON.stringify(res.data))
+    downloadFile(content, `draft-${props.runId}.tex`, 'application/x-tex')
+  } catch (err) {
+    error.value = 'LaTeX export failed — draft may not be available yet'
+  } finally {
+    latexLoading.value = false
+  }
 }
 
-function handleExportBibtex() {
+async function handleExportBibtex() {
   if (!props.runId) return
-  window.open(exportBibtex(props.runId), '_blank')
+  bibtexLoading.value = true
+  try {
+    const res = await service.get(`/api/research/ais/${props.runId}/export/bibtex`, { responseType: 'text' })
+    const content = typeof res.data === 'string' ? res.data : (res.data?.data ?? JSON.stringify(res.data))
+    downloadFile(content, `references-${props.runId}.bib`, 'application/x-bibtex')
+  } catch (err) {
+    error.value = 'BibTeX export failed — draft may not be available yet'
+  } finally {
+    bibtexLoading.value = false
+  }
+}
+
+function downloadFile(content: string, filename: string, mimeType: string) {
+  const blob = new Blob([content], { type: mimeType })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
 }
 
 // ── Version History ──────────────────────────────────────────────────
@@ -356,8 +405,9 @@ const hasData = computed(() =>
           icon="visibility"
           @click="handleViewFullDraft"
         >
-          View Full Draft
+          Read Draft
         </ActionButton>
+
         <ActionButton
           v-if="runId"
           variant="ghost"
@@ -365,26 +415,29 @@ const hasData = computed(() =>
           icon="download"
           @click="handleExportMarkdown"
         >
-          Export Markdown
+          .md
         </ActionButton>
         <ActionButton
           v-if="runId"
           variant="ghost"
           size="sm"
           icon="article"
+          :disabled="latexLoading"
           @click="handleExportLatex"
         >
-          LaTeX
+          {{ latexLoading ? '...' : '.tex' }}
         </ActionButton>
         <ActionButton
           v-if="runId"
           variant="ghost"
           size="sm"
           icon="format_quote"
+          :disabled="bibtexLoading"
           @click="handleExportBibtex"
         >
-          BibTeX
+          {{ bibtexLoading ? '...' : '.bib' }}
         </ActionButton>
+
         <ActionButton
           v-if="runId"
           variant="ghost"
@@ -398,10 +451,21 @@ const hasData = computed(() =>
           variant="ghost"
           size="sm"
           icon="healing"
+          :disabled="sendingToPaperLab"
           @click="handleSendToPaperLab"
         >
-          Send to Paper Lab
+          {{ sendingToPaperLab ? 'Sending...' : 'Paper Lab' }}
         </ActionButton>
+      </div>
+
+      <!-- Experiment Design: separate section with explanation -->
+      <div class="draft-detail__experiment-section">
+        <div class="draft-detail__experiment-header">
+          <h5 class="detail-heading">Experiment Design</h5>
+          <p class="draft-detail__experiment-desc">
+            Analyzes your draft for evidence gaps and proposes experiments to strengthen claims.
+          </p>
+        </div>
         <ActionButton
           v-if="runId"
           variant="secondary"
@@ -410,7 +474,7 @@ const hasData = computed(() =>
           :disabled="experimentLoading"
           @click="handleRunExperimentDesign"
         >
-          {{ experimentLoading ? 'Running...' : 'Run Experiment Design' }}
+          {{ experimentLoading ? 'Analyzing...' : 'Analyze Evidence Gaps' }}
         </ActionButton>
       </div>
 
@@ -761,6 +825,31 @@ const hasData = computed(() =>
   background: rgba(239, 68, 68, 0.06);
   border: 1px solid rgba(239, 68, 68, 0.2);
   border-radius: var(--radius-md);
+}
+
+/* ── Experiment Design Section ── */
+.draft-detail__experiment-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--os-brand);
+}
+
+.draft-detail__experiment-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.draft-detail__experiment-desc {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin: 0;
+  line-height: 1.5;
 }
 
 /* ── Experiment Loading ── */
