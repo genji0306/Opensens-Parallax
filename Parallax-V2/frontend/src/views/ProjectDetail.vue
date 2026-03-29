@@ -42,10 +42,13 @@ import ReviewerBoardConfig from '@/components/review/ReviewerBoardConfig.vue'
 import ReviewConflictPanel from '@/components/review/ReviewConflictPanel.vue'
 import RevisionPlanView from '@/components/review/RevisionPlanView.vue'
 
+// P-5: Translation
+import GrantPreview from '@/components/knowledge/GrantPreview.vue'
+
 // P-6: Handoff
 import ReadinessPanel from '@/components/handoff/ReadinessPanel.vue'
 
-import { buildKnowledgeArtifact, getKnowledgeArtifact } from '@/api/ais'
+import { buildKnowledgeArtifact, getKnowledgeArtifact, exportKnowledge } from '@/api/ais'
 import type { KnowledgeArtifact as KAType } from '@/api/ais'
 
 const route = useRoute()
@@ -62,7 +65,7 @@ const costBreakdown = ref<RunCost | null>(null)
 const showCostBreakdown = ref(false)
 
 // Intelligence tabs (P-2/P-3/P-6)
-type IntelTab = 'knowledge' | 'review' | 'readiness'
+type IntelTab = 'knowledge' | 'review' | 'translation' | 'readiness'
 const activeIntelTab = ref<IntelTab | null>(null)
 const knowledgeArtifact = ref<KAType | null>(null)
 const knowledgeLoading = ref(false)
@@ -87,6 +90,44 @@ async function handleBuildArtifact() {
     console.error('Build artifact failed:', err)
   } finally {
     knowledgeLoading.value = false
+  }
+}
+
+// Translation state
+const translationResult = ref<Record<string, unknown> | null>(null)
+const translationLoading = ref(false)
+const translationMode = ref('grant')
+
+async function handleTranslate() {
+  if (!runId.value) return
+  translationLoading.value = true
+  try {
+    const { default: service } = await import('@/api/client')
+    const res = await service.post(`/api/research/ais/${runId.value}/translate`, { mode: translationMode.value }, { timeout: 120000 })
+    translationResult.value = res.data?.data ?? null
+  } catch (err) {
+    console.error('Translation failed:', err)
+  } finally {
+    translationLoading.value = false
+  }
+}
+
+async function handleExportKnowledge() {
+  if (!runId.value) return
+  try {
+    const res = await exportKnowledge(runId.value)
+    const data = res.data?.data
+    if (data) {
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `knowledge-${runId.value}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+    }
+  } catch (err) {
+    console.error('Export failed:', err)
   }
 }
 
@@ -644,6 +685,7 @@ function handleNextAction(handler: string) {
             v-for="tab in ([
               { key: 'knowledge', label: 'Knowledge', icon: 'psychology' },
               { key: 'review', label: 'Review Board', icon: 'rate_review' },
+              { key: 'translation', label: 'Translation', icon: 'translate' },
               { key: 'readiness', label: 'Readiness', icon: 'rocket_launch' },
             ] as const)"
             :key="tab.key"
@@ -691,6 +733,41 @@ function handleNextAction(handler: string) {
           <ReviewerBoardConfig :run-id="runId" @review-complete="fetchKnowledgeArtifact" />
           <ReviewConflictPanel :run-id="runId" />
           <RevisionPlanView :run-id="runId" />
+        </div>
+
+        <!-- Translation Tab -->
+        <div v-if="activeIntelTab === 'translation'" class="intel-panel__content">
+          <div class="translation-controls">
+            <div class="translation-controls__row">
+              <select v-model="translationMode" class="translation-controls__select">
+                <option value="journal">Journal Paper</option>
+                <option value="grant">Grant Concept Note</option>
+                <option value="funding">Funding Brief</option>
+                <option value="patent">Patent Assessment</option>
+                <option value="commercial">Commercialization Brief</option>
+              </select>
+              <ActionButton
+                variant="primary"
+                size="sm"
+                icon="translate"
+                :loading="translationLoading"
+                @click="handleTranslate"
+              >
+                Translate
+              </ActionButton>
+              <ActionButton
+                v-if="knowledgeArtifact"
+                variant="secondary"
+                size="sm"
+                icon="download"
+                @click="handleExportKnowledge"
+              >
+                Export JSON
+              </ActionButton>
+            </div>
+          </div>
+
+          <GrantPreview v-if="translationResult" :data="translationResult" />
         </div>
 
         <!-- Readiness Tab -->
@@ -1307,5 +1384,36 @@ function handleNextAction(handler: string) {
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+/* ── Translation Controls ── */
+
+.translation-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.translation-controls__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.translation-controls__select {
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  min-width: 180px;
+}
+
+.translation-controls__select:focus {
+  border-color: var(--os-brand);
+  outline: none;
 }
 </style>

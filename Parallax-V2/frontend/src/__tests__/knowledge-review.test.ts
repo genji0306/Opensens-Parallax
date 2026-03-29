@@ -2,23 +2,12 @@
  * Tests for P-2 Knowledge Engine and P-3 Review Board API types + contracts.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import type {
   KnowledgeArtifact,
-  KnowledgeClaim,
-  KnowledgeEvidence,
-  KnowledgeGap,
-  NoveltyAssessment,
-  SubQuestion,
-  KnowledgeHypothesis,
   ClaimGraphData,
   NoveltyMapData,
-  QuestionTreeData,
-  ReviewComment,
-  ReviewerResult,
   RevisionRound,
-  ReviewConflict,
-  RevisionTheme,
 } from '@/api/ais'
 
 // ── P-2 Knowledge Types ──────────────────────────────────────────────
@@ -88,20 +77,20 @@ describe('P-2 Knowledge Engine Types', () => {
   })
 
   it('Claims have typed evidence links', () => {
-    const claim = MOCK_ARTIFACT.claims[0]
+    const claim = MOCK_ARTIFACT.claims[0]!
     expect(claim.supporting).toContain('ev_1')
     expect(claim.category).toBe('finding')
     expect(claim.confidence).toBeGreaterThan(0)
   })
 
   it('Gaps reference related claims', () => {
-    const gap = MOCK_ARTIFACT.gaps[0]
+    const gap = MOCK_ARTIFACT.gaps[0]!
     expect(gap.related_claims).toContain('cl_1')
     expect(gap.severity).toBe('critical')
   })
 
   it('Novelty assessment has score and explanation', () => {
-    const na = MOCK_ARTIFACT.novelty_assessments[0]
+    const na = MOCK_ARTIFACT.novelty_assessments[0]!
     expect(na.novelty_score).toBeGreaterThanOrEqual(0)
     expect(na.novelty_score).toBeLessThanOrEqual(1)
     expect(na.explanation).toBeTruthy()
@@ -138,8 +127,8 @@ describe('ClaimGraphData shape', () => {
   })
 
   it('has links with typed edges', () => {
-    expect(MOCK_GRAPH.links[0].type).toBe('supports')
-    expect(MOCK_GRAPH.links[1].type).toBe('gap_for')
+    expect(MOCK_GRAPH.links[0]!.type).toBe('supports')
+    expect(MOCK_GRAPH.links[1]!.type).toBe('gap_for')
   })
 
   it('stats match node counts', () => {
@@ -162,8 +151,8 @@ describe('NoveltyMapData shape', () => {
   }
 
   it('heatmap items have zone classification', () => {
-    expect(MOCK_NOVELTY.heatmap[0].zone).toBe('novel')
-    expect(MOCK_NOVELTY.heatmap[1].zone).toBe('covered')
+    expect(MOCK_NOVELTY.heatmap[0]!.zone).toBe('novel')
+    expect(MOCK_NOVELTY.heatmap[1]!.zone).toBe('covered')
   })
 
   it('stats aggregate correctly', () => {
@@ -246,23 +235,23 @@ describe('P-3 Review Board Types', () => {
   })
 
   it('ReviewerResult has scored comments', () => {
-    const result = MOCK_ROUND.results[0]
+    const result = MOCK_ROUND.results[0]!
     expect(result.overall_score).toBe(6.5)
     expect(result.comments).toHaveLength(1)
-    expect(result.comments[0].severity).toBe('critical')
-    expect(result.comments[0].confidence).toBe(0.9)
-    expect(result.comments[0].impact).toBe('high')
+    expect(result.comments[0]!.severity).toBe('critical')
+    expect(result.comments[0]!.confidence).toBe(0.9)
+    expect(result.comments[0]!.impact).toBe('high')
   })
 
   it('RevisionTheme links to comments', () => {
-    const theme = MOCK_ROUND.themes[0]
+    const theme = MOCK_ROUND.themes[0]!
     expect(theme.comment_ids).toContain('rc_1')
     expect(theme.priority).toBe(1)
     expect(theme.impact).toBe('high')
   })
 
   it('ReviewConflict identifies opposing reviewers', () => {
-    const cf = MOCK_ROUND.conflicts[0]
+    const cf = MOCK_ROUND.conflicts[0]!
     expect(cf.reviewer_a).toBe('methodological')
     expect(cf.reviewer_b).toBe('novelty')
     expect(cf.resolution_suggestion).toBeTruthy()
