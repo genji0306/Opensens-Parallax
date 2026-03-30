@@ -56,7 +56,12 @@ class BoardManager:
     """Manages a configurable panel of reviewer archetypes."""
 
     def __init__(self):
-        self.llm = LLMClient()
+        self.llm = None
+
+    def _get_llm(self) -> LLMClient:
+        if self.llm is None:
+            self.llm = LLMClient()
+        return self.llm
 
     def get_available_archetypes(self) -> Dict[str, Dict[str, Any]]:
         """Return all available reviewer archetypes."""
@@ -153,7 +158,7 @@ class BoardManager:
         )
 
         try:
-            response = self.llm.chat(prompt, model=model)
+            response = self._get_llm().chat(prompt, model=model)
             return self._parse_reviewer_response(rtype, archetype["name"], response)
         except Exception as e:
             logger.error("[BoardManager] Reviewer %s failed: %s", rtype, e)

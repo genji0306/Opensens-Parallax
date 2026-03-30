@@ -80,7 +80,12 @@ class PatentAnalyzer:
     """Assesses patentability of research findings."""
 
     def __init__(self):
-        self.llm = LLMClient()
+        self.llm = None
+
+    def _get_llm(self) -> LLMClient:
+        if self.llm is None:
+            self.llm = LLMClient()
+        return self.llm
 
     def analyze(self, run_id: str, model: str = "") -> Dict[str, Any]:
         artifact = KnowledgeArtifactDAO.load(run_id)
@@ -93,7 +98,7 @@ class PatentAnalyzer:
         )
 
         model = model or "claude-sonnet-4-20250514"
-        response = self.llm.chat(
+        response = self._get_llm().chat(
             PATENT_PROMPT.format(idea=idea, contribution=contribution, novelty=novelty or "None."),
             model=model,
         )
@@ -116,7 +121,12 @@ class CommercialAnalyzer:
     """Assesses commercial potential of research findings."""
 
     def __init__(self):
-        self.llm = LLMClient()
+        self.llm = None
+
+    def _get_llm(self) -> LLMClient:
+        if self.llm is None:
+            self.llm = LLMClient()
+        return self.llm
 
     def analyze(self, run_id: str, model: str = "") -> Dict[str, Any]:
         artifact = KnowledgeArtifactDAO.load(run_id)
@@ -126,7 +136,7 @@ class CommercialAnalyzer:
         differentiators = ", ".join(hyp.differentiators) if hyp else ""
 
         model = model or "claude-sonnet-4-20250514"
-        response = self.llm.chat(
+        response = self._get_llm().chat(
             COMMERCIAL_PROMPT.format(idea=idea, contribution=contribution, differentiators=differentiators or "None."),
             model=model,
         )

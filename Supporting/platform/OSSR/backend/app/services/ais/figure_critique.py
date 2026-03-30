@@ -80,7 +80,12 @@ class FigureCritique:
     """Automated critique for scientific figures by type."""
 
     def __init__(self):
-        self.llm = LLMClient()
+        self.llm = None
+
+    def _get_llm(self) -> LLMClient:
+        if self.llm is None:
+            self.llm = LLMClient()
+        return self.llm
 
     def get_figure_types(self) -> Dict[str, Dict]:
         return FIGURE_TYPES
@@ -97,7 +102,7 @@ class FigureCritique:
         criteria = ", ".join(ft["criteria"])
 
         model = model or "claude-sonnet-4-20250514"
-        response = self.llm.chat(
+        response = self._get_llm().chat(
             CRITIQUE_PROMPT.format(
                 figure_type=ft["label"],
                 figure_type_key=figure_type,

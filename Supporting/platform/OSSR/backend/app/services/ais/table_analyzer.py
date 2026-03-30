@@ -51,7 +51,12 @@ class TableAnalyzer:
     """Analyzes tables in research papers for quality and anomalies."""
 
     def __init__(self):
-        self.llm = LLMClient()
+        self.llm = None
+
+    def _get_llm(self) -> LLMClient:
+        if self.llm is None:
+            self.llm = LLMClient()
+        return self.llm
 
     def analyze(
         self,
@@ -61,7 +66,7 @@ class TableAnalyzer:
     ) -> Dict[str, Any]:
         """Analyze a single table."""
         model = model or "claude-sonnet-4-20250514"
-        response = self.llm.chat(
+        response = self._get_llm().chat(
             TABLE_PROMPT.format(
                 table_data=table_data[:3000],
                 context=paper_context[:2000],

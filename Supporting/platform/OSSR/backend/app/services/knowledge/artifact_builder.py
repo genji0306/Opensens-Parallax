@@ -72,7 +72,12 @@ class ArtifactBuilder:
     """Builds KnowledgeArtifact from pipeline run outputs."""
 
     def __init__(self):
-        self.llm = LLMClient()
+        self.llm = None
+
+    def _get_llm(self) -> LLMClient:
+        if self.llm is None:
+            self.llm = LLMClient()
+        return self.llm
 
     def build(self, run_id: str, model: str = "") -> KnowledgeArtifact:
         """
@@ -105,7 +110,7 @@ class ArtifactBuilder:
         )
 
         model = model or "claude-sonnet-4-20250514"
-        response = self.llm.chat(prompt, model=model)
+        response = self._get_llm().chat(prompt, model=model)
 
         # Parse LLM response
         claims, extracted_gaps = self._parse_extraction(response)

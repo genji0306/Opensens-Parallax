@@ -58,7 +58,12 @@ class QuestionDecomposer:
     """Decomposes research ideas into sub-question trees."""
 
     def __init__(self):
-        self.llm = LLMClient()
+        self.llm = None
+
+    def _get_llm(self) -> LLMClient:
+        if self.llm is None:
+            self.llm = LLMClient()
+        return self.llm
 
     def decompose(self, run_id: str, model: str = "") -> Dict[str, Any]:
         """
@@ -84,7 +89,7 @@ class QuestionDecomposer:
             evidence_summary = f"{len(artifact.evidence)} pieces of evidence, {len(artifact.claims)} claims"
 
         model = model or "claude-sonnet-4-20250514"
-        response = self.llm.chat(
+        response = self._get_llm().chat(
             DECOMPOSE_PROMPT.format(
                 idea=idea,
                 claims=claims_text or "No claims extracted yet.",

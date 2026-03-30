@@ -84,7 +84,12 @@ class TemplateEngine:
     """Translates KnowledgeArtifact into multiple output formats."""
 
     def __init__(self):
-        self.llm = LLMClient()
+        self.llm = None
+
+    def _get_llm(self) -> LLMClient:
+        if self.llm is None:
+            self.llm = LLMClient()
+        return self.llm
 
     def get_output_modes(self) -> Dict[str, Dict[str, Any]]:
         return {k: {"name": v["name"], "description": v["description"]} for k, v in OUTPUT_MODES.items()}
@@ -111,7 +116,7 @@ class TemplateEngine:
         hypothesis = f"Problem: {hyp.problem_statement}\nContribution: {hyp.contribution}" if hyp else "Not defined"
 
         model = model or "claude-sonnet-4-20250514"
-        response = self.llm.chat(
+        response = self._get_llm().chat(
             TRANSLATE_PROMPT.format(
                 mode_name=mode_info["name"],
                 mode_key=mode,

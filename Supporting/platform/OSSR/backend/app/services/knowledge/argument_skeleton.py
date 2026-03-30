@@ -55,7 +55,12 @@ class ArgumentSkeleton:
     """Generates citation-backed argument skeletons from knowledge artifacts."""
 
     def __init__(self):
-        self.llm = LLMClient()
+        self.llm = None
+
+    def _get_llm(self) -> LLMClient:
+        if self.llm is None:
+            self.llm = LLMClient()
+        return self.llm
 
     def build(self, run_id: str, model: str = "") -> Dict[str, Any]:
         """
@@ -81,7 +86,7 @@ class ArgumentSkeleton:
         papers = self._get_paper_titles(run_id)
 
         model = model or "claude-sonnet-4-20250514"
-        response = self.llm.chat(
+        response = self._get_llm().chat(
             SKELETON_PROMPT.format(
                 problem=problem,
                 contribution=contribution,

@@ -44,7 +44,12 @@ class FigureBriefGenerator:
     """Generates briefs for missing figures in a paper."""
 
     def __init__(self):
-        self.llm = LLMClient()
+        self.llm = None
+
+    def _get_llm(self) -> LLMClient:
+        if self.llm is None:
+            self.llm = LLMClient()
+        return self.llm
 
     def generate(
         self,
@@ -64,7 +69,7 @@ class FigureBriefGenerator:
         existing = "\n".join(f"- {f}" for f in (existing_figures or [])) or "None listed."
 
         model = model or "claude-sonnet-4-20250514"
-        response = self.llm.chat(
+        response = self._get_llm().chat(
             BRIEF_PROMPT.format(
                 sections=paper_sections[:5000],
                 existing_figures=existing[:1000],

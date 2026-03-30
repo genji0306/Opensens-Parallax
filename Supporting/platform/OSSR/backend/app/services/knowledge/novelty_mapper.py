@@ -48,7 +48,12 @@ class NoveltyMapper:
     """Maps novelty scores across all claims in a knowledge artifact."""
 
     def __init__(self):
-        self.llm = LLMClient()
+        self.llm = None
+
+    def _get_llm(self) -> LLMClient:
+        if self.llm is None:
+            self.llm = LLMClient()
+        return self.llm
 
     def map_novelty(self, run_id: str, model: str = "") -> Dict[str, Any]:
         """
@@ -71,7 +76,7 @@ class NoveltyMapper:
         )
 
         model = model or "claude-sonnet-4-20250514"
-        response = self.llm.chat(
+        response = self._get_llm().chat(
             NOVELTY_PROMPT.format(claims=claims_text[:3000], literature=literature[:3000]),
             model=model,
         )

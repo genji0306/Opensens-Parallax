@@ -61,7 +61,12 @@ class ConflictDetector:
     """Detects conflicts between reviewers and clusters comments into themes."""
 
     def __init__(self):
-        self.llm = LLMClient()
+        self.llm = None
+
+    def _get_llm(self) -> LLMClient:
+        if self.llm is None:
+            self.llm = LLMClient()
+        return self.llm
 
     def analyze(self, run_id: str, model: str = "") -> Dict[str, Any]:
         """
@@ -92,7 +97,7 @@ class ConflictDetector:
         )
 
         model = model or "claude-sonnet-4-20250514"
-        response = self.llm.chat(
+        response = self._get_llm().chat(
             CONFLICT_PROMPT.format(comments=comments_text[:5000]),
             model=model,
         )

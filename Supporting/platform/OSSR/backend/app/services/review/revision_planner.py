@@ -70,7 +70,12 @@ class RevisionPlanner:
     """Creates prioritized revision plans and response-to-reviewers."""
 
     def __init__(self):
-        self.llm = LLMClient()
+        self.llm = None
+
+    def _get_llm(self) -> LLMClient:
+        if self.llm is None:
+            self.llm = LLMClient()
+        return self.llm
 
     def create_plan(self, run_id: str, model: str = "") -> Dict[str, Any]:
         """
@@ -97,7 +102,7 @@ class RevisionPlanner:
         )
 
         model = model or "claude-sonnet-4-20250514"
-        response = self.llm.chat(
+        response = self._get_llm().chat(
             REVISION_PLAN_PROMPT.format(themes=themes_text, summaries=summaries_text),
             model=model,
         )
@@ -146,7 +151,7 @@ class RevisionPlanner:
         ) or "No revision plan."
 
         model = model or "claude-sonnet-4-20250514"
-        response = self.llm.chat(
+        response = self._get_llm().chat(
             REBUTTAL_PROMPT.format(comments=comments_text[:5000], plan=plan_text[:2000]),
             model=model,
         )
