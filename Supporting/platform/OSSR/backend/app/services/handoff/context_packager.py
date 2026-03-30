@@ -108,12 +108,12 @@ class ContextPackager:
     def _get_topics(self, run_id: str):
         conn = get_connection()
         rows = conn.execute("""
-            SELECT t.topic_id, t.name, t.level, t.data
+            SELECT t.topic_id, t.name, t.level, t.metadata
             FROM topics t JOIN run_topics rt ON t.topic_id = rt.topic_id
             WHERE rt.run_id = ?
         """, (run_id,)).fetchall()
         return [
             {"topic_id": r["topic_id"], "name": r["name"], "level": r["level"],
-             "data": json.loads(r["data"]) if r["data"] else {}}
+             "metadata": json.loads(r["metadata"]) if r["metadata"] else {}}
             for r in rows
         ]

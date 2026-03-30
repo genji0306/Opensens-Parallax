@@ -196,14 +196,14 @@ class ArtifactBuilder:
     def _get_topic_gaps(self, run_id: str) -> str:
         conn = get_connection()
         rows = conn.execute("""
-            SELECT t.name, t.data FROM topics t
+            SELECT t.name, t.metadata FROM topics t
             JOIN run_topics rt ON t.topic_id = rt.topic_id
             WHERE rt.run_id = ?
         """, (run_id,)).fetchall()
 
         gaps = []
         for row in rows:
-            data = json.loads(row["data"]) if row["data"] else {}
+            data = json.loads(row["metadata"]) if row["metadata"] else {}
             topic_gaps = data.get("gaps", [])
             for g in topic_gaps:
                 gaps.append(f"[{row['name']}] {g}")
