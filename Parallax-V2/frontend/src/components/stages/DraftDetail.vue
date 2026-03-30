@@ -2,7 +2,7 @@
 import { computed, ref, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import ActionButton from '@/components/shared/ActionButton.vue'
-import { exportDraft, runExperimentDesign, getPipelineStatus, getDraftVersions } from '@/api/ais'
+import { exportDraft, runExperimentDesign, getPipelineStatus, getDraftVersions, buildArgumentSkeleton } from '@/api/ais'
 import type { ExperimentDesignResult, DraftVersion } from '@/api/ais'
 import service from '@/api/client'
 
@@ -300,6 +300,23 @@ function severityColor(severity: string): string {
   return 'var(--info)'
 }
 
+// ── Argument Skeleton (P-2) ───────────────────────────────────────────
+const skeletonLoading = ref(false)
+const skeletonResult = ref<Array<{ section_id: string; heading: string; purpose: string; key_points: string[]; assigned_citations: string[] }> | null>(null)
+
+async function handleBuildSkeleton() {
+  if (!props.runId || skeletonLoading.value) return
+  skeletonLoading.value = true
+  try {
+    const res = await buildArgumentSkeleton(props.runId)
+    skeletonResult.value = res.data?.data?.sections ?? null
+  } catch {
+    // best effort
+  } finally {
+    skeletonLoading.value = false
+  }
+}
+
 // ── Weakness Tracking ─────────────────────────────────────────────────
 const reviewStrengths = computed<string[]>(() => {
   const raw = props.result.review_strengths as string[] | undefined
@@ -588,6 +605,35 @@ const hasData = computed(() =>
                   </tr>
                 </tbody>
               </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Argument Skeleton (P-2) ── -->
+      <div v-if="runId" class="argument-skeleton-section">
+        <div class="argument-skeleton-section__header">
+          <h5 class="detail-heading">Argument Skeleton</h5>
+          <ActionButton
+            v-if="!skeletonResult"
+            variant="secondary"
+            size="sm"
+            icon="account_tree"
+            :loading="skeletonLoading"
+            @click="handleBuildSkeleton"
+          >
+            Build Skeleton
+          </ActionButton>
+        </div>
+        <div v-if="skeletonResult" class="argument-skeleton-section__list">
+          <div v-for="sec in skeletonResult" :key="sec.section_id" class="skeleton-section-card">
+            <div class="skeleton-section-card__heading">{{ sec.heading }}</div>
+            <p class="skeleton-section-card__purpose">{{ sec.purpose }}</p>
+            <ul v-if="sec.key_points.length" class="skeleton-section-card__points">
+              <li v-for="(pt, i) in sec.key_points" :key="i">{{ pt }}</li>
+            </ul>
+            <div v-if="sec.assigned_citations.length" class="skeleton-section-card__citations">
+              <span v-for="(cit, i) in sec.assigned_citations" :key="i" class="skeleton-section-card__cite">{{ cit }}</span>
             </div>
           </div>
         </div>
@@ -1278,5 +1324,23 @@ const hasData = computed(() =>
   border: none;
   border-top: 1px solid var(--border-primary, #333);
   margin: 20px 0;
+}
+
+/* ── Argument Skeleton ── */
+.argument-skeleton-section { margin-top: 8px; }
+.argument-skeleton-section__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.argument-skeleton-section__list { display: flex; flex-direction: column; gap: 6px; }
+.skeleton-section-card {
+  padding: 10px 12px; background: var(--bg-secondary);
+  border: 1px solid var(--border-secondary); border-radius: var(--radius-md);
+}
+.skeleton-section-card__heading { font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+.skeleton-section-card__purpose { font-size: 11px; color: var(--text-secondary); margin: 0 0 6px; line-height: 1.4; }
+.skeleton-section-card__points { margin: 0; padding-left: 16px; font-size: 11px; color: var(--text-secondary); line-height: 1.5; }
+.skeleton-section-card__citations { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.skeleton-section-card__cite {
+  font-size: 9px; padding: 2px 6px; border-radius: var(--radius-pill, 999px);
+  background: color-mix(in srgb, var(--os-brand) 10%, transparent);
+  color: var(--os-brand); font-weight: 500;
 }
 </style>
