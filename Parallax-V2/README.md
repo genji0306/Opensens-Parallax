@@ -92,14 +92,14 @@ Parallax-V2/
 - **Multimodal Layer** -- Vision-capable figure analysis with text-only fallback
 - **5 New Adapters** -- CrossRef, PubMed, CORE, DOAJ, Europe PMC (14 sources total)
 
-### V2 API Endpoints (12 new)
+### V2 API Endpoints (12 core)
 
 ```
 GET    /ais/<id>/graph                    DAG state
 POST   /ais/<id>/restart/<node>           Restart + invalidation
 PUT    /ais/<id>/node/<n>/model           Per-step model
 PUT    /ais/<id>/node/<n>/settings        Per-step settings
-GET    /ais/<id>/papers                   Paper browser (paginated)
+GET    /ais/<id>/papers                   Paper browser (sort, filter, paginate)
 GET    /ais/<id>/topics                   Topic map (clickable)
 POST   /ais/<id>/specialist-review        8-domain review
 GET    /ais/specialist-domains            List domains
@@ -107,6 +107,49 @@ POST   /ais/<id>/experiment-design        Experiment design agent
 GET    /ais/multimodal/status             Vision check
 POST   /ais/<id>/analyze-figures          Figure analysis
 GET    /ais/providers                     LLM provider info
+```
+
+### Knowledge Engine Endpoints (P-2, 8 new)
+
+```
+POST   /ais/<id>/knowledge/build          Extract KnowledgeArtifact from pipeline
+GET    /ais/<id>/knowledge                Get existing artifact
+GET    /ais/<id>/knowledge/claim-graph    D3 force-directed claim-evidence graph
+POST   /ais/<id>/knowledge/novelty        Score novelty per claim
+POST   /ais/<id>/knowledge/questions      Decompose into sub-questions
+POST   /ais/<id>/knowledge/hypothesis     Build contribution hypothesis
+POST   /ais/<id>/knowledge/argument-skeleton  Citation-backed outline
+GET    /ais/<id>/knowledge-export         Export full artifact JSON
+```
+
+### Review Board Endpoints (P-3, 7 new)
+
+```
+GET    /ais/review/archetypes             5 reviewer archetypes
+POST   /ais/<id>/review/round             Run full review round
+POST   /ais/<id>/review/conflicts         Detect conflicts + cluster themes
+POST   /ais/<id>/review/revision-plan     Prioritized revision plan
+POST   /ais/<id>/review/rebuttal          Point-by-point rebuttal
+GET    /ais/<id>/review/history           Revision history + analytics
+GET    /ais/review/rewrite-modes          4 rewrite modes
+```
+
+### Multimodal + Translation + Handoff Endpoints (P-4/P-5/P-6, 13 new)
+
+```
+POST   /ais/<id>/figures/critique         Type-specific figure critique
+GET    /ais/figures/types                 Figure type criteria
+POST   /ais/<id>/consistency-check        Text-vs-figure contradiction detection
+POST   /ais/<id>/tables/analyze           Table anomaly detection
+POST   /ais/<id>/figures/briefs           Briefs for missing figures
+GET    /ais/translation/modes             5 output modes
+POST   /ais/<id>/translate                Translate to output mode
+POST   /ais/<id>/translate/all            Translate to all 5 modes
+POST   /ais/<id>/grant                    Grant concept note with TRL
+POST   /ais/<id>/patent-assessment        Patentability analysis
+POST   /ais/<id>/commercial-assessment    Commercial potential
+GET    /ais/<id>/readiness                Platform readiness scores
+POST   /ais/<id>/handoff                  Bundle artifacts for handoff
 ```
 
 ## Frontend Stack
@@ -119,7 +162,7 @@ GET    /ais/providers                     LLM provider info
 | Styling | Tailwind CSS 4 |
 | Visualization | D3.js 7, SVG sparkline charts |
 | Build | Vite 6 |
-| Testing | Vitest 4 (137 tests) |
+| Testing | Vitest 4 (182 tests) |
 | Routing | Vue Router 4 |
 
 ## Environment
@@ -144,7 +187,12 @@ CORE_API_KEY=          # CORE (higher rate limits)
 ```bash
 cd frontend
 npm run typecheck    # vue-tsc --noEmit
-npm test             # vitest (137 tests)
+npm test             # vitest (182 tests)
+```
+
+```bash
+# Backend tests (129 tests)
+pytest backend/tests -q
 ```
 
 ```bash

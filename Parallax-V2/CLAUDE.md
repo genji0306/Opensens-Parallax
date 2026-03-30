@@ -48,9 +48,10 @@ frontend/src/
 +-- components/
 |   +-- pipeline/
 |   |   +-- PipelineTracker.vue    Two-row DAG (top: Search-Map-Debate-Validate, bottom: Ideas-Draft-Experiment-Revise-Pass)
-|   |   +-- StageCard.vue          Expandable card with model selector, settings, restart
+|   |   +-- StageCard.vue          Expandable card with model selector, typed settings, restart
+|   |   +-- StageSettingsForm.vue  Dynamic per-stage settings (source chips, sliders, toggles)
 |   +-- stages/
-|   |   +-- CrawlDetail.vue       Paper browser (search + pagination)
+|   |   +-- CrawlDetail.vue       Paper browser (search + sort + source filter + pagination)
 |   |   +-- MapDetail.vue         D3 topic graph (clickable nodes + detail panel)
 |   |   +-- IdeasDetail.vue       Ranked idea cards with composite scoring
 |   |   +-- DebateDetail.vue      Metrics + transcript viewer
@@ -59,6 +60,21 @@ frontend/src/
 |   |   +-- ExperimentDetail.vue  Template info + SVG loss chart
 |   |   +-- RehabDetail.vue       Review round scores + export
 |   |   +-- PassDetail.vue        Final score + revision count
+|   |   +-- FigureCritiquePanel   Automated figure quality critique (P-4)
+|   |   +-- TableAnalysisPanel    Table anomaly detection (P-4)
+|   +-- knowledge/               P-2 Knowledge Engine
+|   |   +-- ClaimGraphView.vue    D3 force-directed claim-evidence graph
+|   |   +-- NoveltyMap.vue        Novelty heatmap (novel/partial/covered zones)
+|   |   +-- QuestionTree.vue      Sub-question tree with coverage bars
+|   |   +-- HypothesisCard.vue    Structured contribution hypothesis
+|   |   +-- GrantPreview.vue      Grant concept note preview (P-5)
+|   +-- review/                  P-3 Review Board
+|   |   +-- ReviewerBoardConfig   5 archetypes, strictness, rewrite mode
+|   |   +-- ReviewConflictPanel   Conflicts + revision themes
+|   |   +-- RevisionPlanView      Revision plan + rebuttal generator
+|   |   +-- ConsistencyReport     Text-vs-figure contradiction display (P-4)
+|   +-- handoff/                 P-6 Handoff
+|   |   +-- ReadinessPanel        Platform readiness scoring
 |   +-- layout/
 |   |   +-- AppShell.vue          Root container
 |   |   +-- AppHeader.vue         Brand, search, cost, tools
@@ -80,26 +96,65 @@ frontend/src/
 +-- types/
 |   +-- pipeline.ts     StageId, StageStatus, StageInfo, STAGE_ORDER
 |   +-- api.ts          ApiResponse, WorkflowNode, SpecialistReviewResult, etc.
+|   +-- stage-settings.ts  Typed per-stage settings schemas (P-1)
 ```
 
 ## V2 Backend Services
 
 | Service | File | Purpose |
 |---------|------|---------|
-| Workflow Engine | `services/workflow/engine.py` | DAG creation, restart, feedback loop, legacy migration |
+| Workflow Engine | `services/workflow/engine.py` | DAG creation, restart (with thread locks), feedback loop |
+| Cost Tracker | `services/workflow/cost_tracker.py` | Per-node LLM cost recording + aggregation |
+| Stage Executor | `services/workflow/executor.py` | Node dispatch, model resolution, auto-advance |
 | Specialist Review | `services/ais/specialist_review.py` | 8-domain expert review |
 | Experiment Design | `services/ais/experiment_design_agent.py` | Evidence gaps + experiment designs |
 | Multimodal | `services/ais/multimodal.py` | Vision figure analysis + text fallback |
-| CORE Adapter | `services/ingestion/adapters/core_ac.py` | 300M+ open access papers |
-| CrossRef Adapter | `services/ingestion/adapters/crossref.py` | 150M+ DOI metadata |
-| PubMed Adapter | `services/ingestion/adapters/pubmed.py` | 36M+ biomedical papers |
-| DOAJ Adapter | `services/ingestion/adapters/doaj.py` | 10M+ open access articles |
-| Europe PMC Adapter | `services/ingestion/adapters/europe_pmc.py` | 44M+ life science papers |
+| Figure Critique | `services/ais/figure_critique.py` | Type-specific figure quality critique (P-4) |
+| Consistency Checker | `services/ais/consistency_checker.py` | Text-vs-figure contradiction detection (P-4) |
+| Table Analyzer | `services/ais/table_analyzer.py` | Table quality + anomaly detection (P-4) |
+| Figure Brief Gen | `services/ais/figure_brief_generator.py` | Briefs for missing figures (P-4) |
+
+### P-2 Knowledge Engine (`services/knowledge/`)
+
+| Service | Purpose |
+|---------|---------|
+| `artifact_builder.py` | Extract KnowledgeArtifact from pipeline outputs |
+| `claim_graph.py` | Build D3 force-directed claim-evidence graph |
+| `novelty_mapper.py` | Score novelty per claim against literature |
+| `question_decomposer.py` | Decompose research idea into sub-question tree |
+| `hypothesis_builder.py` | Structured contribution hypothesis |
+| `argument_skeleton.py` | Citation-backed argument skeleton for draft |
+
+### P-3 Review Board (`services/review/`)
+
+| Service | Purpose |
+|---------|---------|
+| `board_manager.py` | 5 reviewer archetypes, run review rounds |
+| `conflict_detector.py` | Detect reviewer conflicts, cluster into themes |
+| `revision_planner.py` | Prioritized revision plan + rebuttal generator |
+| `revision_tracker.py` | 4 rewrite modes, cross-round regression detection |
+
+### P-5 Translation (`services/translation/`)
+
+| Service | Purpose |
+|---------|---------|
+| `template_engine.py` | 5 output modes (journal/grant/funding/patent/commercial) |
+| `grant_generator.py` | Grant concept notes with TRL/SRL framing |
+| `patent_analyzer.py` | Patentability + commercial potential analysis |
+
+### P-6 Handoff (`services/handoff/`)
+
+| Service | Purpose |
+|---------|---------|
+| `readiness_analyzer.py` | Score readiness for 5 downstream platforms |
+| `context_packager.py` | Bundle all artifacts for handoff |
 
 ## V2 Database Tables (added to shared DB)
 
 - `workflow_nodes` -- DAG node state (id, type, config, inputs, outputs, status, score, model)
 - `workflow_edges` -- DAG edges (source, target, type: dependency/conditional/optional/feedback)
+- `knowledge_artifacts` -- Structured knowledge (claims, evidence, gaps, hypothesis) per run
+- `revision_history` -- Review rounds with reviewer results, themes, conflicts
 - `schema_versions` -- Migration tracking
 
 ## Key Behaviors to Monitor
@@ -124,9 +179,10 @@ From `docs/reviewtrack.md`:
 ## Verification
 
 ```bash
-cd frontend && npm run typecheck && npm test   # 137 tests
+cd frontend && npm run typecheck && npm test   # 182 tests
+pytest backend/tests -q                        # 129 tests
 python cli_debug.py                            # 75 system checks
-python3 debug_agent.py                         # top-level platform debug runner
+python3 debug_agent.py                         # top-level platform debug runner (includes P-2/P-3/P-4/P-5/P-6 smoke)
 ```
 
 Important: for Parallax V2, the active shared backend is `backend -> Supporting/platform/OSSR/backend`. Avoid launching against the sibling `platform/OSSR/backend` stub tree; it can produce live `sqlite3.OperationalError: no such table: ais_pipeline_runs` failures.
