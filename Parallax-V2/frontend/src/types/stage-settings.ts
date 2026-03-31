@@ -222,6 +222,36 @@ export const STAGE_SETTINGS_SCHEMAS: Record<StageId, StageSettingsSchema> = {
     label: 'Experiment Design Settings',
     fields: [
       {
+        key: 'ais_version',
+        label: 'AI Scientist Version',
+        type: 'select',
+        description: 'V1 uses templates; V2 uses agentic tree search (BFTS)',
+        default: 'v2',
+        options: [
+          { value: 'v1', label: 'V1 (Template-based)' },
+          { value: 'v2', label: 'V2 (Tree Search / BFTS)' },
+        ],
+      },
+      {
+        key: 'bfts_profile',
+        label: 'Exploration Depth',
+        type: 'select',
+        description: 'BFTS profile (V2 only)',
+        default: 'standard',
+        options: [
+          { value: 'quick', label: 'Quick (3 steps, ~$10)' },
+          { value: 'standard', label: 'Standard (5 steps, ~$25)' },
+          { value: 'thorough', label: 'Thorough (10 steps, ~$40)' },
+        ],
+      },
+      {
+        key: 'include_writeup',
+        label: 'Generate Paper',
+        type: 'boolean',
+        description: 'V2 can generate a full 4-page paper (~$5 extra)',
+        default: false,
+      },
+      {
         key: 'auto_detect_gaps',
         label: 'Auto-detect Gaps',
         type: 'boolean',

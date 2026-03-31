@@ -64,6 +64,57 @@ interface ImportPaper {
 
 interface StartExperimentParams {
   template?: string
+  version?: 'v1' | 'v2'
+  bfts_profile?: 'quick' | 'standard' | 'thorough'
+  bfts_config?: Record<string, unknown>
+  include_writeup?: boolean
+}
+
+// ── V2 BFTS Types ─────────────────────────────────────────────────────
+
+export interface BFTSNode {
+  node_id: string
+  parent_id: string | null
+  depth: number
+  status: 'success' | 'failed' | 'debugging' | 'unexplored'
+  metrics: Record<string, unknown>
+  code_changes: string
+  is_best: boolean
+}
+
+export interface BFTSTreeStructure {
+  nodes: BFTSNode[]
+  max_depth: number
+  total_explored: number
+  successful: number
+  failed: number
+  best_node_id: string | null
+  best_metrics: Record<string, unknown>
+}
+
+export interface V2TokenUsage {
+  total_input_tokens: number
+  total_output_tokens: number
+  total_cost_usd: number
+  by_model: Record<string, { input_tokens: number; output_tokens: number; cost_usd: number }>
+}
+
+export interface V2ExperimentResult {
+  result_id: string
+  spec_id: string
+  run_id: string
+  metrics: Record<string, unknown>
+  artifacts: string[]
+  log_summary: string
+  paper_path: string | null
+  status: string
+  started_at: string | null
+  completed_at: string | null
+  error: string | null
+  tree_structure: BFTSTreeStructure
+  token_usage: V2TokenUsage
+  self_review: string
+  is_v2: boolean
 }
 
 interface HistoryListParams {
@@ -335,12 +386,30 @@ export function getExperimentStatus(
 }
 
 /**
- * Get full experiment result.
+ * Get full experiment result (V1 or V2).
  */
 export function getExperimentResult(
   runId: string,
-): Promise<AxiosResponse<ApiResponse<Record<string, unknown>>>> {
+): Promise<AxiosResponse<ApiResponse<V2ExperimentResult>>> {
   return service.get(`/api/research/ais/${runId}/experiment/result`)
+}
+
+/**
+ * Get BFTS tree structure for V2 experiment visualization.
+ */
+export function getExperimentTree(
+  runId: string,
+): Promise<AxiosResponse<ApiResponse<BFTSTreeStructure>>> {
+  return service.get(`/api/research/ais/${runId}/experiment/tree`)
+}
+
+/**
+ * Get V2-generated paper PDF path.
+ */
+export function getExperimentPaper(
+  runId: string,
+): Promise<AxiosResponse<ApiResponse<{ paper_path: string; result_id: string }>>> {
+  return service.get(`/api/research/ais/${runId}/experiment/paper`)
 }
 
 // ── History (unified CLI + platform results) ───────────────────────────
@@ -608,8 +677,9 @@ export function getRunPapers(
 /** Get interactive topic map data for a pipeline run. */
 export function getRunTopics(
   runId: string,
+  params: { limit?: number } = {},
 ): Promise<AxiosResponse<ApiResponse<{ topics: RunTopic[]; count: number }>>> {
-  return service.get(`/api/research/ais/${runId}/topics`)
+  return service.get(`/api/research/ais/${runId}/topics`, { params, timeout: 30_000 })
 }
 
 /** Run specialist domain reviews. */

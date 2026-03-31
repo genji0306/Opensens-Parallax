@@ -14,7 +14,7 @@ cd backend && source ../../Supporting/platform/OSSR/.venv/bin/activate && python
 cd frontend && npm run dev    # :3002
 
 # Diagnostics
-python3 debug_agent.py                    # full platform verification + API smoke
+python3 debug_agent.py                    # full platform verification + V3 gateway tests + API smoke
 python3 debug_agent.py --quick            # fast local pass, skips frontend build
 python3 debug_agent.py --live             # includes live :5002/:3002 probes when servers are running
 python cli_debug.py           # 75 checks across all subsystems
@@ -57,7 +57,8 @@ frontend/src/
 |   |   +-- DebateDetail.vue      Metrics + transcript viewer
 |   |   +-- ValidationDetail.vue  Novelty badge + specialist review panel
 |   |   +-- DraftDetail.vue       Sections + experiment design + weakness tracking
-|   |   +-- ExperimentDetail.vue  Template info + SVG loss chart
+|   |   +-- ExperimentDetail.vue  V1: template + loss chart; V2: BFTS tree + cost breakdown
+|   |   +-- BFTSTreeView.vue     V2 BFTS tree visualization (SVG + node list + best path)
 |   |   +-- RehabDetail.vue       Review round scores + export
 |   |   +-- PassDetail.vue        Final score + revision count
 |   |   +-- FigureCritiquePanel   Automated figure quality critique (P-4)
@@ -108,6 +109,11 @@ frontend/src/
 | Stage Executor | `services/workflow/executor.py` | Node dispatch, model resolution, auto-advance |
 | Specialist Review | `services/ais/specialist_review.py` | 8-domain expert review |
 | Experiment Design | `services/ais/experiment_design_agent.py` | Evidence gaps + experiment designs |
+| Experiment Planner | `services/ais/experiment_planner.py` | Idea → ExperimentSpec (V1 template or V2 template-free) |
+| Experiment Runner V1 | `services/ais/experiment_runner.py` | V1 linear execution via `launch_scientist.py` |
+| Experiment Runner V2 | `services/ais/experiment_runner_v2.py` | V2 BFTS tree search via `launch_scientist_bfts.py` |
+| BFTS Config | `services/ais/bfts_config.py` | Config profiles (quick/standard/thorough), YAML generation |
+| V2 Result Parser | `services/ais/v2_result_parser.py` | Parse BFTS tree, token_tracker.json, paper PDF, self-review |
 | Multimodal | `services/ais/multimodal.py` | Vision figure analysis + text fallback |
 | Figure Critique | `services/ais/figure_critique.py` | Type-specific figure quality critique (P-4) |
 | Consistency Checker | `services/ais/consistency_checker.py` | Text-vs-figure contradiction detection (P-4) |
@@ -182,7 +188,7 @@ From `docs/reviewtrack.md`:
 cd frontend && npm run typecheck && npm test   # 182 tests
 pytest backend/tests -q                        # 129 tests
 python cli_debug.py                            # 75 system checks
-python3 debug_agent.py                         # top-level platform debug runner (includes P-2/P-3/P-4/P-5/P-6 smoke)
+python3 debug_agent.py                         # top-level platform debug runner (includes V3 gateway tests + P-2/P-3/P-4/P-5/P-6 smoke)
 ```
 
 Important: for Parallax V2, the active shared backend is `backend -> Supporting/platform/OSSR/backend`. Avoid launching against the sibling `platform/OSSR/backend` stub tree; it can produce live `sqlite3.OperationalError: no such table: ais_pipeline_runs` failures.

@@ -314,18 +314,66 @@ class StageExecutor:
         }
 
     def _handle_experiment_design(self, run_id: str, node: WorkflowNode, model: str, task_id: str) -> Dict:
-        """Execute experiment design + run."""
+        """Execute experiment design + run. Routes to V1 or V2 based on node config."""
         from ..ais.pipeline import AisPipeline
-        pipeline = AisPipeline()
-        pipeline.run_stage_6(run_id, task_id)
 
+        # Read ais_version from node config (set via stage settings UI)
+        node_config = node.config if isinstance(node.config, dict) else {}
+        version = node_config.get("ais_version", "v1")
+
+        # Build config overrides from node settings
+        config_overrides = {}
+        if version == "v2":
+            config_overrides["bfts_profile"] = node_config.get("bfts_profile", "standard")
+            config_overrides["include_writeup"] = node_config.get("include_writeup", False)
+            bfts_config = node_config.get("bfts_config", {})
+            if bfts_config:
+                config_overrides["bfts_config"] = bfts_config
+
+        pipeline = AisPipeline()
+        pipeline.run_stage_6(run_id, task_id, config_overrides=config_overrides or None, version=version)
+
+        # After completion, feed V2 costs into CostTracker
         run = PipelineRunDAO.load(run_id)
         stage_6 = run.stage_results.get("stage_6", {}) if run else {}
+
+        if version == "v2":
+            self._record_v2_costs(node.node_id, run_id)
+
         return {
             "spec_id": stage_6.get("spec_id", ""),
             "template": stage_6.get("template", ""),
+            "version": version,
             "_score": 7.0 if stage_6.get("status") == "completed" else 3.0,
         }
+
+    def _record_v2_costs(self, node_id: str, run_id: str):
+        """Feed V2 experiment token costs into CostTracker from experiment results."""
+        try:
+            from .cost_tracker import CostTracker
+            conn = get_connection()
+            # Find the latest V2 result for this run
+            row = conn.execute(
+                "SELECT token_usage FROM experiment_results WHERE run_id = ? ORDER BY completed_at DESC LIMIT 1",
+                (run_id,),
+            ).fetchone()
+            if not row or not row["token_usage"]:
+                return
+
+            import json
+            token_usage = json.loads(row["token_usage"])
+            by_model = token_usage.get("by_model", {})
+            tracker = CostTracker()
+            for model_name, usage in by_model.items():
+                if isinstance(usage, dict) and usage.get("input_tokens", 0) > 0:
+                    tracker.record(
+                        node_id=node_id,
+                        model=model_name,
+                        input_tokens=usage.get("input_tokens", 0),
+                        output_tokens=usage.get("output_tokens", 0),
+                    )
+        except Exception as e:
+            logger.warning("[Executor] Failed to record V2 costs: %s", e)
 
     def _handle_revise(self, run_id: str, node: WorkflowNode, model: str, task_id: str) -> Dict:
         """Execute revision scoring. Reads validation + draft scores, determines pass/loop/fail."""

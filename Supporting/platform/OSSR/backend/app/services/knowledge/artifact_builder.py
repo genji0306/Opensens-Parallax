@@ -43,6 +43,9 @@ Research Idea: {idea}
 === TOPIC MAP GAPS ===
 {gaps}
 
+=== EXPERIMENT RESULTS ===
+{experiment}
+
 Extract and return a JSON object with:
 {{
   "claims": [
@@ -99,6 +102,7 @@ class ArtifactBuilder:
         validation = self._get_validation(sr)
         gaps = self._get_topic_gaps(run_id)
         paper_evidence = self._get_paper_evidence(run_id)
+        experiment = self._get_experiment_results(run_id, sr)
 
         # LLM extraction
         prompt = EXTRACTION_PROMPT.format(
@@ -107,6 +111,7 @@ class ArtifactBuilder:
             draft_sections=draft_sections[:4000],
             validation=validation[:2000],
             gaps=gaps[:1500],
+            experiment=experiment[:2000],
         )
 
         model = model or "claude-sonnet-4-20250514"
@@ -225,6 +230,50 @@ class ArtifactBuilder:
             LIMIT 20
         """, (run_id,)).fetchall()
         return [dict(r) for r in rows]
+
+    def _get_experiment_results(self, run_id: str, sr: Dict) -> str:
+        """Extract experiment results (V1 or V2) for the knowledge artifact."""
+        s6 = sr.get("stage_6", {})
+        result_id = s6.get("result_id", "") if isinstance(s6, dict) else ""
+        if not result_id:
+            return "No experiment data available."
+
+        conn = get_connection()
+        row = conn.execute(
+            "SELECT metrics, tree_structure, self_review, status FROM experiment_results WHERE result_id = ?",
+            (result_id,),
+        ).fetchone()
+        if not row:
+            return "No experiment result found."
+
+        parts = [f"Status: {row['status']}"]
+
+        # V2: tree search results
+        keys = row.keys() if hasattr(row, "keys") else []
+        if "tree_structure" in keys and row["tree_structure"]:
+            tree = json.loads(row["tree_structure"])
+            if tree.get("nodes"):
+                parts.append(f"BFTS Tree: {tree.get('total_explored', 0)} nodes explored, "
+                             f"{tree.get('successful', 0)} successful, depth={tree.get('max_depth', 0)}")
+                best = tree.get("best_metrics", {})
+                if best:
+                    metrics_str = ", ".join(f"{k}={v}" for k, v in best.items() if isinstance(v, (int, float)))
+                    parts.append(f"Best node metrics: {metrics_str}")
+
+        # V1 or V2: general metrics
+        if row["metrics"]:
+            metrics = json.loads(row["metrics"])
+            if isinstance(metrics, dict) and not metrics.get("stub"):
+                for key in ("best_loss", "best_accuracy", "final_loss", "accuracy"):
+                    if key in metrics:
+                        parts.append(f"{key}: {metrics[key]}")
+
+        # V2: self-review
+        if "self_review" in keys and row["self_review"]:
+            review = row["self_review"][:500]
+            parts.append(f"Self-review: {review}")
+
+        return "\n".join(parts) if len(parts) > 1 else "Experiment completed but no detailed metrics."
 
     def _parse_extraction(self, response: str):
         """Parse LLM JSON response into Claim and Gap objects."""

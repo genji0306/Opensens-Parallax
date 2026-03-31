@@ -663,19 +663,28 @@ def start_experiment(run_id: str):
 
     data = request.get_json() or {}
     template_override = data.get("template")  # Optional: force a specific AI-Scientist template
+    version = data.get("version", "v1")  # "v1" or "v2"
+    bfts_profile = data.get("bfts_profile", "standard")
+    bfts_config = data.get("bfts_config", {})
 
     tm = TaskManager()
-    task_id = tm.create_task(task_type="ais_experiment", metadata={"run_id": run_id})
+    task_id = tm.create_task(task_type="ais_experiment", metadata={"run_id": run_id, "version": version})
 
-    # Build config overrides if template specified
+    # Build config overrides
     config_overrides = {}
     if template_override:
         config_overrides["template"] = template_override
+    if version == "v2":
+        config_overrides["bfts_profile"] = bfts_profile
+        if bfts_config:
+            config_overrides["bfts_config"] = bfts_config
+        if data.get("include_writeup") is not None:
+            config_overrides["include_writeup"] = data["include_writeup"]
 
     def _run_experiment():
         from ..services.ais.pipeline import AisPipeline
         pipeline = AisPipeline()
-        pipeline.run_stage_6(run_id, task_id, config_overrides=config_overrides or None)
+        pipeline.run_stage_6(run_id, task_id, config_overrides=config_overrides or None, version=version)
 
     thread = threading.Thread(target=_run_experiment, daemon=True)
     thread.start()
@@ -685,7 +694,8 @@ def start_experiment(run_id: str):
         "data": {
             "run_id": run_id,
             "task_id": task_id,
-            "message": "Stage 6 (experiment) started.",
+            "version": version,
+            "message": f"Stage 6 (experiment {version.upper()}) started.",
         },
     }), 202
 
@@ -717,21 +727,71 @@ def experiment_result(run_id: str):
     if not row:
         return jsonify({"success": False, "error": f"Result not found: {result_id}"}), 404
 
+    keys = row.keys() if hasattr(row, "keys") else []
+    result_data = {
+        "result_id": row["result_id"],
+        "spec_id": row["spec_id"],
+        "run_id": row["run_id"],
+        "metrics": json.loads(row["metrics"]) if row["metrics"] else {},
+        "artifacts": json.loads(row["artifacts"]) if row["artifacts"] else [],
+        "log_summary": row["log_summary"],
+        "paper_path": row["paper_path"],
+        "status": row["status"],
+        "started_at": row["started_at"],
+        "completed_at": row["completed_at"],
+        "error": row["error"],
+        "tree_structure": json.loads(row["tree_structure"]) if "tree_structure" in keys and row["tree_structure"] else {},
+        "token_usage": json.loads(row["token_usage"]) if "token_usage" in keys and row["token_usage"] else {},
+        "self_review": row["self_review"] if "self_review" in keys else "",
+    }
+    result_data["is_v2"] = bool(result_data["tree_structure"] and result_data["tree_structure"].get("nodes"))
+
+    return jsonify({"success": True, "data": result_data})
+
+
+@ais_bp.route("/ais/<run_id>/experiment/tree", methods=["GET"])
+def experiment_tree(run_id: str):
+    """Get BFTS tree structure for V2 experiment visualization."""
+    run = PipelineRunDAO.load(run_id)
+    if not run:
+        return jsonify({"success": False, "error": f"Run not found: {run_id}"}), 404
+
+    result_id = run.stage_results.get("stage_6", {}).get("result_id")
+    if not result_id:
+        return jsonify({"success": False, "error": "No experiment result for this run"}), 404
+
+    conn = get_connection()
+    row = conn.execute(
+        "SELECT tree_structure FROM experiment_results WHERE result_id = ?", (result_id,)
+    ).fetchone()
+    if not row:
+        return jsonify({"success": False, "error": f"Result not found: {result_id}"}), 404
+
+    tree = json.loads(row["tree_structure"]) if row["tree_structure"] else {}
+    return jsonify({"success": True, "data": tree})
+
+
+@ais_bp.route("/ais/<run_id>/experiment/paper", methods=["GET"])
+def experiment_paper(run_id: str):
+    """Get V2-generated paper PDF path or download URL."""
+    run = PipelineRunDAO.load(run_id)
+    if not run:
+        return jsonify({"success": False, "error": f"Run not found: {run_id}"}), 404
+
+    result_id = run.stage_results.get("stage_6", {}).get("result_id")
+    if not result_id:
+        return jsonify({"success": False, "error": "No experiment result for this run"}), 404
+
+    conn = get_connection()
+    row = conn.execute(
+        "SELECT paper_path FROM experiment_results WHERE result_id = ?", (result_id,)
+    ).fetchone()
+    if not row or not row["paper_path"]:
+        return jsonify({"success": False, "error": "No paper generated for this experiment"}), 404
+
     return jsonify({
         "success": True,
-        "data": {
-            "result_id": row["result_id"],
-            "spec_id": row["spec_id"],
-            "run_id": row["run_id"],
-            "metrics": json.loads(row["metrics"]) if row["metrics"] else {},
-            "artifacts": json.loads(row["artifacts"]) if row["artifacts"] else [],
-            "log_summary": row["log_summary"],
-            "paper_path": row["paper_path"],
-            "status": row["status"],
-            "started_at": row["started_at"],
-            "completed_at": row["completed_at"],
-            "error": row["error"],
-        },
+        "data": {"paper_path": row["paper_path"], "result_id": result_id},
     })
 
 
@@ -1725,20 +1785,30 @@ def get_run_topics(run_id: str):
     Get the topic map data for a pipeline run.
     Returns hierarchical topics with cluster summaries, key papers,
     contradictions, and novelty opportunities (for interactive clickable map).
+
+    Query params:
+      limit  — max topics to return (default: unlimited; use 50 for interactive map)
     """
     run = PipelineRunDAO.load(run_id)
     if not run:
         return jsonify({"success": False, "error": f"Run not found: {run_id}"}), 404
 
+    limit = request.args.get("limit", type=int, default=0)
+
     conn = get_connection()
 
     # Get topics linked to this run
-    rows = conn.execute("""
+    query = """
         SELECT t.* FROM topics t
         JOIN run_topics rt ON t.topic_id = rt.topic_id
         WHERE rt.run_id = ?
-        ORDER BY t.level, t.paper_count DESC
-    """, (run_id,)).fetchall()
+        ORDER BY t.paper_count DESC, t.level
+    """
+    params_list: list = [run_id]
+    if limit and limit > 0:
+        query += " LIMIT ?"
+        params_list.append(limit)
+    rows = conn.execute(query, params_list).fetchall()
 
     topics = []
     for row in rows:

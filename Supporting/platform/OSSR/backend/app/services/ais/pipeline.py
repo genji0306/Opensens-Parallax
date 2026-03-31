@@ -337,7 +337,7 @@ class AisPipeline:
                 self.wf.fail_node(draft_node.node_id, str(e))
             self.tm.fail_task(task_id, str(e))
 
-    def run_stage_6(self, run_id: str, task_id: str, config_overrides: Optional[Dict[str, Any]] = None):
+    def run_stage_6(self, run_id: str, task_id: str, config_overrides: Optional[Dict[str, Any]] = None, version: str = "v1"):
         """
         Stage 6: Experiment Execution.
         Plans and runs an experiment via AI-Scientist, then optionally
@@ -384,22 +384,31 @@ class AisPipeline:
             except Exception as e:
                 logger.warning("[AiS %s] Could not load topics for landscape: %s", run_id, e)
 
-            # Plan experiment (template selection + seed idea generation)
+            # Plan experiment (template selection for V1, template-free for V2)
             self.tm.update_task(task_id, progress=15,
-                                message="Stage 6: Selecting template and building seed ideas...")
+                                message=f"Stage 6: Planning {version.upper()} experiment...")
             spec = self.exp_planner.plan_experiment(
                 idea=idea,
                 debate_transcript=transcript,
                 landscape=landscape,
                 run_id=run_id,
                 config_overrides=config_overrides,
+                version=version,
             )
 
-            # Run experiment
-            self.tm.update_task(task_id, progress=25,
-                                message=f"Stage 6: Running experiment (template={spec.template})...")
-            exp_task_id = self.tm.create_task(f"experiment_{spec.spec_id}")
-            self.exp_runner.run_experiment(spec, exp_task_id)
+            # Run experiment — route to V1 or V2 runner
+            if version == "v2":
+                self.tm.update_task(task_id, progress=25,
+                                    message=f"Stage 6: Running V2 BFTS experiment...")
+                exp_task_id = self.tm.create_task(f"experiment_v2_{spec.spec_id}")
+                from .experiment_runner_v2 import ExperimentRunnerV2
+                v2_runner = ExperimentRunnerV2()
+                v2_runner.run_experiment(spec, exp_task_id)
+            else:
+                self.tm.update_task(task_id, progress=25,
+                                    message=f"Stage 6: Running experiment (template={spec.template})...")
+                exp_task_id = self.tm.create_task(f"experiment_{spec.spec_id}")
+                self.exp_runner.run_experiment(spec, exp_task_id)
 
             # Fetch result
             result = self.exp_runner.get_result(spec.spec_id)

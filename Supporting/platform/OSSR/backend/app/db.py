@@ -317,7 +317,9 @@ def init_db():
             seed_ideas TEXT NOT NULL DEFAULT '[]',
             config TEXT NOT NULL DEFAULT '{}',
             status TEXT NOT NULL DEFAULT 'pending',
-            created_at TEXT NOT NULL DEFAULT ''
+            created_at TEXT NOT NULL DEFAULT '',
+            planner_version TEXT NOT NULL DEFAULT 'v1',
+            bfts_config TEXT NOT NULL DEFAULT '{}'
         );
 
         CREATE TABLE IF NOT EXISTS experiment_results (
@@ -331,7 +333,10 @@ def init_db():
             status TEXT NOT NULL DEFAULT 'pending',
             started_at TEXT,
             completed_at TEXT,
-            error TEXT
+            error TEXT,
+            tree_structure TEXT NOT NULL DEFAULT '{}',
+            token_usage TEXT NOT NULL DEFAULT '{}',
+            self_review TEXT NOT NULL DEFAULT ''
         );
 
         CREATE TABLE IF NOT EXISTS autoresearch_runs (
@@ -591,6 +596,16 @@ def _get_migrations():
                 created_at TEXT NOT NULL DEFAULT ''
             );
             CREATE INDEX IF NOT EXISTS idx_revision_history_run ON revision_history(run_id);
+        """),
+        (5, "AI Scientist V2 (BFTS) columns", """
+            -- experiment_specs: V2 planner fields
+            ALTER TABLE experiment_specs ADD COLUMN planner_version TEXT NOT NULL DEFAULT 'v1';
+            ALTER TABLE experiment_specs ADD COLUMN bfts_config TEXT NOT NULL DEFAULT '{}';
+
+            -- experiment_results: V2 tree search + cost tracking
+            ALTER TABLE experiment_results ADD COLUMN tree_structure TEXT NOT NULL DEFAULT '{}';
+            ALTER TABLE experiment_results ADD COLUMN token_usage TEXT NOT NULL DEFAULT '{}';
+            ALTER TABLE experiment_results ADD COLUMN self_review TEXT NOT NULL DEFAULT '';
         """),
     ]
 
