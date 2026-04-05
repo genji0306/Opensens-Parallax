@@ -1,0 +1,16 @@
+# Optional dependencies for the Grant Hunt module.
+#
+# The grants module works with httpx + BeautifulSoup alone (already
+# shipped with OSSR), but for the full JavaScript-rendering browser
+# crawl path you need crawl4ai + its Playwright runtime.
+#
+# Install with:
+#     pip install -r backend/requirements-grants.txt
+#     playwright install chromium
+#
+# Without these, the GrantCrawler automatically falls back to an
+# httpx-based fetcher that works on most static grant pages but can't
+# render SPA-heavy portals.
+
+crawl4ai>=0.4.0
+beautifulsoup4>=4.12.0

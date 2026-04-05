@@ -20,6 +20,14 @@ python3 debug_agent.py --live             # includes live :5002/:3002 probes whe
 python cli_debug.py           # 75 checks across all subsystems
 ```
 
+## Modules
+
+Parallax V2 has three top-level modules sharing the same backend/DB:
+
+1. **Research pipeline** — Command Center + Project Detail. Graph-based DAG (Search→Pass). See "Pipeline Structure" below.
+2. **Paper Lab** — upload paper drafts, run adversarial review, revise.
+3. **Grant Hunt** — discover funding opportunities, match against an applicant profile (markdown context), plan, draft, and package proposals. Parallel pipeline `Discover → Match → Plan → Draft → Package`. Backend lives at `Supporting/platform/OSSR/backend/app/services/grants/`. Routes at `/api/research/grants/*`. Crawler is `crawl4ai` primary with an httpx fallback; install browser deps with `pip install -r backend/requirements-grants.txt && playwright install chromium` if you want JS-rendered sources. Matcher + drafter + planner all use the self-evolving feedback loop via the `grant_feedback` table.
+
 ## Pipeline Structure
 
 ```
@@ -252,3 +260,9 @@ from parallax_sdk import ParallaxClient, PipelineConfig
 client = ParallaxClient(handlers=[MyHandler()], max_workers=3)
 future = client.run_async(PipelineConfig(research_idea="..."))
 ```
+
+## Design System
+
+The frontend design system is documented in `frontend/DESIGN.md` following the [Google Stitch DESIGN.md format](https://github.com/VoltAgent/awesome-design-md). This file captures the complete visual language — colors, typography, component patterns, spacing, and agent prompts — so that AI agents generate consistent UI.
+
+Reference DESIGN.md files from other products are available in `frontend/design/` for cross-reference when building new views (Linear, Sentry, Supabase, Notion, Cursor).

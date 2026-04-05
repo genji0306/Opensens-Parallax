@@ -485,6 +485,58 @@ def init_db():
             created_at TEXT NOT NULL DEFAULT ''
         );
 
+        -- Grant Hunt module tables
+        CREATE TABLE IF NOT EXISTS grant_profiles (
+            profile_id TEXT PRIMARY KEY,
+            name TEXT NOT NULL DEFAULT '',
+            data TEXT NOT NULL DEFAULT '{}',
+            created_at TEXT NOT NULL DEFAULT '',
+            updated_at TEXT NOT NULL DEFAULT ''
+        );
+
+        CREATE TABLE IF NOT EXISTS grant_sources (
+            source_id TEXT PRIMARY KEY,
+            kind TEXT NOT NULL DEFAULT 'generic',
+            enabled INTEGER NOT NULL DEFAULT 1,
+            data TEXT NOT NULL DEFAULT '{}'
+        );
+
+        CREATE TABLE IF NOT EXISTS grant_opportunities (
+            opportunity_id TEXT PRIMARY KEY,
+            source_id TEXT NOT NULL DEFAULT '',
+            title TEXT NOT NULL DEFAULT '',
+            deadline TEXT NOT NULL DEFAULT '',
+            fetched_at TEXT NOT NULL DEFAULT '',
+            data TEXT NOT NULL DEFAULT '{}'
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_grant_opps_source ON grant_opportunities(source_id);
+        CREATE INDEX IF NOT EXISTS idx_grant_opps_fetched ON grant_opportunities(fetched_at DESC);
+
+        CREATE TABLE IF NOT EXISTS grant_proposals (
+            proposal_id TEXT PRIMARY KEY,
+            opportunity_id TEXT NOT NULL DEFAULT '',
+            profile_id TEXT NOT NULL DEFAULT '',
+            status TEXT NOT NULL DEFAULT 'planning',
+            data TEXT NOT NULL DEFAULT '{}',
+            created_at TEXT NOT NULL DEFAULT '',
+            updated_at TEXT NOT NULL DEFAULT ''
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_grant_proposals_profile ON grant_proposals(profile_id);
+        CREATE INDEX IF NOT EXISTS idx_grant_proposals_opp ON grant_proposals(opportunity_id);
+
+        CREATE TABLE IF NOT EXISTS grant_feedback (
+            event_id TEXT PRIMARY KEY,
+            profile_id TEXT NOT NULL DEFAULT '',
+            event_type TEXT NOT NULL DEFAULT '',
+            target_id TEXT NOT NULL DEFAULT '',
+            data TEXT NOT NULL DEFAULT '{}',
+            created_at TEXT NOT NULL DEFAULT ''
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_grant_feedback_profile ON grant_feedback(profile_id, created_at DESC);
+
         -- Indexes for common query patterns
 
         CREATE INDEX IF NOT EXISTS idx_knowledge_artifacts_run ON knowledge_artifacts(run_id);
@@ -606,6 +658,63 @@ def _get_migrations():
             ALTER TABLE experiment_results ADD COLUMN tree_structure TEXT NOT NULL DEFAULT '{}';
             ALTER TABLE experiment_results ADD COLUMN token_usage TEXT NOT NULL DEFAULT '{}';
             ALTER TABLE experiment_results ADD COLUMN self_review TEXT NOT NULL DEFAULT '';
+        """),
+        (6, "Grant Hunt module tables", """
+            CREATE TABLE IF NOT EXISTS grant_profiles (
+                profile_id TEXT PRIMARY KEY,
+                name TEXT NOT NULL DEFAULT '',
+                data TEXT NOT NULL DEFAULT '{}',
+                created_at TEXT NOT NULL DEFAULT '',
+                updated_at TEXT NOT NULL DEFAULT ''
+            );
+
+            CREATE TABLE IF NOT EXISTS grant_sources (
+                source_id TEXT PRIMARY KEY,
+                kind TEXT NOT NULL DEFAULT 'generic',
+                enabled INTEGER NOT NULL DEFAULT 1,
+                data TEXT NOT NULL DEFAULT '{}'
+            );
+
+            CREATE TABLE IF NOT EXISTS grant_opportunities (
+                opportunity_id TEXT PRIMARY KEY,
+                source_id TEXT NOT NULL DEFAULT '',
+                title TEXT NOT NULL DEFAULT '',
+                deadline TEXT NOT NULL DEFAULT '',
+                fetched_at TEXT NOT NULL DEFAULT '',
+                data TEXT NOT NULL DEFAULT '{}'
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_grant_opps_source
+                ON grant_opportunities(source_id);
+            CREATE INDEX IF NOT EXISTS idx_grant_opps_fetched
+                ON grant_opportunities(fetched_at DESC);
+
+            CREATE TABLE IF NOT EXISTS grant_proposals (
+                proposal_id TEXT PRIMARY KEY,
+                opportunity_id TEXT NOT NULL DEFAULT '',
+                profile_id TEXT NOT NULL DEFAULT '',
+                status TEXT NOT NULL DEFAULT 'planning',
+                data TEXT NOT NULL DEFAULT '{}',
+                created_at TEXT NOT NULL DEFAULT '',
+                updated_at TEXT NOT NULL DEFAULT ''
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_grant_proposals_profile
+                ON grant_proposals(profile_id);
+            CREATE INDEX IF NOT EXISTS idx_grant_proposals_opp
+                ON grant_proposals(opportunity_id);
+
+            CREATE TABLE IF NOT EXISTS grant_feedback (
+                event_id TEXT PRIMARY KEY,
+                profile_id TEXT NOT NULL DEFAULT '',
+                event_type TEXT NOT NULL DEFAULT '',
+                target_id TEXT NOT NULL DEFAULT '',
+                data TEXT NOT NULL DEFAULT '{}',
+                created_at TEXT NOT NULL DEFAULT ''
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_grant_feedback_profile
+                ON grant_feedback(profile_id, created_at DESC);
         """),
     ]
 
