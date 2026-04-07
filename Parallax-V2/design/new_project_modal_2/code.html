@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Opensens Parallax | Research Command Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#006b59",
+                        "on-primary-fixed": "#00201a",
+                        "surface-container-highest": "#dae3f7",
+                        "surface-container": "#e7eeff",
+                        "tertiary-fixed-dim": "#ffb4a4",
+                        "on-surface": "#131c2a",
+                        "on-surface-variant": "#3d4945",
+                        "outline": "#6d7a75",
+                        "error-container": "#ffdad6",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error": "#ffffff",
+                        "surface-bright": "#f9f9ff",
+                        "primary-container": "#1ea88e",
+                        "primary-fixed-dim": "#61dbbe",
+                        "primary-fixed": "#7ff7da",
+                        "surface-variant": "#dae3f7",
+                        "on-tertiary-container": "#5a1506",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#7c2d1c",
+                        "background": "#f9f9ff",
+                        "on-secondary-fixed-variant": "#244e44",
+                        "tertiary-fixed": "#ffdad2",
+                        "on-error-container": "#93000a",
+                        "on-background": "#131c2a",
+                        "secondary-fixed-dim": "#a3d0c2",
+                        "secondary-container": "#bce9db",
+                        "inverse-on-surface": "#ecf1ff",
+                        "tertiary-container": "#df7962",
+                        "surface": "#f9f9ff",
+                        "surface-container-low": "#f0f3ff",
+                        "secondary-fixed": "#bfecde",
+                        "surface-tint": "#006b59",
+                        "outline-variant": "#bccac4",
+                        "secondary": "#3c665b",
+                        "on-primary-container": "#00352b",
+                        "surface-dim": "#d1daef",
+                        "inverse-surface": "#283140",
+                        "on-tertiary-fixed": "#3d0600",
+                        "on-primary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-high": "#dfe8fd",
+                        "on-primary-fixed-variant": "#005143",
+                        "inverse-primary": "#61dbbe",
+                        "error": "#ba1a1a",
+                        "on-secondary-container": "#416a5f",
+                        "on-secondary-fixed": "#00201a",
+                        "tertiary": "#9a4431"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"],
+                        "mono": ["JetBrains Mono"]
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .mono-metrics { font-family: 'JetBrains Mono', monospace; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .dark .glass-panel {
+            background: rgba(19, 28, 42, 0.8);
+        }
+        .step-glow {
+            box-shadow: 0 0 15px rgba(30, 168, 142, 0.5);
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-primary-fixed-dim selection:text-on-primary-fixed overflow-hidden">
+<!-- TopNavBar -->
+<nav class="bg-white/80 dark:bg-slate-950/80 backdrop-blur-md font-['Inter'] antialiased tracking-tight docked border-b border-slate-200 dark:border-slate-800 shadow-sm fixed top-0 w-full z-50 flex justify-between items-center px-6 py-3 max-w-full">
+<div class="flex items-center gap-4">
+<span class="text-xl font-bold tracking-tighter text-slate-900 dark:text-slate-50">Opensens Parallax</span>
+<div class="hidden md:flex gap-1 bg-surface-container-low p-1 rounded-lg">
+<span class="px-3 py-1 text-xs font-mono bg-primary-container text-on-primary-container rounded">ACTIVE_NODE: 0x88F</span>
+<span class="px-3 py-1 text-xs font-mono text-on-surface-variant">LATEST_SYNC: 2m ago</span>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex gap-4 items-center">
+<span class="text-[#1EA88E] font-mono text-sm font-bold">$0.41</span>
+<div class="flex gap-2">
+<button class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+</div>
+<div class="h-8 w-8 rounded-full bg-surface-container-highest border border-outline-variant overflow-hidden">
+<img alt="Researcher Profile" data-alt="Stylized researcher avatar profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZVv2T1GxszD8_c3-caKs6e88YtWcn9-K-Zw1CMOtnJqlz28XAnx0FF8LOiXfxcU0pftfm-_Q3QltVeLMgdsWJALnps21zwmGfea-2serfmZ5cqjBHhNzoUgzw59HZd_NSDZi1GPAeQw3lIIhfV8JiUjHXVBEBpOU_fHjGC3fbM58cAIot823z-dZGML6XqoNuQK4hJEYZ7k5UwWpMtcd6CMhgonjAenk50n-WGltwjlQtlVSF42hepMhPV4p8qzzvYR6_m1NGGYE"/>
+</div>
+</div>
+</nav>
+<main class="pt-24 pb-16 px-6 max-w-[1600px] mx-auto space-y-8">
+<!-- Research Pipeline Stage Tracker -->
+<section class="w-full">
+<div class="flex flex-col md:flex-row items-center justify-between gap-4 overflow-x-auto pb-4 scrollbar-hide">
+<!-- 1: Crawl -->
+<div class="flex flex-col items-center min-w-[100px] group">
+<div class="w-12 h-12 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center mb-2">
+<span class="material-symbols-outlined" data-icon="travel_explore">travel_explore</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Crawl</span>
+<span class="mono-metrics text-xs text-primary font-bold">15PPR</span>
+</div>
+<div class="hidden md:block h-px w-full bg-primary-container/30"></div>
+<!-- 2: Map -->
+<div class="flex flex-col items-center min-w-[100px]">
+<div class="w-12 h-12 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center mb-2">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Map</span>
+<span class="mono-metrics text-xs text-primary font-bold">3TOP</span>
+</div>
+<div class="hidden md:block h-px w-full bg-primary-container/30"></div>
+<!-- 3: Debate -->
+<div class="flex flex-col items-center min-w-[100px]">
+<div class="w-12 h-12 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center mb-2">
+<span class="material-symbols-outlined" data-icon="forum">forum</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Debate</span>
+<span class="mono-metrics text-xs text-primary font-bold">20AGT</span>
+</div>
+<div class="hidden md:block h-px w-full bg-primary-container/30"></div>
+<!-- 4: Valid -->
+<div class="flex flex-col items-center min-w-[100px]">
+<div class="w-12 h-12 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center mb-2">
+<span class="material-symbols-outlined" data-icon="verified">verified</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Valid</span>
+<span class="mono-metrics text-xs text-primary font-bold">NOVEL</span>
+</div>
+<div class="hidden md:block h-px w-full bg-primary-container/30"></div>
+<!-- 5: Ideas -->
+<div class="flex flex-col items-center min-w-[100px]">
+<div class="w-12 h-12 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center mb-2">
+<span class="material-symbols-outlined" data-icon="lightbulb">lightbulb</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Ideas</span>
+<span class="mono-metrics text-xs text-primary font-bold">3IDS</span>
+</div>
+<div class="hidden md:block h-px w-full bg-primary-container/30"></div>
+<!-- 6: Draft (Active) -->
+<div class="flex flex-col items-center min-w-[100px]">
+<div class="w-12 h-12 rounded-full border-4 border-primary-container ring-4 ring-primary-fixed/50 step-glow bg-surface flex items-center justify-center mb-2">
+<span class="material-symbols-outlined text-primary" data-icon="edit_note">edit_note</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-primary">Draft</span>
+<span class="mono-metrics text-xs text-primary font-bold">12CITE</span>
+</div>
+<div class="hidden md:block h-px w-full bg-outline-variant"></div>
+<!-- 7: Exp -->
+<div class="flex flex-col items-center min-w-[100px]">
+<div class="w-12 h-12 rounded-full border-2 border-outline-variant text-outline-variant flex items-center justify-center mb-2">
+<span class="material-symbols-outlined" data-icon="science">science</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-outline">Exper</span>
+<span class="mono-metrics text-xs text-outline">QUEUE</span>
+</div>
+<div class="hidden md:block h-px w-full bg-outline-variant"></div>
+<!-- 8: Rehab -->
+<div class="flex flex-col items-center min-w-[100px]">
+<div class="w-12 h-12 rounded-full border-2 border-outline-variant text-outline-variant flex items-center justify-center mb-2">
+<span class="material-symbols-outlined" data-icon="clinical_notes">clinical_notes</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-outline">Rehab</span>
+<span class="mono-metrics text-xs text-outline">PENDING</span>
+</div>
+</div>
+</section>
+<!-- Stage Detail Cards Grid -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Debate Card -->
+<div class="glass-panel p-6 rounded-xl border border-outline/10 shadow-sm flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<h3 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">💬 Debate</h3>
+<span class="mono-metrics text-[10px] bg-secondary-container px-2 py-0.5 rounded text-on-secondary-container">SYNC_COMPLETE</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-low p-3 rounded">
+<p class="text-[10px] text-outline uppercase font-bold">Agents</p>
+<p class="mono-metrics text-xl font-bold">20</p>
+</div>
+<div class="bg-surface-container-low p-3 rounded">
+<p class="text-[10px] text-outline uppercase font-bold">Rounds</p>
+<p class="mono-metrics text-xl font-bold">5</p>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between items-end">
+<span class="text-[10px] font-bold text-outline">CONSENSUS</span>
+<span class="mono-metrics text-[10px] font-bold text-primary">94%</span>
+</div>
+<div class="w-full h-1.5 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary-container" style="width: 94%"></div>
+</div>
+<p class="text-[11px] text-on-surface-variant mt-2 italic">"Synthesis of 27K words complete. 3 divergent viewpoints reconciled."</p>
+</div>
+</div>
+<!-- Validation Card -->
+<div class="glass-panel p-6 rounded-xl border border-outline/10 shadow-sm flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<h3 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">📊 Validation</h3>
+<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary text-white">NOVEL</span>
+</div>
+<div class="flex items-center gap-4 py-2">
+<div class="flex-1">
+<p class="text-[10px] text-outline uppercase font-bold">Context Depth</p>
+<p class="mono-metrics text-xl font-bold">15 Papers</p>
+</div>
+<div class="flex-1 text-right">
+<p class="text-[10px] text-outline uppercase font-bold">Identified Gaps</p>
+<p class="mono-metrics text-xl font-bold text-tertiary">5 Gaps</p>
+</div>
+</div>
+<div class="flex flex-wrap gap-2">
+<span class="text-[9px] px-2 py-1 bg-surface-container rounded border border-outline-variant font-mono uppercase tracking-tight">SOTA_GAP_ANALYSIS</span>
+<span class="text-[9px] px-2 py-1 bg-surface-container rounded border border-outline-variant font-mono uppercase tracking-tight">NULL_HYPOTHESIS_CHECK</span>
+</div>
+</div>
+<!-- Ideas Card -->
+<div class="glass-panel p-6 rounded-xl border border-outline/10 shadow-sm flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<h3 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">💡 Ideas</h3>
+<p class="mono-metrics text-sm font-bold text-primary">TOP 8.2/10</p>
+</div>
+<div class="space-y-3">
+<div class="space-y-1">
+<div class="flex justify-between text-[9px] font-bold text-outline">
+<span>NEURO_EVO_MORPH</span>
+<span class="mono-metrics text-primary">8.2</span>
+</div>
+<div class="h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary-container" style="width: 82%"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-[9px] font-bold text-outline">
+<span>QUANTUM_DISTILL</span>
+<span class="mono-metrics text-primary">7.5</span>
+</div>
+<div class="h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary-container" style="width: 75%"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-[9px] font-bold text-outline">
+<span>CROSS_MODAL_LATENT</span>
+<span class="mono-metrics text-primary">6.9</span>
+</div>
+<div class="h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary-container" style="width: 69%"></div>
+</div>
+</div>
+</div>
+<p class="text-[10px] text-on-surface-variant text-center font-bold tracking-widest mt-auto border-t border-outline-variant pt-2">3 ACTIVE PROMPTS</p>
+</div>
+<!-- Draft Card -->
+<div class="glass-panel p-6 rounded-xl border-2 border-primary-container/30 shadow-md flex flex-col gap-4 ring-2 ring-primary-container/5">
+<div class="flex justify-between items-start">
+<h3 class="text-xs font-bold uppercase tracking-widest text-primary">📝 Draft (Active)</h3>
+<div class="flex flex-col items-end">
+<span class="text-[9px] text-outline font-bold uppercase">Review Score</span>
+<span class="mono-metrics text-lg font-bold text-tertiary">2.0</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-primary/5 p-3 rounded border border-primary/10">
+<p class="text-[10px] text-outline uppercase font-bold">Sections</p>
+<p class="mono-metrics text-xl font-bold">8</p>
+</div>
+<div class="bg-primary/5 p-3 rounded border border-primary/10">
+<p class="text-[10px] text-outline uppercase font-bold">Citations</p>
+<p class="mono-metrics text-xl font-bold">12</p>
+</div>
+</div>
+<div class="flex gap-1.5 items-center bg-error-container/20 p-2 rounded">
+<span class="material-symbols-outlined text-tertiary text-sm" data-icon="warning">warning</span>
+<span class="text-[10px] font-medium text-on-tertiary-fixed-variant uppercase">Critical Gaps in Methodology</span>
+</div>
+</div>
+<!-- Experiment Card -->
+<div class="glass-panel p-6 rounded-xl border border-outline/10 shadow-sm flex flex-col gap-4 opacity-75">
+<div class="flex justify-between items-start">
+<h3 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">🧪 Exper</h3>
+<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-surface-variant text-on-surface-variant">QUEUED</span>
+</div>
+<div class="flex flex-col gap-3 py-2">
+<div>
+<p class="text-[10px] text-outline uppercase font-bold">Template</p>
+<p class="mono-metrics text-sm font-bold text-on-surface">nanoGPT_v2.1</p>
+</div>
+<div>
+<p class="text-[10px] text-outline uppercase font-bold">Target</p>
+<p class="mono-metrics text-sm font-bold text-on-surface">Loss Convergence &lt; 0.12</p>
+</div>
+</div>
+<div class="mt-auto flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-outline-variant animate-pulse"></span>
+<span class="text-[10px] font-mono text-outline uppercase">Awaiting Draft Approval</span>
+</div>
+</div>
+<!-- Rehab Card -->
+<div class="glass-panel p-6 rounded-xl border border-outline/10 shadow-sm flex flex-col gap-4 opacity-75">
+<div class="flex justify-between items-start">
+<h3 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">📄 Rehab</h3>
+<p class="mono-metrics text-xs font-bold text-outline">3 ROUNDS REQ</p>
+</div>
+<div class="flex items-center justify-center p-4">
+<div class="flex items-center gap-4">
+<div class="text-center">
+<p class="text-[9px] font-bold text-outline uppercase">Baseline</p>
+<p class="mono-metrics text-lg font-bold">3.0</p>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="trending_flat">trending_flat</span>
+<div class="text-center">
+<p class="text-[9px] font-bold text-primary uppercase">Target</p>
+<p class="mono-metrics text-lg font-bold text-primary">7.1</p>
+</div>
+</div>
+</div>
+<button class="w-full py-2 bg-surface-container-highest text-outline font-bold text-[10px] uppercase tracking-widest rounded cursor-not-allowed">
+                Phase Locked
+            </button>
+</div>
+</section>
+<!-- Recommendation Banner -->
+<section class="w-full">
+<div class="bg-primary/5 border border-primary/20 rounded-xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+<div class="flex gap-4 items-start">
+<div class="p-3 rounded-full bg-primary-container text-on-primary-container">
+<span class="material-symbols-outlined" data-icon="clinical_notes">clinical_notes</span>
+</div>
+<div>
+<h4 class="font-bold text-primary flex items-center gap-2 uppercase tracking-tight text-sm">
+<span class="material-symbols-outlined text-lg" data-icon="lightbulb">lightbulb</span>
+                        SYSTEM RECOMMENDATION
+                    </h4>
+<p class="text-on-surface-variant text-sm mt-1 max-w-2xl">
+                        Draft score is <span class="mono-metrics font-bold text-tertiary">2.0/10</span>. The current structure lacks adversarial rigor. Send to <span class="font-bold text-on-surface">Paper Lab</span> for adversarial review or address the 5 identified gaps first.
+                    </p>
+</div>
+</div>
+<div class="flex flex-wrap gap-3">
+<button class="px-5 py-2.5 bg-primary text-white text-xs font-bold rounded-lg shadow-sm hover:opacity-90 transition-opacity active:scale-95">START PAPER REHAB</button>
+<button class="px-5 py-2.5 bg-white dark:bg-slate-900 border border-outline-variant text-on-surface-variant text-xs font-bold rounded-lg hover:bg-surface-container-low transition-colors active:scale-95">FILL GAPS FIRST</button>
+<button class="px-5 py-2.5 text-outline text-xs font-bold hover:underline transition-all">SKIP</button>
+</div>
+</div>
+</section>
+<!-- Recent Projects Section -->
+<section class="space-y-4">
+<div class="flex justify-between items-center">
+<h2 class="text-xs font-bold uppercase tracking-[0.2em] text-outline">Recent Investigations</h2>
+<div class="h-px flex-1 mx-6 bg-outline/10"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+<!-- Project 1 -->
+<div class="bg-surface-container-lowest border border-outline/10 p-5 rounded-lg flex flex-col gap-3 group hover:border-primary/30 transition-colors">
+<div class="flex justify-between items-start">
+<span class="p-2 bg-primary/10 text-primary rounded-lg material-symbols-outlined text-lg" data-icon="microscope">magnification_small</span>
+<span class="text-[10px] font-mono text-outline">MAR 19</span>
+</div>
+<div>
+<h4 class="font-bold text-sm text-on-surface group-hover:text-primary transition-colors">EIT with ML Integration</h4>
+<p class="text-[11px] text-outline mt-1 uppercase font-bold tracking-tight">Draft Done • 82% Quality</p>
+</div>
+<div class="w-full h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary-container" style="width: 82%"></div>
+</div>
+</div>
+<!-- Project 2 -->
+<div class="bg-surface-container-lowest border border-outline/10 p-5 rounded-lg flex flex-col gap-3 group hover:border-primary/30 transition-colors">
+<div class="flex justify-between items-start">
+<span class="p-2 bg-tertiary/10 text-tertiary rounded-lg material-symbols-outlined text-lg" data-icon="article">article</span>
+<span class="text-[10px] font-mono text-outline">MAR 18</span>
+</div>
+<div>
+<h4 class="font-bold text-sm text-on-surface group-hover:text-primary transition-colors">Lost Foam Casting Optimization</h4>
+<p class="text-[11px] text-outline mt-1 uppercase font-bold tracking-tight">Rehab 7.1 • Optimized</p>
+</div>
+<div class="w-full h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-tertiary-container" style="width: 100%"></div>
+</div>
+</div>
+<!-- Project 3 -->
+<div class="bg-surface-container-lowest border border-outline/10 p-5 rounded-lg flex flex-col gap-3 group hover:border-primary/30 transition-colors">
+<div class="flex justify-between items-start">
+<span class="p-2 bg-blue-500/10 text-blue-500 rounded-lg material-symbols-outlined text-lg" data-icon="forum">forum</span>
+<span class="text-[10px] font-mono text-outline">MAR 17</span>
+</div>
+<div>
+<h4 class="font-bold text-sm text-on-surface group-hover:text-primary transition-colors">Quantum Materials Synthesis</h4>
+<p class="text-[11px] text-outline mt-1 uppercase font-bold tracking-tight">Debate Running • Round 3/5</p>
+</div>
+<div class="w-full h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-blue-500" style="width: 60%"></div>
+</div>
+</div>
+</div>
+<button class="w-full md:w-auto mt-4 px-6 py-3 bg-secondary text-white rounded-lg flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest hover:opacity-90 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+            New Research Project
+        </button>
+</section>
+</main>
+<!-- Modal Backdrop -->
+<div class="fixed inset-0 z-[60] bg-on-surface/60 backdrop-blur-sm flex items-center justify-center p-4">
+<!-- Modal Container -->
+<div class="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-2xl shadow-2xl border border-outline-variant overflow-hidden flex flex-col relative">
+<!-- Close Button -->
+<button class="absolute top-4 right-4 p-2 text-on-surface-variant hover:bg-surface-container rounded-full transition-colors active:scale-95">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+<div class="p-8 space-y-8">
+<!-- Modal Header -->
+<div class="flex items-center gap-4">
+<div class="h-10 w-10">
+<img alt="Opensens Logo" class="h-full w-full object-contain" src="https://lh3.googleusercontent.com/aida/ADBb0ugqbNocUznkDKlSkmuD7fCXkkaX7xQaa-roCWhl16fuxwA76py_aIfcRuOIP9tv2eIawQyHUXESWuPJh-7-aA-vc0zKatLclngpUB-hTocjSBaNXgil_j6eaRErhp1SIF57vLW1qjZu30L99xspqnaraUO9DxCwis1X9hQM_dkQNJ1btHS41mfESk8SSkxjI0ePvv1wdb3ddJZKeMxYNIVq6GfeYTmCX-ZX2xEZ_WQT1YNPyYv6r3Og_pWeRffYAand1XqFXWqe"/>
+</div>
+<h2 class="text-[18px] font-bold text-on-surface leading-none">New Research Project</h2>
+</div>
+<!-- Content -->
+<div class="space-y-6">
+<!-- Text Area Section -->
+<div class="space-y-2">
+<label class="block text-sm font-bold text-on-surface uppercase tracking-wider" for="research-question">
+                        What research question do you want to explore?
+                    </label>
+<textarea class="w-full h-32 p-4 bg-surface-container-low border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary-container focus:border-transparent outline-none transition-all text-on-surface resize-none placeholder:text-outline/50 font-body" id="research-question" placeholder="e.g., Investigate the long-term impact of cross-modal latent spaces on autonomous robotic navigation in unstructured environments..."></textarea>
+</div>
+<!-- Source Selection -->
+<div class="space-y-3">
+<h3 class="text-[12px] font-bold text-outline uppercase tracking-[0.1em]">Academic Sources</h3>
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+<label class="flex items-center gap-2 p-3 rounded-lg border border-outline-variant bg-surface-container-lowest hover:bg-primary-container/10 transition-colors cursor-pointer group">
+<input checked="" class="rounded text-primary focus:ring-primary w-4 h-4 border-outline-variant" type="checkbox"/>
+<span class="text-xs font-mono font-medium text-on-surface-variant group-hover:text-primary transition-colors">arXiv</span>
+</label>
+<label class="flex items-center gap-2 p-3 rounded-lg border border-outline-variant bg-surface-container-lowest hover:bg-primary-container/10 transition-colors cursor-pointer group">
+<input checked="" class="rounded text-primary focus:ring-primary w-4 h-4 border-outline-variant" type="checkbox"/>
+<span class="text-xs font-mono font-medium text-on-surface-variant group-hover:text-primary transition-colors">Semantic Scholar</span>
+</label>
+<label class="flex items-center gap-2 p-3 rounded-lg border border-outline-variant bg-surface-container-lowest hover:bg-primary-container/10 transition-colors cursor-pointer group">
+<input class="rounded text-primary focus:ring-primary w-4 h-4 border-outline-variant" type="checkbox"/>
+<span class="text-xs font-mono font-medium text-on-surface-variant group-hover:text-primary transition-colors">OpenAlex</span>
+</label>
+<label class="flex items-center gap-2 p-3 rounded-lg border border-outline-variant bg-surface-container-lowest hover:bg-primary-container/10 transition-colors cursor-pointer group">
+<input class="rounded text-primary focus:ring-primary w-4 h-4 border-outline-variant" type="checkbox"/>
+<span class="text-xs font-mono font-medium text-on-surface-variant group-hover:text-primary transition-colors">bioRxiv</span>
+</label>
+<label class="flex items-center gap-2 p-3 rounded-lg border border-outline-variant bg-surface-container-lowest hover:bg-primary-container/10 transition-colors cursor-pointer group">
+<input class="rounded text-primary focus:ring-primary w-4 h-4 border-outline-variant" type="checkbox"/>
+<span class="text-xs font-mono font-medium text-on-surface-variant group-hover:text-primary transition-colors">OpenReview</span>
+</label>
+<label class="flex items-center gap-2 p-3 rounded-lg border border-outline-variant bg-surface-container-lowest hover:bg-primary-container/10 transition-colors cursor-pointer group">
+<input class="rounded text-primary focus:ring-primary w-4 h-4 border-outline-variant" type="checkbox"/>
+<span class="text-xs font-mono font-medium text-on-surface-variant group-hover:text-primary transition-colors">IEEE</span>
+</label>
+<label class="flex items-center gap-2 p-3 rounded-lg border border-outline-variant bg-surface-container-lowest hover:bg-primary-container/10 transition-colors cursor-pointer group">
+<input class="rounded text-primary focus:ring-primary w-4 h-4 border-outline-variant" type="checkbox"/>
+<span class="text-xs font-mono font-medium text-on-surface-variant group-hover:text-primary transition-colors">ACM</span>
+</label>
+<label class="flex items-center gap-2 p-3 rounded-lg border border-outline-variant bg-surface-container-lowest hover:bg-primary-container/10 transition-colors cursor-pointer group">
+<input class="rounded text-primary focus:ring-primary w-4 h-4 border-outline-variant" type="checkbox"/>
+<span class="text-xs font-mono font-medium text-on-surface-variant group-hover:text-primary transition-colors">Springer</span>
+</label>
+<label class="flex items-center gap-2 p-3 rounded-lg border border-outline-variant bg-surface-container-lowest hover:bg-primary-container/10 transition-colors cursor-pointer group">
+<input class="rounded text-primary focus:ring-primary w-4 h-4 border-outline-variant" type="checkbox"/>
+<span class="text-xs font-mono font-medium text-on-surface-variant group-hover:text-primary transition-colors">PubMed</span>
+</label></div>
+</div>
+</div>
+<!-- Modal Footer -->
+<div class="pt-4 border-t border-outline-variant">
+<button class="w-full py-4 bg-[#1EA88E] text-white font-bold uppercase tracking-widest rounded-xl shadow-lg shadow-primary-container/30 hover:shadow-primary-container/50 active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+                    Start Research
+                    <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- BottomNavBar System Status Bar -->
+<footer class="bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 fixed bottom-0 w-full z-50 flex justify-between items-center px-4 py-1.5 gap-6 no-shadows">
+<div class="flex gap-6 items-center">
+<div class="flex items-center gap-1.5 text-slate-400 dark:text-slate-500 font-mono text-[11px] uppercase tracking-widest">
+<span class="material-symbols-outlined text-[10px]" data-icon="fiber_manual_record">fiber_manual_record</span>
+            LLM Proxy: <span class="text-primary font-bold">READY</span>
+</div>
+<div class="flex items-center gap-1.5 text-slate-400 dark:text-slate-500 font-mono text-[11px] uppercase tracking-widest">
+<span class="material-symbols-outlined text-[10px]" data-icon="fiber_manual_record">fiber_manual_record</span>
+            Anthropic API: <span class="text-primary font-bold">STABLE</span>
+</div>
+<div class="hidden sm:flex items-center gap-1.5 text-emerald-500 dark:text-emerald-400 font-mono text-[11px] uppercase tracking-widest">
+<span class="material-symbols-outlined text-[10px]" data-icon="fiber_manual_record" style="font-variation-settings: 'FILL' 1;">fiber_manual_record</span>
+            ScienceClaw: <span class="font-bold">ACTIVE</span>
+</div>
+<div class="hidden md:flex items-center gap-1.5 text-slate-400 dark:text-slate-500 font-mono text-[11px] uppercase tracking-widest">
+<span class="material-symbols-outlined text-[10px]" data-icon="fiber_manual_record">fiber_manual_record</span>
+            AutoResearch: <span class="text-slate-600 dark:text-slate-300">IDLE</span>
+</div>
+</div>
+<div class="flex items-center gap-4 text-[10px] font-mono text-outline uppercase">
+<span>Uptime: 99.98%</span>
+<span class="hidden sm:inline">Region: US-EAST-1</span>
+<span class="text-primary-container font-bold">V1.4.2-STABLE</span>
+</div>
+</footer>
+</body></html>

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary-fixed-dim": "#61dbbe",
+                        "surface-bright": "#f9f9ff",
+                        "primary-fixed": "#7ff7da",
+                        "on-error": "#ffffff",
+                        "tertiary": "#9a4431",
+                        "error": "#ba1a1a",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed": "#00201a",
+                        "inverse-surface": "#283140",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed": "#ffdad2",
+                        "surface-container-high": "#dfe8fd",
+                        "inverse-on-surface": "#ecf1ff",
+                        "secondary-fixed": "#bfecde",
+                        "secondary-container": "#bce9db",
+                        "on-surface": "#131c2a",
+                        "surface-container-highest": "#dae3f7",
+                        "on-tertiary-fixed-variant": "#7c2d1c",
+                        "on-primary-fixed-variant": "#005143",
+                        "on-primary-fixed": "#00201a",
+                        "tertiary-container": "#df7962",
+                        "secondary-fixed-dim": "#a3d0c2",
+                        "on-primary-container": "#00352b",
+                        "outline": "#6d7a75",
+                        "surface-dim": "#d1daef",
+                        "surface-container-low": "#f0f3ff",
+                        "on-tertiary-fixed": "#3d0600",
+                        "outline-variant": "#bccac4",
+                        "surface": "#f9f9ff",
+                        "on-secondary-container": "#416a5f",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed-dim": "#ffb4a4",
+                        "surface-container-lowest": "#ffffff",
+                        "on-background": "#131c2a",
+                        "surface-variant": "#dae3f7",
+                        "on-surface-variant": "#3d4945",
+                        "on-secondary": "#ffffff",
+                        "primary-container": "#1ea88e",
+                        "background": "#f9f9ff",
+                        "primary": "#006b59",
+                        "on-tertiary-container": "#5a1506",
+                        "on-secondary-fixed-variant": "#244e44",
+                        "secondary": "#3c665b",
+                        "surface-container": "#e7eeff",
+                        "error-container": "#ffdad6",
+                        "surface-tint": "#006b59",
+                        "inverse-primary": "#61dbbe"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"],
+                        "mono": ["JetBrains Mono", "monospace"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .step-pulse {
+            box-shadow: 0 0 0 0 rgba(30, 168, 142, 0.7);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(30, 168, 142, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(30, 168, 142, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(30, 168, 142, 0); }
+        }
+        .landscape-mesh {
+            background-image: radial-gradient(circle at 2px 2px, rgba(0, 107, 89, 0.05) 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+    </style>
+</head>
+<body class="bg-background font-body text-on-background overflow-hidden">
+<!-- TopNavBar -->
+<header class="fixed top-0 left-0 right-0 z-50 flex justify-between items-center w-full px-6 py-3 h-16 bg-white/80 backdrop-blur-md border-b border-slate-200/60">
+<div class="flex items-center gap-8">
+<span class="text-lg font-black tracking-tighter text-slate-900 uppercase">Opensens Parallax</span>
+<div class="hidden md:flex items-center bg-surface-container-low px-3 py-1.5 rounded-lg border border-outline-variant/30 w-64">
+<span class="material-symbols-outlined text-outline text-sm mr-2">search</span>
+<input class="bg-transparent border-none text-xs focus:ring-0 p-0 w-full placeholder:text-outline/60" placeholder="Search pipeline..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center bg-primary-container/10 px-3 py-1 rounded-full border border-primary-container/20">
+<span class="material-symbols-outlined text-primary text-sm mr-1.5" style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
+<span class="font-mono text-sm font-bold text-primary">$0.41</span>
+</div>
+<button class="p-2 text-slate-500 hover:text-teal-500 transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden border border-outline-variant/50">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="Stylized research avatar with glasses" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAit_Dv_GlcKxnMS-7x2uXNIdKAbpHfiSjkuUP_YOTDXJ6dvV2RGbXPrRFYF2_Y2vmdnnV4hzKWnn_OJUbLRper5Sp4TfUvurzfloYihIEEtE2Oc9RHey9C7Eu2CEmi1jIA4zCa2P8aWX15FlsdBL27mDwPR9N6qZalSLw2kYo_ugoD5eQqSejhGl2qzlMyWRCW7S8fehZ_dNym8pGl4alG6LvmIssvWCi6iN_0LEXqKuBov_9VtMt8GmaobfI5RW-KL4d5jJrecE0"/>
+</div>
+</div>
+</header>
+<div class="flex h-screen pt-16">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 bg-slate-50 border-r border-slate-200 flex flex-col z-40">
+<div class="p-6">
+<h2 class="font-bold text-slate-800 uppercase tracking-tighter text-sm">Research Pipeline</h2>
+<p class="text-[10px] font-mono text-primary uppercase tracking-widest mt-1">Active Stage: Debate</p>
+</div>
+<nav class="flex-1 px-3 space-y-1 overflow-y-auto">
+<!-- Nav Item: Crawl -->
+<div class="group flex items-center px-4 py-3 text-slate-500 hover:pl-5 transition-all duration-200 cursor-pointer">
+<span class="material-symbols-outlined mr-3 text-lg">manage_search</span>
+<span class="font-mono text-xs uppercase tracking-widest">Crawl</span>
+<span class="ml-auto material-symbols-outlined text-primary text-sm">check_circle</span>
+</div>
+<!-- Nav Item: Map -->
+<div class="group flex items-center px-4 py-3 text-slate-500 hover:pl-5 transition-all duration-200 cursor-pointer">
+<span class="material-symbols-outlined mr-3 text-lg">account_tree</span>
+<span class="font-mono text-xs uppercase tracking-widest">Map</span>
+<span class="ml-auto material-symbols-outlined text-primary text-sm">check_circle</span>
+</div>
+<!-- Nav Item: Debate (ACTIVE) -->
+<div class="flex items-center px-4 py-3 bg-teal-50 text-teal-700 border-r-4 border-teal-600 font-bold transition-all duration-200 cursor-default">
+<span class="material-symbols-outlined mr-3 text-lg" style="font-variation-settings: 'FILL' 1;">forum</span>
+<span class="font-mono text-xs uppercase tracking-widest">Debate</span>
+<div class="ml-auto w-2 h-2 rounded-full bg-teal-600 step-pulse"></div>
+</div>
+<!-- Nav Items: Pending -->
+<div class="group flex items-center px-4 py-3 text-slate-400 hover:pl-5 transition-all duration-200 cursor-pointer">
+<span class="material-symbols-outlined mr-3 text-lg opacity-50">fact_check</span>
+<span class="font-mono text-xs uppercase tracking-widest">Validate</span>
+</div>
+<div class="group flex items-center px-4 py-3 text-slate-400 hover:pl-5 transition-all duration-200 cursor-pointer">
+<span class="material-symbols-outlined mr-3 text-lg opacity-50">lightbulb</span>
+<span class="font-mono text-xs uppercase tracking-widest">Ideas</span>
+</div>
+<div class="group flex items-center px-4 py-3 text-slate-400 hover:pl-5 transition-all duration-200 cursor-pointer">
+<span class="material-symbols-outlined mr-3 text-lg opacity-50">edit_note</span>
+<span class="font-mono text-xs uppercase tracking-widest">Draft</span>
+</div>
+<div class="group flex items-center px-4 py-3 text-slate-400 hover:pl-5 transition-all duration-200 cursor-pointer">
+<span class="material-symbols-outlined mr-3 text-lg opacity-50">biotech</span>
+<span class="font-mono text-xs uppercase tracking-widest">Experiment</span>
+</div>
+<div class="group flex items-center px-4 py-3 text-slate-400 hover:pl-5 transition-all duration-200 cursor-pointer">
+<span class="material-symbols-outlined mr-3 text-lg opacity-50">repeat</span>
+<span class="font-mono text-xs uppercase tracking-widest">Rehab</span>
+</div>
+</nav>
+<div class="p-4 bg-slate-100 border-t border-slate-200">
+<div class="bg-white p-3 rounded shadow-sm">
+<div class="flex justify-between items-center mb-2">
+<span class="text-[10px] font-bold uppercase text-slate-400">Memory Usage</span>
+<span class="text-[10px] font-mono text-primary">82%</span>
+</div>
+<div class="w-full bg-slate-100 h-1 rounded-full overflow-hidden">
+<div class="bg-primary w-[82%] h-full"></div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 flex-1 overflow-y-auto p-8 pb-16 bg-surface-bright">
+<!-- Recommendation Banner -->
+<div class="mb-8 flex items-center justify-between bg-primary-container text-white p-4 rounded-lg shadow-lg border-l-8 border-primary ring-1 ring-white/20">
+<div class="flex items-center gap-4">
+<div class="p-2 bg-white/20 rounded">
+<span class="material-symbols-outlined">auto_awesome</span>
+</div>
+<div>
+<p class="font-medium tracking-tight">Consensus is building (72%). Once rounds complete, proceed to Validation against 250M+ papers.</p>
+<p class="text-[11px] opacity-80 uppercase font-mono mt-0.5">Automated Intelligence Recommendation</p>
+</div>
+</div>
+<button class="px-4 py-1.5 bg-white text-primary font-bold text-xs uppercase tracking-widest hover:bg-slate-50 transition-colors">
+                    Preview Next Stage
+                </button>
+</div>
+<!-- Pipeline Summary & 3D Viewer Container -->
+<div class="grid grid-cols-12 gap-6">
+<!-- Expanded Debate Stage Viewer -->
+<div class="col-span-12 bg-white rounded-xl border border-slate-200 shadow-xl overflow-hidden flex flex-col min-h-[600px]">
+<div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">forum</span>
+<h3 class="font-bold text-lg tracking-tight">Agent Office: Dialectic Reasoning Visualization</h3>
+</div>
+<div class="flex items-center gap-2">
+<span class="bg-teal-50 text-teal-700 px-2 py-0.5 rounded text-[10px] font-bold uppercase border border-teal-200">20 Agents Active</span>
+<span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[10px] font-bold uppercase">Round 4 / 12</span>
+</div>
+</div>
+<!-- 3D Visualization Viewer -->
+<div class="flex-1 relative flex">
+<!-- The 3D Terrain Viewport (Simulated) -->
+<div class="flex-1 relative bg-slate-900 landscape-mesh overflow-hidden">
+<!-- Simulated Topographic Stance Heatmap Background -->
+<div class="absolute inset-0 opacity-40 mix-blend-screen" style="background: radial-gradient(circle at 40% 60%, #1ea88e 0%, transparent 40%), radial-gradient(circle at 70% 30%, #9a4431 0%, transparent 40%), radial-gradient(circle at 10% 20%, #006b59 0%, transparent 50%);"></div>
+<!-- Floating Nodes (Agents) -->
+<div class="absolute top-1/4 left-1/3 w-4 h-4 bg-primary-fixed-dim rounded-full ring-4 ring-primary-container/30 shadow-[0_0_20px_rgba(30,168,142,0.8)]">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[9px] font-mono text-white bg-slate-800 px-1 py-0.5">AG-07: Prof. Kim</div>
+</div>
+<div class="absolute bottom-1/3 right-1/4 w-3 h-3 bg-tertiary-fixed-dim rounded-full ring-4 ring-tertiary/30 shadow-[0_0_15px_rgba(154,68,49,0.8)]">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[9px] font-mono text-white bg-slate-800 px-1 py-0.5">AG-12: Dr. Aris</div>
+</div>
+<!-- More Nodes -->
+<div class="absolute top-2/3 left-1/4 w-2 h-2 bg-white/60 rounded-full"></div>
+<div class="absolute top-1/2 right-1/2 w-2 h-2 bg-white/60 rounded-full"></div>
+<div class="absolute top-1/4 right-1/3 w-2 h-2 bg-white/60 rounded-full"></div>
+<!-- Connecting Threads (Active Arguments) -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none opacity-60">
+<line stroke="white" stroke-dasharray="4" stroke-width="1" x1="33%" x2="75%" y1="25%" y2="66%"></line>
+<line stroke="#61dbbe" stroke-width="2" x1="33%" x2="50%" y1="25%" y2="50%"></line>
+<line stroke="#ffb4a4" stroke-width="1.5" x1="75%" x2="25%" y1="66%" y2="66%"></line>
+</svg>
+<!-- 3D Controls Overlay -->
+<div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center bg-slate-800/90 backdrop-blur-sm border border-slate-700 p-1.5 rounded-xl gap-2 shadow-2xl">
+<button class="w-10 h-10 flex items-center justify-center bg-primary text-white rounded hover:bg-primary-container transition-colors">
+<span class="material-symbols-outlined">play_arrow</span>
+</button>
+<div class="w-px h-6 bg-slate-700"></div>
+<button class="p-2 text-slate-300 hover:text-white transition-colors">
+<span class="material-symbols-outlined">rotate_right</span>
+</button>
+<button class="p-2 text-slate-300 hover:text-white transition-colors">
+<span class="material-symbols-outlined">zoom_in</span>
+</button>
+<button class="p-2 text-slate-300 hover:text-white transition-colors">
+<span class="material-symbols-outlined">center_focus_weak</span>
+</button>
+<div class="w-px h-6 bg-slate-700"></div>
+<div class="flex items-center gap-2 px-3">
+<span class="text-[10px] text-slate-400 font-mono uppercase">Heatmap</span>
+<div class="w-8 h-4 bg-primary/40 rounded-full relative cursor-pointer border border-primary/60">
+<div class="absolute right-0.5 top-0.5 w-3 h-3 bg-primary rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Viewer Sidebar: Live Analyst Narrative -->
+<div class="w-80 border-l border-slate-200 bg-slate-50 flex flex-col">
+<div class="p-4 border-b border-slate-200 flex justify-between items-center">
+<h4 class="text-[10px] font-bold uppercase text-slate-500 tracking-wider">Live Analyst Narrative</h4>
+<span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+</div>
+<div class="flex-1 overflow-y-auto p-4 space-y-4">
+<div class="p-3 bg-white rounded border border-slate-200 shadow-sm">
+<p class="text-xs text-slate-400 font-mono mb-1">T+ 14:02:41</p>
+<p class="text-sm leading-relaxed text-slate-800">
+<span class="font-bold text-primary">Agent 07 (Prof. Kim)</span> is challenging the statistical validity of the latent space mapping.
+                                    </p>
+</div>
+<div class="p-3 bg-white/50 rounded border border-slate-200">
+<p class="text-xs text-slate-400 font-mono mb-1">T+ 13:58:12</p>
+<p class="text-sm leading-relaxed text-slate-500">
+                                        Synthesis Agent clusters high-variance nodes around the "Dark Matter Decay" hypothesis.
+                                    </p>
+</div>
+<div class="p-3 bg-white/50 rounded border border-slate-200">
+<p class="text-xs text-slate-400 font-mono mb-1">T+ 13:52:05</p>
+<p class="text-sm leading-relaxed text-slate-500">
+                                        Agent 12 acknowledges potential bias in training set 'C-Alpha'.
+                                    </p>
+</div>
+</div>
+<div class="p-4 bg-white border-t border-slate-200">
+<button class="w-full py-2 bg-slate-900 text-white text-xs font-bold uppercase tracking-widest rounded hover:bg-black transition-all">
+                                    Export Session Log
+                                </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Recent Projects List Section -->
+<div class="col-span-12 mt-4">
+<div class="flex items-center justify-between mb-4 px-2">
+<h3 class="font-bold text-sm uppercase tracking-tight text-slate-500">Secondary Observables</h3>
+<a class="text-xs font-mono text-primary hover:underline" href="#">View All Projects</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div class="p-4 bg-white rounded-lg border border-slate-200 hover:border-primary-fixed-dim transition-all cursor-pointer group">
+<div class="flex justify-between items-start mb-2">
+<span class="text-[10px] font-mono text-slate-400">#PX-882</span>
+<span class="material-symbols-outlined text-slate-300 group-hover:text-primary">open_in_new</span>
+</div>
+<h4 class="font-bold text-slate-800 truncate">Quantum Entanglement Drift</h4>
+<p class="text-xs text-slate-500 mt-1">Status: Archived (Validation Fail)</p>
+</div>
+<div class="p-4 bg-white rounded-lg border border-slate-200 hover:border-primary-fixed-dim transition-all cursor-pointer group">
+<div class="flex justify-between items-start mb-2">
+<span class="text-[10px] font-mono text-slate-400">#PX-901</span>
+<span class="material-symbols-outlined text-slate-300 group-hover:text-primary">open_in_new</span>
+</div>
+<h4 class="font-bold text-slate-800 truncate">Heuristic Logic Splice</h4>
+<p class="text-xs text-slate-500 mt-1">Status: Stage 6 (Drafting)</p>
+</div>
+<div class="p-4 bg-white rounded-lg border border-slate-200 hover:border-primary-fixed-dim transition-all cursor-pointer group">
+<div class="flex justify-between items-start mb-2">
+<span class="text-[10px] font-mono text-slate-400">#PX-915</span>
+<span class="material-symbols-outlined text-slate-300 group-hover:text-primary">open_in_new</span>
+</div>
+<h4 class="font-bold text-slate-800 truncate">Neural Latency Bypass</h4>
+<p class="text-xs text-slate-500 mt-1">Status: Stage 2 (Mapping)</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer / System Status -->
+<footer class="fixed bottom-0 w-full z-50 flex justify-between items-center px-4 py-1 bg-slate-900 h-8 border-t border-slate-800">
+<div class="flex items-center gap-6">
+<span class="font-mono text-[10px] text-slate-500 uppercase">LLM Proxy: Anthropic | Tools: ScienceClaw</span>
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_5px_#1ea88e] animate-pulse"></span>
+<span class="font-mono text-[10px] text-teal-400 uppercase">Network: Connected</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<a class="font-mono text-[10px] text-slate-500 uppercase hover:text-white transition-colors" href="#">System Status</a>
+<a class="font-mono text-[10px] text-slate-500 uppercase hover:text-white transition-colors" href="#">API Logs</a>
+</div>
+</footer>
+</body></html>

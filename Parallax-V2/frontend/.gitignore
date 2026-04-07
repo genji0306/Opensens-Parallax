@@ -1,0 +1,4 @@
+# Prevent tsc emit artifacts from shadowing .ts/.vue sources
+src/**/*.js
+src/**/*.vue.js
+!src/__tests__/**/*.js

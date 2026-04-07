@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Research Command Center - Paper Rehab</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .mono { font-family: 'JetBrains+Mono', monospace; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "surface-tint": "#006b59",
+                "inverse-on-surface": "#ecf1ff",
+                "surface-container-lowest": "#ffffff",
+                "on-primary-container": "#00352b",
+                "surface-container-low": "#f0f3ff",
+                "secondary": "#3c665b",
+                "primary-container": "#1ea88e",
+                "on-tertiary-fixed": "#3d0600",
+                "inverse-primary": "#61dbbe",
+                "outline-variant": "#bccac4",
+                "on-tertiary-fixed-variant": "#7c2d1c",
+                "on-secondary-fixed": "#00201a",
+                "tertiary": "#9a4431",
+                "primary": "#006b59",
+                "on-surface": "#131c2a",
+                "surface-container-high": "#dfe8fd",
+                "on-primary-fixed-variant": "#005143",
+                "on-primary-fixed": "#00201a",
+                "on-tertiary-container": "#5a1506",
+                "surface-dim": "#d1daef",
+                "secondary-fixed": "#bfecde",
+                "on-tertiary": "#ffffff",
+                "on-background": "#131c2a",
+                "on-surface-variant": "#3d4945",
+                "surface-container-highest": "#dae3f7",
+                "on-secondary": "#ffffff",
+                "primary-fixed-dim": "#61dbbe",
+                "surface-variant": "#dae3f7",
+                "on-primary": "#ffffff",
+                "error": "#ba1a1a",
+                "on-secondary-container": "#416a5f",
+                "inverse-surface": "#283140",
+                "tertiary-fixed-dim": "#ffb4a4",
+                "tertiary-fixed": "#ffdad2",
+                "primary-fixed": "#7ff7da",
+                "outline": "#6d7a75",
+                "error-container": "#ffdad6",
+                "tertiary-container": "#df7962",
+                "on-error-container": "#93000a",
+                "on-secondary-fixed-variant": "#244e44",
+                "secondary-fixed-dim": "#a3d0c2",
+                "on-error": "#ffffff",
+                "surface-bright": "#f9f9ff",
+                "surface": "#f9f9ff",
+                "secondary-container": "#bce9db",
+                "surface-container": "#e7eeff",
+                "background": "#f9f9ff"
+              },
+              fontFamily: {
+                "headline": ["Inter"],
+                "body": ["Inter"],
+                "label": ["Inter"]
+              },
+              borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+            },
+          },
+        }
+      </script>
+</head>
+<body class="bg-surface font-body text-on-surface selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md shadow-sm border-b border-slate-200/60 dark:border-slate-800/60 flex justify-between items-center px-6 h-16">
+<div class="flex items-center gap-8">
+<span class="text-xl font-bold tracking-tighter text-slate-900 dark:text-slate-50">Research Command Center</span>
+<div class="hidden md:flex items-center gap-6">
+<a class="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors font-inter tracking-tight" href="#">Pipeline</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors font-inter tracking-tight" href="#">Datasets</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors font-inter tracking-tight" href="#">Archive</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors font-inter tracking-tight" href="#">Analytics</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden sm:block">
+<input class="bg-surface-container-low border-none rounded-full px-4 py-1.5 text-sm w-64 focus:ring-2 focus:ring-primary/20" placeholder="Search research..." type="text"/>
+</div>
+<div class="px-3 py-1 bg-surface-container-highest rounded text-sm font-bold text-on-surface-variant mono">
+                $42.50 Credits
+            </div>
+<button class="bg-primary text-on-primary px-4 py-1.5 rounded-lg text-sm font-semibold hover:opacity-90 transition-all active:scale-95">
+                Execute Stage
+            </button>
+<div class="flex items-center gap-2 border-l pl-4 border-outline-variant/30">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-slate-50 p-1 rounded-full">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-slate-50 p-1 rounded-full">settings</span>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest overflow-hidden">
+<img alt="Researcher Profile" class="w-full h-full object-cover" data-alt="Researcher Profile avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdBi-LFTnB_CWhQgFIVrMouKvI4OpezVNGGKEc0IVen-SsnFTQ79AxkEWC1AG99R4TWQBAfJA2evA07yNnJaQbxj85lzDqXqVpJiUqHgqLhHZ8ghkjiuP4MEdHeWnkHmduo0Ho67dQCzAVect21Ckyk924oYll1kP2IRa3VosPotvjfSfTEb4P_UeRnGJU3AjlxI90SjvEcBMPEnaYTHVtWARRyUM8m2jng-u2bppS2zREkVh_dGZvADNXHbbmASyPNkX1LrSvfJ0"/>
+</div>
+</div>
+</div>
+</nav>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-64 flex flex-col pt-4 bg-slate-50 dark:bg-slate-900 border-r border-outline-variant/20 z-40 overflow-y-auto">
+<div class="px-6 mb-6">
+<h2 class="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">Pipeline</h2>
+<p class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">10-Step Protocol</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-6 py-2.5 text-slate-500 hover:bg-slate-100 transition-all duration-200 font-inter text-xs font-semibold uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-lg">search</span> Crawl
+            </a>
+<a class="flex items-center gap-3 px-6 py-2.5 text-slate-500 hover:bg-slate-100 transition-all duration-200 font-inter text-xs font-semibold uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-lg">download</span> Ingest
+            </a>
+<a class="flex items-center gap-3 px-6 py-2.5 text-slate-500 hover:bg-slate-100 transition-all duration-200 font-inter text-xs font-semibold uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-lg">account_tree</span> Parse
+            </a>
+<a class="flex items-center gap-3 px-6 py-2.5 text-slate-500 hover:bg-slate-100 transition-all duration-200 font-inter text-xs font-semibold uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-lg">biotech</span> Analyze
+            </a>
+<a class="flex items-center gap-3 px-6 py-2.5 text-slate-500 hover:bg-slate-100 transition-all duration-200 font-inter text-xs font-semibold uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-lg">fact_check</span> Verify
+            </a>
+<a class="flex items-center gap-3 px-6 py-2.5 text-slate-500 hover:bg-slate-100 transition-all duration-200 font-inter text-xs font-semibold uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-lg">auto_fix_high</span> Refine
+            </a>
+<a class="flex items-center gap-3 px-6 py-2.5 text-slate-500 hover:bg-slate-100 transition-all duration-200 font-inter text-xs font-semibold uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-lg">rate_review</span> Review
+            </a>
+<a class="flex items-center gap-3 px-6 py-2.5 text-slate-500 hover:bg-slate-100 transition-all duration-200 font-inter text-xs font-semibold uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-lg">model_training</span> Simulate
+            </a>
+<a class="flex items-center gap-3 px-6 py-2.5 text-slate-500 hover:bg-slate-100 transition-all duration-200 font-inter text-xs font-semibold uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-lg">priority_high</span> Stress Test
+            </a>
+<a class="flex items-center gap-3 px-6 py-2.5 bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300 border-r-4 border-teal-600 font-inter text-xs font-semibold uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-lg">healing</span> Paper Rehab
+            </a>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-16 min-h-screen p-8 bg-surface">
+<!-- Dashboard Header / Active Project Panel -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-10">
+<div>
+<div class="flex items-center gap-3 mb-2">
+<span class="bg-primary-container/20 text-primary-container text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded">Active Project</span>
+<span class="flex items-center gap-1.5 text-on-surface-variant text-xs">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span> Rehab in Progress
+                    </span>
+</div>
+<h1 class="text-4xl font-extrabold tracking-tight text-on-surface">Neural Architecture Draft V2</h1>
+</div>
+<div class="flex items-center gap-4 bg-surface-container-high p-4 rounded-xl border border-outline-variant/30">
+<div class="text-right">
+<p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Project Cost</p>
+<p class="text-2xl font-black text-on-surface mono">$0.41</p>
+</div>
+<div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined">payments</span>
+</div>
+</div>
+</div>
+<!-- Pipeline Stage Tracker -->
+<div class="grid grid-cols-10 gap-2 mb-10">
+<!-- Stages 1-7: Done -->
+<div class="h-1 bg-primary-container rounded-full"></div>
+<div class="h-1 bg-primary-container rounded-full"></div>
+<div class="h-1 bg-primary-container rounded-full"></div>
+<div class="h-1 bg-primary-container rounded-full"></div>
+<div class="h-1 bg-primary-container rounded-full"></div>
+<div class="h-1 bg-primary-container rounded-full"></div>
+<div class="h-1 bg-primary-container rounded-full"></div>
+<!-- Stage 8: Active -->
+<div class="relative">
+<div class="h-1 bg-primary rounded-full relative overflow-hidden">
+<div class="absolute inset-0 bg-white/30 animate-[shimmer_2s_infinite]"></div>
+</div>
+<div class="absolute -top-1 left-1/2 -translate-x-1/2 w-3 h-3 bg-primary rounded-full ring-4 ring-primary/20"></div>
+</div>
+<!-- Remaining -->
+<div class="h-1 bg-surface-container-highest rounded-full"></div>
+<div class="h-1 bg-surface-container-highest rounded-full"></div>
+</div>
+<!-- Main Bento Layout -->
+<div class="grid grid-cols-12 gap-6">
+<!-- Paper Rehab Detail Card (Expanded) -->
+<div class="col-span-12 lg:col-span-8 space-y-6">
+<div class="glass-panel border border-outline-variant/30 rounded-2xl overflow-hidden shadow-sm">
+<div class="bg-surface-container px-6 py-4 flex justify-between items-center border-b border-outline-variant/20">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">description</span>
+<h2 class="font-bold text-on-surface">Paper Rehab</h2>
+<span class="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded font-bold">ACTIVE</span>
+</div>
+<div class="flex gap-2">
+<button class="p-1.5 hover:bg-surface-container-highest rounded transition-colors"><span class="material-symbols-outlined text-sm">settings</span></button>
+<button class="p-1.5 hover:bg-surface-container-highest rounded transition-colors"><span class="material-symbols-outlined text-sm">more_vert</span></button>
+</div>
+</div>
+<div class="p-6">
+<!-- Metrics Grid -->
+<div class="grid grid-cols-3 gap-6 mb-8">
+<div class="p-4 bg-surface-container-low rounded-xl border border-outline-variant/10">
+<p class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mb-1">Impact Score</p>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-black text-on-surface-variant mono">3.0</span>
+<span class="material-symbols-outlined text-primary text-sm">trending_up</span>
+<span class="text-2xl font-black text-primary mono">7.1</span>
+</div>
+</div>
+<div class="p-4 bg-surface-container-low rounded-xl border border-outline-variant/10">
+<p class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mb-1">Iteration Rounds</p>
+<p class="text-3xl font-black text-on-surface mono">3</p>
+</div>
+<div class="p-4 bg-surface-container-low rounded-xl border border-outline-variant/10">
+<p class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mb-1">Context Injected</p>
+<p class="text-2xl font-black text-on-surface mono">19 papers</p>
+</div>
+</div>
+<!-- Score Progression Chart (CSS Mockup) -->
+<div class="mb-8">
+<h3 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-4">Score Progression</h3>
+<div class="h-32 flex items-end gap-1 px-2">
+<div class="w-full bg-primary-container/20 rounded-t h-[30%] relative group">
+<div class="hidden group-hover:block absolute -top-8 left-1/2 -translate-x-1/2 bg-inverse-surface text-inverse-on-surface px-2 py-1 rounded text-[10px] mono">3.0</div>
+</div>
+<div class="w-full bg-primary-container/40 rounded-t h-[45%]"></div>
+<div class="w-full bg-primary-container/60 rounded-t h-[60%]"></div>
+<div class="w-full bg-primary-container/80 rounded-t h-[85%]"></div>
+<div class="w-full bg-primary rounded-t h-[100%] relative group">
+<div class="hidden group-hover:block absolute -top-8 left-1/2 -translate-x-1/2 bg-inverse-surface text-inverse-on-surface px-2 py-1 rounded text-[10px] mono">7.1</div>
+</div>
+</div>
+<div class="flex justify-between text-[10px] text-on-surface-variant mono mt-2">
+<span>Initial</span>
+<span>R1</span>
+<span>R2</span>
+<span>R3</span>
+<span>Current</span>
+</div>
+</div>
+<!-- Adverse Review & Gaps -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+<div class="space-y-4">
+<h3 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">psychology</span> Adversarial Reviews
+                                </h3>
+<div class="space-y-2">
+<div class="p-3 bg-surface-container-highest/50 rounded flex justify-between items-center">
+<span class="text-xs font-medium">Reviewer Alpha</span>
+<span class="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded font-bold">Fixed Gaps</span>
+</div>
+<div class="p-3 bg-surface-container-highest/50 rounded flex justify-between items-center">
+<span class="text-xs font-medium">Reviewer Beta</span>
+<span class="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded font-bold">Improved Citation</span>
+</div>
+<div class="p-3 bg-surface-container-highest/50 rounded flex justify-between items-center">
+<span class="text-xs font-medium">Reviewer Gamma</span>
+<span class="text-[10px] bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded font-bold">Pending Tone</span>
+</div>
+<div class="p-3 bg-surface-container-highest/50 rounded flex justify-between items-center opacity-50">
+<span class="text-xs font-medium">Reviewer Delta</span>
+<span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-bold">Queued</span>
+</div>
+</div>
+</div>
+<div class="space-y-4">
+<h3 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">library_add</span> Gap Filling Sources
+                                </h3>
+<div class="max-h-[160px] overflow-y-auto space-y-2 pr-2">
+<div class="p-3 border border-outline-variant/30 rounded">
+<p class="text-[10px] font-bold text-primary mb-1">OpenAlex</p>
+<p class="text-xs font-semibold leading-tight">Neural Nets in Biomechanics: A Survey of Latent Architectures</p>
+</div>
+<div class="p-3 border border-outline-variant/30 rounded">
+<p class="text-[10px] font-bold text-primary mb-1">CrossRef</p>
+<p class="text-xs font-semibold leading-tight">Mapping Latent Spaces in Unsupervised Environments (2023)</p>
+</div>
+<div class="p-3 border border-outline-variant/30 rounded">
+<p class="text-[10px] font-bold text-primary mb-1">ArXiv</p>
+<p class="text-xs font-semibold leading-tight">Attention is Not All You Need for Bio-Signals</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex flex-wrap gap-4 pt-6 border-t border-outline-variant/20">
+<button class="bg-surface-container-highest text-on-surface-variant/50 px-6 py-2.5 rounded-lg font-bold text-sm cursor-not-allowed border border-outline-variant/20" disabled="">Start Next Round</button>
+<button class="bg-surface-container-highest text-on-surface-variant px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-surface-variant transition-colors border border-outline-variant/30"><span class="material-symbols-outlined text-sm animate-spin mr-2">sync</span> Downloading...</button>
+<button class="text-on-surface-variant px-6 py-2.5 rounded-lg font-bold text-sm hover:underline">
+                                View Full Report
+                            </button>
+</div>
+</div>
+</div>
+<!-- Recommendation Banner -->
+<div class="bg-primary-container/10 border border-primary-container/30 rounded-2xl p-6 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-primary-container/20 rounded-full flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined">auto_awesome</span>
+</div>
+<div>
+<h4 class="font-bold text-on-primary-container">Pipeline complete!</h4>
+<p class="text-sm text-on-primary-container/70">Export your paper or start a new research question with your improved baseline.</p>
+</div>
+</div>
+<button class="px-4 py-2 bg-primary-container text-on-primary-container rounded-lg font-bold text-sm">New Question</button>
+</div>
+</div>
+<!-- Sidebar -->
+<div class="col-span-12 lg:col-span-4 space-y-6">
+<!-- System Status Bar -->
+<div class="glass-panel border border-outline-variant/30 rounded-2xl p-4">
+<h3 class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-4">System Nodes</h3>
+<div class="space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-green-500"></span>
+<span class="text-xs font-medium">Global Proxy</span>
+</div>
+<span class="text-[10px] mono text-on-surface-variant">24ms</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-green-500"></span>
+<span class="text-xs font-medium">Anthropic (Claude-3)</span>
+</div>
+<span class="text-[10px] mono text-on-surface-variant">Online</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-yellow-500"></span>
+<span class="text-xs font-medium">ScienceClaw (Local)</span>
+</div>
+<span class="text-[10px] mono text-on-surface-variant">Syncing...</span>
+</div>
+<div class="pt-3 border-t border-outline-variant/10 flex justify-between items-center mt-3">
+<span class="text-xs font-bold text-on-surface-variant">Session Cost</span>
+<span class="text-sm font-black text-on-surface mono">$0.41</span>
+</div>
+</div>
+</div>
+<!-- Recent Projects -->
+<div class="glass-panel border border-outline-variant/30 rounded-2xl overflow-hidden">
+<div class="px-4 py-3 bg-surface-container border-b border-outline-variant/20 flex justify-between items-center">
+<h3 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Recent Projects</h3>
+<span class="material-symbols-outlined text-sm text-on-surface-variant">history</span>
+</div>
+<div class="divide-y divide-outline-variant/10">
+<div class="p-4 hover:bg-surface-container-low transition-colors cursor-pointer group">
+<div class="flex justify-between items-start mb-1">
+<h4 class="text-sm font-bold text-on-surface">EIT with Machine Learning</h4>
+<span class="material-symbols-outlined text-xs text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity">open_in_new</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-bold text-primary">Stage 5 Done</span>
+<span class="w-1 h-1 bg-outline-variant rounded-full"></span>
+<span class="text-[10px] text-on-surface-variant">2 days ago</span>
+</div>
+</div>
+<div class="p-4 hover:bg-surface-container-low transition-colors cursor-pointer group">
+<div class="flex justify-between items-start mb-1">
+<h4 class="text-sm font-bold text-on-surface">Climate Data Extraction</h4>
+<span class="material-symbols-outlined text-xs text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity">open_in_new</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-bold text-primary">Stage 10 Done</span>
+<span class="w-1 h-1 bg-outline-variant rounded-full"></span>
+<span class="text-[10px] text-on-surface-variant">Last Week</span>
+</div>
+</div>
+<div class="p-4 hover:bg-surface-container-low transition-colors cursor-pointer group">
+<div class="flex justify-between items-start mb-1">
+<h4 class="text-sm font-bold text-on-surface">Quantum Benchmarking</h4>
+<span class="material-symbols-outlined text-xs text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity">open_in_new</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-bold text-tertiary">Stage 2 Failed</span>
+<span class="w-1 h-1 bg-outline-variant rounded-full"></span>
+<span class="text-[10px] text-on-surface-variant">2 weeks ago</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer Meta -->
+<div class="ml-64 p-6 border-t border-outline-variant/10 flex justify-between text-[10px] text-on-surface-variant font-bold uppercase tracking-[0.2em]">
+<span>Precision Editorial v4.2.0</span>
+<div class="flex gap-4">
+<a class="hover:text-primary transition-colors" href="#">API Docs</a>
+<a class="hover:text-primary transition-colors" href="#">Lab Guidelines</a>
+<a class="hover:text-primary transition-colors" href="#">Support</a>
+</div>
+</div>
+
+```<div class="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] animate-bounce">
+<div class="bg-inverse-surface text-inverse-on-surface px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-outline-variant/20">
+<span class="material-symbols-outlined text-primary-fixed">check_circle</span>
+<span class="text-sm font-medium">Paper exported successfully as Neural_Architecture_Draft_V2.docx</span>
+</div>
+</div></body></html>

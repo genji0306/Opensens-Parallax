@@ -1,0 +1,9 @@
+# V3 Gateway dependencies
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+pydantic>=2.0
+pydantic-settings>=2.0
+sqlalchemy[asyncio]>=2.0
+aiosqlite>=0.20.0        # Async SQLite for local dev
+# asyncpg>=0.30.0        # Uncomment for PostgreSQL
+# redis>=5.0             # Uncomment for Redis DRVP

@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Research Command Center - Ideas Stage</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary-fixed": "#bfecde",
+                        "primary-container": "#1ea88e",
+                        "primary-fixed-dim": "#61dbbe",
+                        "on-tertiary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "on-primary-container": "#00352b",
+                        "inverse-on-surface": "#ecf1ff",
+                        "tertiary-container": "#df7962",
+                        "outline-variant": "#bccac4",
+                        "on-secondary-fixed-variant": "#244e44",
+                        "on-tertiary-fixed": "#3d0600",
+                        "secondary-container": "#bce9db",
+                        "on-secondary": "#ffffff",
+                        "surface-dim": "#d1daef",
+                        "on-surface": "#131c2a",
+                        "on-background": "#131c2a",
+                        "surface-container-low": "#f0f3ff",
+                        "on-secondary-fixed": "#00201a",
+                        "inverse-primary": "#61dbbe",
+                        "surface-variant": "#dae3f7",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#ffb4a4",
+                        "primary-fixed": "#7ff7da",
+                        "primary": "#006b59",
+                        "surface": "#f9f9ff",
+                        "outline": "#6d7a75",
+                        "on-primary-fixed": "#00201a",
+                        "on-error-container": "#93000a",
+                        "secondary-fixed-dim": "#a3d0c2",
+                        "surface-tint": "#006b59",
+                        "surface-container-lowest": "#ffffff",
+                        "error": "#ba1a1a",
+                        "surface-container-highest": "#dae3f7",
+                        "tertiary": "#9a4431",
+                        "on-tertiary-fixed-variant": "#7c2d1c",
+                        "background": "#f9f9ff",
+                        "tertiary-fixed": "#ffdad2",
+                        "on-primary-fixed-variant": "#005143",
+                        "on-primary": "#ffffff",
+                        "surface-container-high": "#dfe8fd",
+                        "on-secondary-container": "#416a5f",
+                        "surface-bright": "#f9f9ff",
+                        "on-tertiary-container": "#5a1506",
+                        "inverse-surface": "#283140",
+                        "surface-container": "#e7eeff",
+                        "secondary": "#3c665b",
+                        "on-surface-variant": "#3d4945"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        .pulsing-ring {
+            box-shadow: 0 0 0 0 rgba(30, 168, 142, 0.7);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(30, 168, 142, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(30, 168, 142, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(30, 168, 142, 0); }
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen pb-14">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md shadow-sm z-50 flex items-center justify-between px-6 h-14">
+<div class="flex items-center gap-8">
+<span class="text-lg font-black tracking-tighter text-slate-900">Opensens Parallax</span>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-teal-600 border-b-2 border-teal-600 pb-1 font-sans tracking-tight text-sm font-medium" href="#">Pipeline</a>
+<a class="text-slate-500 hover:text-slate-800 transition-colors font-sans tracking-tight text-sm font-medium" href="#">Datasets</a>
+<a class="text-slate-500 hover:text-slate-800 transition-colors font-sans tracking-tight text-sm font-medium" href="#">Inference</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+<input class="pl-9 pr-4 py-1.5 bg-slate-50 border-none rounded-lg text-xs w-64 focus:ring-1 focus:ring-primary-container" placeholder="Search research..." type="text"/>
+</div>
+<span class="material-symbols-outlined text-slate-600 cursor-pointer hover:bg-slate-50 p-1 rounded transition-colors" data-icon="monetization_on">monetization_on</span>
+<span class="material-symbols-outlined text-slate-600 cursor-pointer hover:bg-slate-50 p-1 rounded transition-colors" data-icon="contrast">contrast</span>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden border border-slate-200">
+<img alt="User avatar" class="w-full h-full object-cover" data-alt="Close up of a professional researcher avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDID1BYQFU5e0lFGwQhDapo6YBPJtKipFB4xKmKwoKk-SArNQaBuknWjgriz6GKSnC0YZ6JgPy8ylYS7z0DpmLEjun5XbMyqMcN7Sm1JJZ45SI3qPjUiDKs19h0voF_CEtA1z0RM-SWQsyohb2WEu12Qk5p57TybADJtdJ9UeUhBUv2W8IhHcUK59aPm56hbcYYulZ4_aXSeGnRnseZZOR9HHcRKpg9HElFCST-WMILxebmHvdb_HS-9ijI7shX01md1k4LJE7ZQXA"/>
+</div>
+</div>
+</header>
+<main class="pt-24 px-8 max-w-7xl mx-auto space-y-8">
+<!-- Pipeline Tracker -->
+<section class="relative">
+<div class="flex items-center justify-between max-w-4xl mx-auto relative z-10">
+<!-- Step 1 -->
+<div class="flex flex-col items-center gap-2 group">
+<div class="w-10 h-10 rounded-full bg-primary-container text-white flex items-center justify-center border-4 border-white shadow-md">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-primary">Crawl</span>
+</div>
+<!-- Connector -->
+<div class="h-1 flex-1 mx-[-10px] mb-6 bg-primary-container"></div>
+<!-- Step 2 -->
+<div class="flex flex-col items-center gap-2 group">
+<div class="w-10 h-10 rounded-full bg-primary-container text-white flex items-center justify-center border-4 border-white shadow-md">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-primary">Map</span>
+</div>
+<div class="h-1 flex-1 mx-[-10px] mb-6 bg-primary-container"></div>
+<!-- Step 3 -->
+<div class="flex flex-col items-center gap-2 group">
+<div class="w-10 h-10 rounded-full bg-primary-container text-white flex items-center justify-center border-4 border-white shadow-md">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-primary">Debate</span>
+</div>
+<div class="h-1 flex-1 mx-[-10px] mb-6 bg-primary-container"></div>
+<!-- Step 4 -->
+<div class="flex flex-col items-center gap-2 group">
+<div class="w-10 h-10 rounded-full bg-primary-container text-white flex items-center justify-center border-4 border-white shadow-md">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-primary">Validate</span>
+</div>
+<div class="h-1 flex-1 mx-[-10px] mb-6 bg-primary-container"></div>
+<!-- Step 5 (Active) -->
+<div class="flex flex-col items-center gap-2 group relative">
+<div class="w-10 h-10 rounded-full bg-white text-primary flex items-center justify-center border-4 border-primary-container pulsing-ring z-20 shadow-lg">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-primary-container">Ideas</span>
+</div>
+<div class="h-1 flex-1 mx-[-10px] mb-6 bg-slate-200"></div>
+<!-- Step 6 -->
+<div class="flex flex-col items-center gap-2 opacity-40">
+<div class="w-10 h-10 rounded-full bg-white text-slate-400 flex items-center justify-center border-4 border-slate-100 shadow-sm">
+<span class="material-symbols-outlined text-xl">description</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Draft</span>
+</div>
+</div>
+</section>
+<!-- Main Workspace Grid -->
+<div class="grid grid-cols-12 gap-8">
+<!-- Left Side: Recommendation & Ideas -->
+<div class="col-span-12 lg:col-span-8 space-y-6">
+<!-- Recommendation Banner -->
+<div class="bg-primary-container/10 border-l-4 border-primary-container p-6 rounded-r-xl shadow-sm relative overflow-hidden">
+<div class="flex gap-4 items-start relative z-10">
+<div class="bg-white p-2 rounded-lg shadow-sm">
+<span class="material-symbols-outlined text-primary-container" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<div class="flex-1">
+<h3 class="font-bold text-on-primary-container text-sm flex items-center gap-2">
+                                💡 RECOMMENDED
+                                <span class="bg-white text-primary-container text-[10px] px-2 py-0.5 rounded-full border border-primary-container/20">Ready for Drafting</span>
+</h3>
+<p class="text-sm text-on-secondary-fixed-variant mt-1 leading-relaxed max-w-2xl">
+                                Top idea (8.2) is ready for drafting. Section templates for <span class="font-semibold">'Electrochemical Diagnostics'</span> are optimized based on 15 validated papers.
+                            </p>
+<div class="mt-4 flex flex-wrap items-center gap-3">
+<button class="bg-primary-container text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 hover:opacity-90 transition-opacity">
+                                    Start Draft <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+<button class="bg-white text-on-surface border border-slate-200 px-4 py-2 rounded-lg text-xs font-medium hover:bg-slate-50 transition-colors">
+                                    Regenerate Ideas
+                                </button>
+<button class="text-slate-500 text-xs font-medium px-4 py-2 hover:underline">
+                                    Skip
+                                </button>
+<div class="ml-auto bg-white/50 px-3 py-1.5 rounded-lg border border-primary-container/10 flex items-center gap-2">
+<span class="material-symbols-outlined text-xs text-primary-container">payments</span>
+<span class="text-[10px] font-mono font-bold text-primary-container tracking-tight">EST: ~$0.06</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Expanded Ideas Card -->
+<div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+<div class="p-6 border-b border-slate-50 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-slate-50 flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-400">format_list_numbered</span>
+</div>
+<div>
+<h2 class="font-black text-slate-800 tracking-tight">Ranked Research Hypotheses</h2>
+<p class="text-xs text-slate-400">Synthesized from validated datasets</p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[10px] text-slate-400 font-medium uppercase tracking-widest">Sort: By Score</span>
+<span class="material-symbols-outlined text-slate-400 text-sm">expand_more</span>
+</div>
+</div>
+<div class="divide-y divide-slate-50">
+<!-- Idea 1 -->
+<div class="p-6 bg-primary-container/5 hover:bg-primary-container/[0.08] transition-colors cursor-pointer group">
+<div class="flex items-start justify-between">
+<div class="space-y-3 flex-1">
+<div class="flex items-center gap-2">
+<span class="bg-primary-container text-white text-[10px] font-black px-2 py-0.5 rounded tracking-tighter">TOP</span>
+<span class="text-[10px] font-mono text-primary-container font-bold">ID: HYP-082</span>
+</div>
+<h3 class="text-lg font-bold text-slate-900 group-hover:text-primary transition-colors">Adaptive Multi-Scale Electrochemical Diagnostics</h3>
+<div class="flex flex-wrap gap-4 mt-4">
+<div class="bg-white px-3 py-2 rounded border border-primary-container/10 shadow-sm">
+<p class="text-[10px] uppercase text-slate-400 font-bold tracking-tighter">Novelty</p>
+<p class="text-sm font-mono font-black text-primary-container">9.1</p>
+</div>
+<div class="bg-white px-3 py-2 rounded border border-slate-100">
+<p class="text-[10px] uppercase text-slate-400 font-bold tracking-tighter">Feasibility</p>
+<p class="text-sm font-mono font-black text-slate-700">7.8</p>
+</div>
+<div class="bg-white px-3 py-2 rounded border border-slate-100">
+<p class="text-[10px] uppercase text-slate-400 font-bold tracking-tighter">Impact</p>
+<p class="text-sm font-mono font-black text-slate-700">7.7</p>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1">
+<div class="text-3xl font-black text-primary-container font-mono tracking-tighter">8.2</div>
+<div class="text-[10px] font-bold text-primary-container uppercase tracking-widest">Aggregate Score</div>
+</div>
+</div>
+</div>
+<!-- Idea 2 -->
+<div class="p-6 hover:bg-slate-50 transition-colors cursor-pointer group">
+<div class="flex items-start justify-between">
+<div class="space-y-3 flex-1">
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-mono text-slate-400 font-bold">ID: HYP-081</span>
+</div>
+<h3 class="text-lg font-bold text-slate-700 group-hover:text-slate-900 transition-colors">Edge-Probing Multiplexed Electrochemistry</h3>
+<div class="flex flex-wrap gap-4 mt-4">
+<div class="bg-slate-50 px-3 py-2 rounded">
+<p class="text-[10px] uppercase text-slate-400 font-bold tracking-tighter">Novelty</p>
+<p class="text-sm font-mono font-black text-slate-600">8.4</p>
+</div>
+<div class="bg-slate-50 px-3 py-2 rounded">
+<p class="text-[10px] uppercase text-slate-400 font-bold tracking-tighter">Feasibility</p>
+<p class="text-sm font-mono font-black text-slate-600">8.2</p>
+</div>
+<div class="bg-slate-50 px-3 py-2 rounded">
+<p class="text-[10px] uppercase text-slate-400 font-bold tracking-tighter">Impact</p>
+<p class="text-sm font-mono font-black text-slate-600">7.7</p>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1">
+<div class="text-3xl font-black text-slate-300 font-mono tracking-tighter">8.1</div>
+<div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Aggregate Score</div>
+</div>
+</div>
+</div>
+<!-- Idea 3 -->
+<div class="p-6 hover:bg-slate-50 transition-colors cursor-pointer group">
+<div class="flex items-start justify-between">
+<div class="space-y-3 flex-1">
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-mono text-slate-400 font-bold">ID: HYP-080</span>
+</div>
+<h3 class="text-lg font-bold text-slate-700 group-hover:text-slate-900 transition-colors">Statistical Synthesis Framework for Data Fusion</h3>
+<div class="flex flex-wrap gap-4 mt-4">
+<div class="bg-slate-50 px-3 py-2 rounded">
+<p class="text-[10px] uppercase text-slate-400 font-bold tracking-tighter">Novelty</p>
+<p class="text-sm font-mono font-black text-slate-600">7.9</p>
+</div>
+<div class="bg-slate-50 px-3 py-2 rounded">
+<p class="text-[10px] uppercase text-slate-400 font-bold tracking-tighter">Feasibility</p>
+<p class="text-sm font-mono font-black text-slate-600">8.1</p>
+</div>
+<div class="bg-slate-50 px-3 py-2 rounded">
+<p class="text-[10px] uppercase text-slate-400 font-bold tracking-tighter">Impact</p>
+<p class="text-sm font-mono font-black text-slate-600">8.0</p>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1">
+<div class="text-3xl font-black text-slate-300 font-mono tracking-tighter">8.0</div>
+<div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Aggregate Score</div>
+</div>
+</div>
+</div>
+</div>
+<div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-center">
+<button class="text-primary text-xs font-bold uppercase tracking-widest flex items-center gap-2 hover:opacity-80">
+                            Load 7 More Hypotheses <span class="material-symbols-outlined text-sm">keyboard_double_arrow_down</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Right Side: Sidebar Context -->
+<div class="col-span-12 lg:col-span-4 space-y-6">
+<!-- Recent Projects List -->
+<div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+<div class="p-5 border-b border-slate-50">
+<h4 class="text-xs font-black text-slate-900 uppercase tracking-widest">Recent Runs</h4>
+</div>
+<div class="divide-y divide-slate-50">
+<div class="p-4 hover:bg-slate-50 cursor-pointer flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-teal-50 text-teal-600 flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">science</span>
+</div>
+<div class="flex-1 overflow-hidden">
+<p class="text-xs font-bold text-slate-700 truncate">Quantum Dot Luminescence</p>
+<p class="text-[10px] text-slate-400">Completed 2d ago • 248 sources</p>
+</div>
+<span class="material-symbols-outlined text-slate-300 text-sm">chevron_right</span>
+</div>
+<div class="p-4 hover:bg-slate-50 cursor-pointer flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-slate-100 text-slate-500 flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">biotech</span>
+</div>
+<div class="flex-1 overflow-hidden">
+<p class="text-xs font-bold text-slate-700 truncate">Microfluidic Assay Optimization</p>
+<p class="text-[10px] text-slate-400">Completed 5d ago • 112 sources</p>
+</div>
+<span class="material-symbols-outlined text-slate-300 text-sm">chevron_right</span>
+</div>
+<div class="p-4 hover:bg-slate-50 cursor-pointer flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-slate-100 text-slate-500 flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">grid_view</span>
+</div>
+<div class="flex-1 overflow-hidden">
+<p class="text-xs font-bold text-slate-700 truncate">Lattice Strain Predictions</p>
+<p class="text-[10px] text-slate-400">Archived • 89 sources</p>
+</div>
+<span class="material-symbols-outlined text-slate-300 text-sm">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- Analysis Overview (Bento Style) -->
+<div class="bg-slate-900 rounded-2xl p-6 text-white space-y-4">
+<div class="flex items-center justify-between">
+<span class="text-[10px] font-bold text-teal-400 uppercase tracking-widest">Project Context</span>
+<span class="bg-teal-500/20 text-teal-300 text-[10px] px-2 py-0.5 rounded">Active State</span>
+</div>
+<div class="space-y-4 pt-2">
+<div class="flex items-end justify-between border-b border-white/10 pb-2">
+<span class="text-xs text-slate-400">Corpus Size</span>
+<span class="text-sm font-mono font-bold">14,209 Papers</span>
+</div>
+<div class="flex items-end justify-between border-b border-white/10 pb-2">
+<span class="text-xs text-slate-400">Mapped Entities</span>
+<span class="text-sm font-mono font-bold">3,120</span>
+</div>
+<div class="flex items-end justify-between border-b border-white/10 pb-2">
+<span class="text-xs text-slate-400">Conflicting Data</span>
+<span class="text-sm font-mono font-bold text-error">42 Points</span>
+</div>
+</div>
+<div class="pt-4">
+<div class="p-3 bg-white/5 rounded-lg border border-white/10">
+<p class="text-[10px] text-slate-400 leading-relaxed italic">
+                                "The current pipeline focus is on mitigating electrochemical drift detected in the Validate stage."
+                            </p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Status) -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-start items-center px-6 h-8 gap-8 bg-slate-50 border-t border-slate-200">
+<div class="flex items-center gap-2 text-teal-600 font-bold font-mono text-[10px] uppercase tracking-widest">
+<span class="material-symbols-outlined text-sm" data-icon="Receipt_long">receipt_long</span>
+<span>LLM Proxy: Active</span>
+</div>
+<div class="flex items-center gap-2 text-slate-500 font-mono text-[10px] uppercase tracking-widest">
+<span class="material-symbols-outlined text-sm" data-icon="api">api</span>
+<span>API: 200 OK</span>
+</div>
+<div class="flex items-center gap-2 text-slate-500 font-mono text-[10px] uppercase tracking-widest">
+<span class="material-symbols-outlined text-sm" data-icon="payments">payments</span>
+<span>Cost: $12.40</span>
+</div>
+<div class="ml-auto flex items-center gap-4">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse"></span>
+<span class="text-[9px] text-slate-400 uppercase font-black">Live Inference Cluster B</span>
+</div>
+</div>
+</footer>
+</body></html>

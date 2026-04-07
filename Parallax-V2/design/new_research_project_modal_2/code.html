@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Opensens Parallax - New Research Project</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-dim": "#d1daef",
+                        "on-secondary-fixed-variant": "#244e44",
+                        "error": "#ba1a1a",
+                        "on-tertiary-container": "#5a1506",
+                        "on-tertiary": "#ffffff",
+                        "on-surface-variant": "#3d4945",
+                        "surface-container-highest": "#dae3f7",
+                        "error-container": "#ffdad6",
+                        "outline": "#6d7a75",
+                        "surface-container-high": "#dfe8fd",
+                        "tertiary": "#9a4431",
+                        "on-surface": "#131c2a",
+                        "on-tertiary-fixed-variant": "#7c2d1c",
+                        "surface-container": "#e7eeff",
+                        "secondary-fixed-dim": "#a3d0c2",
+                        "on-secondary": "#ffffff",
+                        "on-background": "#131c2a",
+                        "on-primary": "#ffffff",
+                        "background": "#f9f9ff",
+                        "surface-container-low": "#f0f3ff",
+                        "on-primary-container": "#00352b",
+                        "on-secondary-fixed": "#00201a",
+                        "tertiary-fixed-dim": "#ffb4a4",
+                        "surface-bright": "#f9f9ff",
+                        "primary": "#006b59",
+                        "on-primary-fixed": "#00201a",
+                        "surface-tint": "#006b59",
+                        "primary-container": "#1ea88e",
+                        "on-tertiary-fixed": "#3d0600",
+                        "on-secondary-container": "#416a5f",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed": "#ffdad2",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed-dim": "#61dbbe",
+                        "on-primary-fixed-variant": "#005143",
+                        "inverse-primary": "#61dbbe",
+                        "surface-variant": "#dae3f7",
+                        "secondary-fixed": "#bfecde",
+                        "inverse-surface": "#283140",
+                        "surface": "#f9f9ff",
+                        "outline-variant": "#bccac4",
+                        "secondary-container": "#bce9db",
+                        "secondary": "#3c665b",
+                        "primary-fixed": "#7ff7da",
+                        "inverse-on-surface": "#ecf1ff",
+                        "tertiary-container": "#df7962",
+                        "on-error-container": "#93000a"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"],
+                        "mono": ["JetBrains Mono", "monospace"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+    </style>
+</head>
+<body class="bg-background text-on-background selection:bg-primary-container selection:text-on-primary-container min-h-screen overflow-hidden">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 flex justify-between items-center px-10 py-4 w-full bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md border-b border-zinc-100 dark:border-zinc-900 font-sans antialiased text-sm tracking-tight">
+<div class="flex items-center gap-8">
+<span class="text-xl font-black tracking-tighter text-zinc-900 dark:text-zinc-50 uppercase">Opensens Parallax</span>
+<div class="hidden md:flex gap-6 items-center">
+<a class="text-teal-600 dark:text-teal-400 font-bold border-b border-teal-600 transition-colors duration-200" href="#">Research</a>
+<a class="text-zinc-500 dark:text-zinc-400 hover:text-teal-500 dark:hover:text-teal-300 transition-colors duration-200" href="#">Databases</a>
+<a class="text-zinc-500 dark:text-zinc-400 hover:text-teal-500 dark:hover:text-teal-300 transition-colors duration-200" href="#">Analytics</a>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden lg:flex items-center bg-surface-container-low px-3 py-1.5 rounded-sm border border-outline-variant">
+<span class="material-symbols-outlined text-outline text-sm mr-2" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-xs w-48" placeholder="Global Research Search..." type="text"/>
+<span class="text-[10px] font-mono text-outline ml-2">⌘K</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-mono text-[11px] text-primary bg-primary-container/20 px-2 py-0.5 rounded">Tracking: $12.40</span>
+<span class="material-symbols-outlined text-zinc-500 hover:text-teal-600 cursor-pointer" data-icon="dark_mode">dark_mode</span>
+<span class="material-symbols-outlined text-zinc-500 hover:text-teal-600 cursor-pointer" data-icon="account_circle">account_circle</span>
+</div>
+</div>
+</nav>
+<!-- Background Content (Blurred) -->
+<main class="pt-24 px-10 pb-20 blur-md pointer-events-none select-none">
+<div class="grid grid-cols-12 gap-6">
+<!-- Hero Stats -->
+<div class="col-span-12 lg:col-span-8 bg-surface-container-lowest p-8 rounded shadow-sm border border-surface-variant/50">
+<div class="flex justify-between items-end mb-8">
+<div>
+<h2 class="text-3xl font-black tracking-tight mb-2">Active Synthesis</h2>
+<p class="text-on-surface-variant text-sm max-w-md">Real-time processing of high-dimensional neural network research across multiple clusters.</p>
+</div>
+<div class="text-right font-mono">
+<span class="text-4xl font-bold text-primary">0.94</span>
+<p class="text-[10px] uppercase tracking-widest text-outline">Confidence Score</p>
+</div>
+</div>
+<div class="h-64 bg-surface-container-low rounded-sm relative overflow-hidden">
+<!-- Abstract Data Visualization Pattern -->
+<div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(circle at 2px 2px, #006b59 1px, transparent 0); background-size: 24px 24px;"></div>
+<div class="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-primary/10 to-transparent"></div>
+</div>
+</div>
+<!-- Sidebar Stats -->
+<div class="col-span-12 lg:col-span-4 flex flex-col gap-6">
+<div class="bg-white p-6 rounded border border-surface-variant/50">
+<h3 class="font-mono text-[10px] uppercase tracking-[0.2em] text-outline mb-4">Pipeline Status</h3>
+<div class="space-y-4">
+<div class="flex justify-between items-center">
+<span class="text-sm font-medium">arXiv Ingestion</span>
+<span class="text-xs font-mono text-primary">ACTIVE</span>
+</div>
+<div class="w-full bg-surface-container h-1 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[72%]"></div>
+</div>
+</div>
+</div>
+<div class="bg-primary text-white p-6 rounded shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-3xl mb-4" data-icon="bolt">bolt</span>
+<h3 class="text-xl font-bold mb-2">Neural Engine</h3>
+<p class="text-sm opacity-80 leading-relaxed">Processing 1,420 tokens per second across local-edge nodes.</p>
+</div>
+</div>
+<!-- Data Grid (Bento) -->
+<div class="col-span-4 bg-surface-container-low p-6 h-48 rounded border border-surface-variant/30"></div>
+<div class="col-span-4 bg-surface-container-low p-6 h-48 rounded border border-surface-variant/30"></div>
+<div class="col-span-4 bg-surface-container-low p-6 h-48 rounded border border-surface-variant/30"></div>
+</div>
+</main>
+<!-- Modal Overlay -->
+<div class="fixed inset-0 z-[100] flex items-center justify-center bg-on-surface/40 backdrop-blur-sm p-4">
+<!-- New Research Project Modal -->
+<div class="bg-white w-full max-w-2xl shadow-2xl rounded-lg overflow-hidden flex flex-col border border-surface-variant">
+<!-- Modal Header -->
+<div class="px-8 pt-8 pb-6 border-b border-surface-container flex justify-between items-start">
+<div>
+<span class="font-mono text-[10px] uppercase tracking-[0.3em] text-primary font-bold mb-2 block">Initialization Phase</span>
+<h1 class="text-3xl font-black tracking-tight text-on-surface">New Research Project</h1>
+</div>
+<button class="text-outline hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+<!-- Modal Body -->
+<div class="p-8 space-y-8 overflow-y-auto max-h-[716px]">
+<!-- Input Section -->
+<div class="space-y-3">
+<label class="font-mono text-[11px] uppercase tracking-wider text-outline-variant font-bold">Research Core Directive</label>
+<textarea class="w-full bg-surface-container-lowest border-2 border-surface-container focus:border-primary-container focus:ring-0 rounded-sm p-4 text-on-surface placeholder:text-outline/50 font-body transition-all text-lg leading-relaxed" placeholder="What research question do you want to explore?" rows="4"></textarea>
+</div>
+<!-- Sources Grid -->
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<label class="font-mono text-[11px] uppercase tracking-wider text-outline-variant font-bold">Academic Data Sources</label>
+<span class="text-[10px] text-primary bg-primary/5 px-2 py-0.5 rounded-full font-bold">9 SOURCES AVAILABLE</span>
+</div>
+<div class="grid grid-cols-3 gap-3">
+<!-- Checkboxes -->
+<label class="flex items-center gap-3 p-3 rounded-sm border border-surface-container hover:bg-surface-container-low cursor-pointer transition-all group">
+<input checked="" class="w-4 h-4 rounded-sm text-primary-container border-surface-variant focus:ring-primary-container" type="checkbox"/>
+<span class="text-xs font-semibold text-on-surface-variant group-hover:text-on-surface">arXiv</span>
+</label>
+<label class="flex items-center gap-3 p-3 rounded-sm border border-surface-container hover:bg-surface-container-low cursor-pointer transition-all group">
+<input checked="" class="w-4 h-4 rounded-sm text-primary-container border-surface-variant focus:ring-primary-container" type="checkbox"/>
+<span class="text-xs font-semibold text-on-surface-variant group-hover:text-on-surface">Semantic Scholar</span>
+</label>
+<label class="flex items-center gap-3 p-3 rounded-sm border border-surface-container hover:bg-surface-container-low cursor-pointer transition-all group">
+<input checked="" class="w-4 h-4 rounded-sm text-primary-container border-surface-variant focus:ring-primary-container" type="checkbox"/>
+<span class="text-xs font-semibold text-on-surface-variant group-hover:text-on-surface">OpenAlex</span>
+</label>
+<label class="flex items-center gap-3 p-3 rounded-sm border border-surface-container hover:bg-surface-container-low cursor-pointer transition-all group">
+<input class="w-4 h-4 rounded-sm text-primary-container border-surface-variant focus:ring-primary-container" type="checkbox"/>
+<span class="text-xs font-semibold text-on-surface-variant group-hover:text-on-surface">bioRxiv</span>
+</label>
+<label class="flex items-center gap-3 p-3 rounded-sm border border-surface-container hover:bg-surface-container-low cursor-pointer transition-all group">
+<input class="w-4 h-4 rounded-sm text-primary-container border-surface-variant focus:ring-primary-container" type="checkbox"/>
+<span class="text-xs font-semibold text-on-surface-variant group-hover:text-on-surface">OpenReview</span>
+</label>
+<label class="flex items-center gap-3 p-3 rounded-sm border border-surface-container hover:bg-surface-container-low cursor-pointer transition-all group">
+<input class="w-4 h-4 rounded-sm text-primary-container border-surface-variant focus:ring-primary-container" type="checkbox"/>
+<span class="text-xs font-semibold text-on-surface-variant group-hover:text-on-surface">IEEE</span>
+</label>
+<label class="flex items-center gap-3 p-3 rounded-sm border border-surface-container hover:bg-surface-container-low cursor-pointer transition-all group">
+<input class="w-4 h-4 rounded-sm text-primary-container border-surface-variant focus:ring-primary-container" type="checkbox"/>
+<span class="text-xs font-semibold text-on-surface-variant group-hover:text-on-surface">ACM</span>
+</label>
+<label class="flex items-center gap-3 p-3 rounded-sm border border-surface-container hover:bg-surface-container-low cursor-pointer transition-all group">
+<input class="w-4 h-4 rounded-sm text-primary-container border-surface-variant focus:ring-primary-container" type="checkbox"/>
+<span class="text-xs font-semibold text-on-surface-variant group-hover:text-on-surface">Springer</span>
+</label>
+<label class="flex items-center gap-3 p-3 rounded-sm border border-surface-container hover:bg-surface-container-low cursor-pointer transition-all group">
+<input class="w-4 h-4 rounded-sm text-primary-container border-surface-variant focus:ring-primary-container" type="checkbox"/>
+<span class="text-xs font-semibold text-on-surface-variant group-hover:text-on-surface">PubMed</span>
+</label>
+</div>
+</div>
+</div>
+<!-- Modal Footer -->
+<div class="p-8 pt-0">
+<button class="w-full bg-[#1EA88E] hover:bg-[#188c76] active:scale-[0.99] text-white font-bold py-5 rounded-sm flex items-center justify-center gap-3 transition-all shadow-xl shadow-[#1EA88E]/20 group">
+<span class="tracking-tight text-lg">Start Research</span>
+<span class="material-symbols-outlined text-2xl group-hover:translate-x-1 transition-transform" data-icon="arrow_right_alt">arrow_right_alt</span>
+</button>
+<p class="text-center mt-4 font-mono text-[9px] text-outline uppercase tracking-widest">Initialization will consume approx. 1,200 synthesis credits</p>
+</div>
+</div>
+</div>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-12 py-2 bg-zinc-50 dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800">
+<div class="flex flex-row items-center gap-2 text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-all cursor-default">
+<span class="material-symbols-outlined" data-icon="cloud_done">cloud_done</span>
+<span class="font-mono text-[10px] uppercase font-bold tracking-[0.1em]">LLM Proxy</span>
+</div>
+<div class="flex flex-row items-center gap-2 text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-all cursor-default">
+<span class="material-symbols-outlined" data-icon="hub">hub</span>
+<span class="font-mono text-[10px] uppercase font-bold tracking-[0.1em]">Anthropic</span>
+</div>
+<!-- Active Nav Item -->
+<div class="flex flex-row items-center gap-2 text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 px-3 py-1 rounded-sm cursor-default">
+<span class="material-symbols-outlined" data-icon="biotech">biotech</span>
+<span class="font-mono text-[10px] uppercase font-bold tracking-[0.1em]">ScienceClaw</span>
+</div>
+<div class="flex flex-row items-center gap-2 text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-all cursor-default">
+<span class="material-symbols-outlined" data-icon="science">science</span>
+<span class="font-mono text-[10px] uppercase font-bold tracking-[0.1em]">AutoResearch</span>
+</div>
+<div class="flex flex-row items-center gap-2 text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-all cursor-default">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span class="font-mono text-[10px] uppercase font-bold tracking-[0.1em]">Cost: $0.42</span>
+</div>
+</nav>
+</body></html>

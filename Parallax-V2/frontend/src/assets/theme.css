@@ -1,0 +1,165 @@
+/* ── Parallax V2 Theme System ──────────────────────────────────────
+   Merges V1 OSSR variables + Stitch "Precision Editorial" palette.
+   Supports light (default) and dark via [data-theme="dark"] on <html>.
+   ─────────────────────────────────────────────────────────────────── */
+
+@import "tailwindcss";
+
+/* ── Tailwind theme layer ── */
+@theme {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+  --color-os-primary: #006b59;
+  --color-os-container: #1ea88e;
+  --color-os-secondary: #3c665b;
+  --color-os-tertiary: #9a4431;
+}
+
+:root {
+  /* ── Brand (V1 compat + Stitch) ── */
+  --os-brand: #1EA88E;
+  --os-brand-hover: #179B82;
+  --os-brand-light: #E6F7F3;
+  --os-brand-subtle: #B8E6DA;
+  --os-brand-rgb: 30, 168, 142;
+
+  /* ── Stitch Precision Editorial ── */
+  --os-primary: #006b59;
+  --os-container: #1ea88e;
+  --os-secondary: #3c665b;
+  --os-tertiary: #9a4431;
+
+  /* ── Surfaces ── */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F7F9FA;
+  --bg-tertiary: #EEF1F4;
+  --bg-elevated: #FFFFFF;
+  --bg-hover: #F0F3F5;
+  --bg-active: #E6F7F3;
+
+  /* ── Glassmorphism ── */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-blur: 12px;
+  --glass-border: rgba(0, 107, 89, 0.1);
+
+  /* ── Borders ── */
+  --border-primary: #E0E5EA;
+  --border-secondary: #EBF0F4;
+  --border-accent: var(--os-brand);
+
+  /* ── Text ── */
+  --text-primary: #1A2332;
+  --text-secondary: #5A6B7B;
+  --text-tertiary: #8B99A8;
+  --text-on-brand: #FFFFFF;
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
+
+  /* ── Semantic ── */
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --error: #EF4444;
+  --info: #3B82F6;
+
+  /* ── Agent roles ── */
+  --role-professor: #1EA88E;
+  --role-assoc-professor: #2E7D68;
+  --role-postdoc: #3B82F6;
+  --role-phd: #8B5CF6;
+  --role-industry: #F59E0B;
+  --role-reviewer: #EF4444;
+
+  /* ── Typography ── */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+
+  /* ── Radius ── */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 16px;
+  --radius-pill: 100px;
+
+  /* ── Transitions ── */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
+}
+
+/* ── Dark Theme ── */
+[data-theme="dark"] {
+  --os-brand: #2DBFA3;
+  --os-brand-hover: #3FCDB2;
+  --os-brand-light: #12322A;
+  --os-brand-subtle: #1A4038;
+  --os-brand-rgb: 45, 191, 163;
+
+  --os-primary: #1ea88e;
+  --os-container: #006b59;
+
+  --bg-primary: #0D1117;
+  --bg-secondary: #161B22;
+  --bg-tertiary: #1C2333;
+  --bg-elevated: #1C2333;
+  --bg-hover: #21293A;
+  --bg-active: #12322A;
+
+  --glass-bg: rgba(17, 19, 24, 0.8);
+  --glass-border: rgba(30, 168, 142, 0.15);
+
+  --border-primary: #2A3544;
+  --border-secondary: #1E2A38;
+
+  --text-primary: #E6ECF1;
+  --text-secondary: #8B9DB3;
+  --text-tertiary: #5A6F84;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  --success: #34D399;
+  --warning: #FBBF24;
+  --error: #F87171;
+  --info: #60A5FA;
+}
+
+/* ── Global Reset ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background var(--transition-normal), color var(--transition-normal);
+}
+
+/* ── Scrollbar theming ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-primary); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
+
+::selection {
+  background: rgba(var(--os-brand-rgb), 0.25);
+}
+
+/* ── Material Symbols ── */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+}
+
+/* ── Pipeline pulse animation ── */
+@keyframes stage-pulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(var(--os-brand-rgb), 0.2); }
+  50% { box-shadow: 0 0 0 8px transparent; }
+}
