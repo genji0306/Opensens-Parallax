@@ -248,7 +248,11 @@ class TestKnowledgeEndpoints:
     def test_get_knowledge_not_found(self, client, seeded_run):
         run_id, _, _ = seeded_run
         resp = client.get(f"/api/research/ais/{run_id}/knowledge")
-        assert resp.status_code == 404
+        # Endpoint returns 200 with data=None when no artifact exists yet
+        assert resp.status_code == 200
+        body = resp.get_json()
+        assert body["success"] is True
+        assert body["data"] is None
 
     def test_get_knowledge(self, client, seeded_artifact):
         run_id, artifact = seeded_artifact

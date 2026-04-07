@@ -20,6 +20,8 @@ export interface GrantSource {
   metadata: Record<string, unknown>
 }
 
+export type DeadlineState = 'open' | 'closing_soon' | 'closed' | 'unknown' | 'rolling'
+
 export interface GrantOpportunity {
   opportunity_id: string
   source_id: string
@@ -38,6 +40,17 @@ export interface GrantOpportunity {
   raw_text: string
   fetched_at: string
   extra: Record<string, unknown>
+  // Phase D/E additions
+  open_date?: string | null
+  deadline_date?: string | null
+  deadline_state?: DeadlineState
+  grant_size_min_usd?: number | null
+  grant_size_max_usd?: number | null
+  applicant_scopes?: string[]
+  theme_tags?: string[]
+  region_codes?: string[]
+  content_hash?: string | null
+  source_ids?: string[]
 }
 
 export interface MatchResult {
@@ -121,3 +134,30 @@ export type FeedbackEventType =
   | 'section_edited'
   | 'section_approved'
   | 'section_regenerated'
+
+export type AlertType =
+  | 'new_match'
+  | 'deadline_t14'
+  | 'deadline_t7'
+  | 'deadline_t3'
+  | 'deadline_t1'
+  | 'watchlist_opened'
+  | 'source_failure'
+
+export interface GrantAlert {
+  alert_id: string
+  profile_id: string
+  alert_type: AlertType
+  target_id: string
+  fired_at: string
+  seen_at: string | null
+  data: Record<string, unknown>
+}
+
+export interface GrantFilter {
+  theme_tags?: string[]
+  region_codes?: string[]
+  deadline_state?: string
+  applicant_scopes?: string[]
+  search?: string
+}

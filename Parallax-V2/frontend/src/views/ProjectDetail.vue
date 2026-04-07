@@ -48,7 +48,7 @@ import GrantPreview from '@/components/knowledge/GrantPreview.vue'
 // P-6: Handoff
 import ReadinessPanel from '@/components/handoff/ReadinessPanel.vue'
 
-import { buildKnowledgeArtifact, getKnowledgeArtifact, exportKnowledge } from '@/api/ais'
+import { buildKnowledgeArtifact, getKnowledgeArtifact, exportKnowledge, getProjectArtifactDownloadUrl } from '@/api/ais'
 import type { KnowledgeArtifact as KAType } from '@/api/ais'
 
 const route = useRoute()
@@ -58,6 +58,11 @@ const { recommendation } = useNextStep()
 
 const runId = computed(() => route.params.runId as string)
 const expandedStage = ref<StageId | null>(null)
+const isAisRun = computed(() => {
+  if (pipeline.projectType === 'ais') return true
+  if (pipeline.projectType !== 'unknown') return false
+  return runId.value.startsWith('ais_run_')
+})
 
 // V2: Workflow graph data for model selector, settings, restart
 const graphNodes = ref<WorkflowNode[]>([])
@@ -71,7 +76,10 @@ const knowledgeArtifact = ref<KAType | null>(null)
 const knowledgeLoading = ref(false)
 
 async function fetchKnowledgeArtifact() {
-  if (!runId.value) return
+  if (!runId.value || !isAisRun.value) {
+    knowledgeArtifact.value = null
+    return
+  }
   try {
     const res = await getKnowledgeArtifact(runId.value)
     knowledgeArtifact.value = res.data?.data ?? null
@@ -81,7 +89,7 @@ async function fetchKnowledgeArtifact() {
 }
 
 async function handleBuildArtifact() {
-  if (!runId.value) return
+  if (!runId.value || !isAisRun.value) return
   knowledgeLoading.value = true
   try {
     const res = await buildKnowledgeArtifact(runId.value)
@@ -99,7 +107,7 @@ const translationLoading = ref(false)
 const translationMode = ref('grant')
 
 async function handleTranslate() {
-  if (!runId.value) return
+  if (!runId.value || !isAisRun.value) return
   translationLoading.value = true
   try {
     const { default: service } = await import('@/api/client')
@@ -112,8 +120,51 @@ async function handleTranslate() {
   }
 }
 
+function getPersistedTranslationForMode(mode: string): Record<string, unknown> | null {
+  const outputs = pipeline.stageResults.translation_outputs
+  if (isRecord(outputs) && isRecord(outputs[mode])) {
+    return outputs[mode] as Record<string, unknown>
+  }
+
+  const directStageKeys: Record<string, string> = {
+    grant: 'grant_translation',
+    journal: 'journal_translation',
+    funding: 'funding_translation',
+    patent: 'patent_analysis',
+    commercial: 'commercial_analysis',
+  }
+  const directKey = directStageKeys[mode]
+  if (directKey && isRecord(pipeline.stageResults[directKey])) {
+    return pipeline.stageResults[directKey] as Record<string, unknown>
+  }
+
+  const latest = pipeline.stageResults.translation_latest
+  if (isRecord(latest) && latest.mode === mode && isRecord(latest.result)) {
+    return latest.result as Record<string, unknown>
+  }
+
+  return null
+}
+
+function getLatestPersistedTranslation(): { mode: string; result: Record<string, unknown> } | null {
+  const latest = pipeline.stageResults.translation_latest
+  if (isRecord(latest) && typeof latest.mode === 'string' && isRecord(latest.result)) {
+    return {
+      mode: latest.mode,
+      result: latest.result as Record<string, unknown>,
+    }
+  }
+
+  const fallbackModes = ['grant', 'journal', 'funding', 'patent', 'commercial']
+  for (const mode of fallbackModes) {
+    const result = getPersistedTranslationForMode(mode)
+    if (result) return { mode, result }
+  }
+  return null
+}
+
 async function handleExportKnowledge() {
-  if (!runId.value) return
+  if (!runId.value || !isAisRun.value) return
   try {
     const res = await exportKnowledge(runId.value)
     const data = res.data?.data
@@ -123,7 +174,10 @@ async function handleExportKnowledge() {
       const a = document.createElement('a')
       a.href = url
       a.download = `knowledge-${runId.value}.json`
+      a.style.display = 'none'
+      document.body.appendChild(a)
       a.click()
+      document.body.removeChild(a)
       URL.revokeObjectURL(url)
     }
   } catch (err) {
@@ -131,8 +185,26 @@ async function handleExportKnowledge() {
   }
 }
 
+function handleExportProjectArtifact(format: 'html' | 'pdf') {
+  if (!runId.value || !isAisRun.value) return
+  try {
+    const url = getProjectArtifactDownloadUrl(runId.value, format)
+    const a = document.createElement('a')
+    a.href = url
+    a.style.display = 'none'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+  } catch (err) {
+    console.error('Project artifact export failed:', err)
+  }
+}
+
 async function fetchGraphNodes() {
-  if (!runId.value) return
+  if (!runId.value || !isAisRun.value) {
+    graphNodes.value = []
+    return
+  }
   try {
     const res = await getWorkflowGraph(runId.value)
     graphNodes.value = res.data?.data?.nodes ?? []
@@ -412,13 +484,16 @@ async function loadProjectView(targetRunId: string) {
   knowledgeArtifact.value = null
   pipeline.clearProject()
   await pipeline.loadProject(targetRunId)
-  await fetchGraphNodes()
-  // Fetch cost breakdown + knowledge artifact (non-blocking)
-  getRunCost(targetRunId).then(res => {
-    const data = res.data?.data
-    if (data) costBreakdown.value = data as unknown as RunCost
-  }).catch(() => { /* best effort */ })
-  fetchKnowledgeArtifact()
+
+  if (isAisRun.value) {
+    await fetchGraphNodes()
+    // Fetch cost breakdown + knowledge artifact (non-blocking)
+    getRunCost(targetRunId).then(res => {
+      const data = res.data?.data
+      if (data) costBreakdown.value = data as unknown as RunCost
+    }).catch(() => { /* best effort */ })
+    fetchKnowledgeArtifact()
+  }
 }
 
 watch(runId, (nextRunId) => {
@@ -428,6 +503,27 @@ watch(runId, (nextRunId) => {
 watch(() => route.query.stage, () => {
   syncExpandedStage()
 }, { immediate: true })
+
+watch(() => pipeline.stageResults, () => {
+  const currentModeResult = getPersistedTranslationForMode(translationMode.value)
+  if (currentModeResult) {
+    translationResult.value = currentModeResult
+    return
+  }
+
+  const latest = getLatestPersistedTranslation()
+  if (latest) {
+    translationMode.value = latest.mode
+    translationResult.value = latest.result
+    return
+  }
+
+  translationResult.value = null
+}, { immediate: true, deep: true })
+
+watch(translationMode, (mode) => {
+  translationResult.value = getPersistedTranslationForMode(mode)
+})
 
 onUnmounted(() => {
   pipeline.stopPolling()
@@ -487,6 +583,24 @@ function handleNextAction(handler: string) {
         <span>Command Center</span>
       </button>
       <div class="topbar-right">
+        <ActionButton
+          v-if="isAisRun"
+          variant="secondary"
+          size="sm"
+          icon="description"
+          @click="handleExportProjectArtifact('html')"
+        >
+          Full HTML
+        </ActionButton>
+        <ActionButton
+          v-if="isAisRun"
+          variant="secondary"
+          size="sm"
+          icon="picture_as_pdf"
+          @click="handleExportProjectArtifact('pdf')"
+        >
+          Full PDF
+        </ActionButton>
         <StatusBadge
           :status="syncBadge.status"
           :label="syncBadge.label"
@@ -638,7 +752,7 @@ function handleNextAction(handler: string) {
           <component
             :is="stageDetailComponents[stage.id]"
             :result="normalizeStageResult(stage.id)"
-            :run-id="runId"
+            :run-id="isAisRun ? runId : undefined"
             :simulation-id="
               pipeline.stageResults['debate']
                 ? (pipeline.stageResults['debate'] as Record<string, unknown>).simulation_id as string | undefined
@@ -679,7 +793,7 @@ function handleNextAction(handler: string) {
       </GlassPanel>
 
       <!-- ══ INTELLIGENCE ZONE ══ -->
-      <GlassPanel elevated padding="16px 20px" class="intel-panel">
+      <GlassPanel v-if="isAisRun" elevated padding="16px 20px" class="intel-panel">
         <div class="intel-panel__tabs">
           <button
             v-for="tab in ([
@@ -773,6 +887,13 @@ function handleNextAction(handler: string) {
         <!-- Readiness Tab -->
         <div v-if="activeIntelTab === 'readiness'" class="intel-panel__content">
           <ReadinessPanel :run-id="runId" />
+        </div>
+      </GlassPanel>
+      <GlassPanel v-else elevated padding="14px 18px" class="intel-panel">
+        <div class="intel-panel__empty">
+          <p>
+            This run is not an AIS pipeline run. Advanced knowledge/review/translation panels are available for AIS runs.
+          </p>
         </div>
       </GlassPanel>
     </template>

@@ -1,12 +1,22 @@
 """Shared fixtures for V3 gateway tests."""
 
-import asyncio
-import pytest
-import pytest_asyncio
-from httpx import AsyncClient, ASGITransport
+import os
 
-from v3_gateway.main import app
-from v3_gateway.models.base import init_db, engine, Base
+# Set in-memory DB BEFORE any v3_gateway imports so the engine and all
+# `from ..models.base import async_session` bindings use the test DB.
+os.environ["V3_DATABASE_URL"] = "sqlite+aiosqlite://"
+
+# Clear cached settings in case config was already imported
+from v3_gateway.config import get_settings  # noqa: E402
+get_settings.cache_clear()
+
+import asyncio  # noqa: E402
+import pytest  # noqa: E402
+import pytest_asyncio  # noqa: E402
+from httpx import AsyncClient, ASGITransport  # noqa: E402
+
+from v3_gateway.models.base import Base, engine  # noqa: E402
+from v3_gateway.main import app  # noqa: E402
 
 
 @pytest.fixture(scope="session")
@@ -51,5 +61,6 @@ async def run_with_phases(client: AsyncClient, project: dict):
         "project_id": project["project_id"],
         "template_id": "academic_research",
         "config": {"research_idea": "test idea"},
+        "auto_start": False,
     })
     return r.json()["data"]

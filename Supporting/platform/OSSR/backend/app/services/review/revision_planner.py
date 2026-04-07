@@ -70,12 +70,10 @@ class RevisionPlanner:
     """Creates prioritized revision plans and response-to-reviewers."""
 
     def __init__(self):
-        self.llm = None
+        pass
 
-    def _get_llm(self) -> LLMClient:
-        if self.llm is None:
-            self.llm = LLMClient()
-        return self.llm
+    def _get_llm(self, model: str = "") -> LLMClient:
+        return LLMClient(model=model) if model else LLMClient()
 
     def create_plan(self, run_id: str, model: str = "") -> Dict[str, Any]:
         """
@@ -101,10 +99,9 @@ class RevisionPlanner:
             for r in latest.results
         )
 
-        model = model or "claude-sonnet-4-20250514"
-        response = self._get_llm().chat(
-            REVISION_PLAN_PROMPT.format(themes=themes_text, summaries=summaries_text),
-            model=model,
+        prompt = REVISION_PLAN_PROMPT.format(themes=themes_text, summaries=summaries_text)
+        response = self._get_llm(model).chat(
+            [{"role": "user", "content": prompt}],
         )
 
         plan = self._parse_plan(response)
@@ -150,10 +147,9 @@ class RevisionPlanner:
             for t in latest.themes
         ) or "No revision plan."
 
-        model = model or "claude-sonnet-4-20250514"
-        response = self._get_llm().chat(
-            REBUTTAL_PROMPT.format(comments=comments_text[:5000], plan=plan_text[:2000]),
-            model=model,
+        prompt = REBUTTAL_PROMPT.format(comments=comments_text[:5000], plan=plan_text[:2000])
+        response = self._get_llm(model).chat(
+            [{"role": "user", "content": prompt}],
         )
 
         responses = self._parse_rebuttal(response)

@@ -84,6 +84,16 @@ def create_app():
     for bp in research_blueprints:
         app.register_blueprint(bp, url_prefix="/api/research")
 
+    # Start the Grant Hunt background scheduler (daemon thread; safe no-op
+    # if already started). Opt-out with GRANT_SCHEDULER_DISABLE=1 for tests.
+    import os as _os
+    if _os.environ.get("GRANT_SCHEDULER_DISABLE", "").lower() not in ("1", "true", "yes"):
+        try:
+            from .services.grants.scheduler import start_scheduler
+            start_scheduler()
+        except Exception as _e:  # noqa: BLE001
+            logger.warning("Grant scheduler failed to start: %s", _e)
+
     # Register auth key management routes (separate prefix)
     from .api.auth_routes import auth_bp
     app.register_blueprint(auth_bp)

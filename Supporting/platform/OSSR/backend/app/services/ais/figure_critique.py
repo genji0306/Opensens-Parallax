@@ -80,12 +80,10 @@ class FigureCritique:
     """Automated critique for scientific figures by type."""
 
     def __init__(self):
-        self.llm = None
+        pass
 
-    def _get_llm(self) -> LLMClient:
-        if self.llm is None:
-            self.llm = LLMClient()
-        return self.llm
+    def _get_llm(self, model: str = "") -> LLMClient:
+        return LLMClient(model=model) if model else LLMClient()
 
     def get_figure_types(self) -> Dict[str, Dict]:
         return FIGURE_TYPES
@@ -101,16 +99,15 @@ class FigureCritique:
         ft = FIGURE_TYPES.get(figure_type, FIGURE_TYPES["plot"])
         criteria = ", ".join(ft["criteria"])
 
-        model = model or "claude-sonnet-4-20250514"
-        response = self._get_llm().chat(
-            CRITIQUE_PROMPT.format(
-                figure_type=ft["label"],
-                figure_type_key=figure_type,
-                description=figure_description[:2000],
-                context=paper_context[:2000],
-                criteria=criteria,
-            ),
-            model=model,
+        prompt = CRITIQUE_PROMPT.format(
+            figure_type=ft["label"],
+            figure_type_key=figure_type,
+            description=figure_description[:2000],
+            context=paper_context[:2000],
+            criteria=criteria,
+        )
+        response = self._get_llm(model).chat(
+            [{"role": "user", "content": prompt}],
         )
 
         return self._parse(response)
@@ -154,7 +151,41 @@ class FigureCritique:
                 text = text.split("```json")[1].split("```")[0]
             elif "```" in text:
                 text = text.split("```")[1].split("```")[0]
-            return json.loads(text)
+            parsed = json.loads(text)
         except (json.JSONDecodeError, KeyError) as e:
             logger.warning("[FigureCritique] Parse error: %s", e)
-            return {"overall_quality": 0, "summary": "Failed to parse critique", "issues": [], "strengths": []}
+            return {"overall_quality": 0, "summary": "Failed to parse critique",
+                    "issues": [], "strengths": [], "annotations": []}
+
+        # LLM-Peer-style annotation projection.
+        # Every ``issue`` becomes a granular annotation that the review UI
+        # can accept/reject individually. The raw ``issues`` list is kept
+        # for backwards compatibility, but the frontend prefers
+        # ``annotations`` when present.
+        parsed.setdefault("annotations", self._issues_to_annotations(parsed))
+        return parsed
+
+    @staticmethod
+    def _issues_to_annotations(parsed: Dict[str, Any]) -> List[Dict[str, Any]]:
+        from .._agents.schema import Annotation
+
+        figure_type = parsed.get("figure_type", "plot")
+        annotations: List[Dict[str, Any]] = []
+        for issue in parsed.get("issues", []) or []:
+            severity = issue.get("severity", "minor")
+            if severity == "suggestion":
+                severity = "nit"
+            if severity not in ("critical", "major", "minor", "nit"):
+                severity = "minor"
+            annotations.append(
+                Annotation(
+                    kind="comment",
+                    target_id=figure_type,
+                    comment=str(issue.get("description", ""))[:600],
+                    replacement_text=str(issue.get("recommendation", ""))[:600],
+                    severity=severity,  # type: ignore[arg-type]
+                    confidence=0.7,
+                    metadata={"source": "figure_critique"},
+                ).to_dict()
+            )
+        return annotations

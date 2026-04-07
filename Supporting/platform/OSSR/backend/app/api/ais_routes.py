@@ -12,6 +12,7 @@ Endpoints:
   POST /ais/<run_id>/approve               — Approve for Stage 5 (drafting)
   GET  /ais/<run_id>/draft                 — Stage 5 output: paper draft
   GET  /ais/<run_id>/export                — Export draft as markdown
+  GET  /ais/<run_id>/artifact              — Export full project artifact (html/pdf/json)
   POST /ais/<run_id>/review                — Trigger standalone self-review
   POST /ais/<run_id>/experiment            — Stage 6: start experiment
   GET  /ais/<run_id>/experiment/status      — Experiment progress
@@ -29,7 +30,7 @@ import logging
 import threading
 from datetime import datetime
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, Response
 
 from opensens_common.config import Config
 from opensens_common.task import TaskManager, TaskStatus
@@ -350,6 +351,51 @@ def export_draft(run_id: str):
         return jsonify({"success": False, "error": f"Unsupported format: {fmt}"}), 400
 
 
+@ais_bp.route("/ais/<run_id>/artifact", methods=["GET"])
+def export_full_project_artifact(run_id: str):
+    """
+    Export a full project artifact containing every stage result.
+
+    Query:
+      - format: html | pdf | json (default: html)
+    """
+    fmt = (request.args.get("format", "html") or "html").strip().lower()
+
+    from ..services.project_artifact_exporter import ProjectArtifactExporter
+    exporter = ProjectArtifactExporter()
+    bundle = exporter.build_bundle(run_id)
+    if not bundle:
+        return jsonify({"success": False, "error": f"Run not found: {run_id}"}), 404
+
+    if fmt == "json":
+        return jsonify({"success": True, "data": bundle})
+
+    if fmt == "html":
+        html = exporter.render_html(bundle)
+        return Response(
+            html,
+            mimetype="text/html; charset=utf-8",
+            headers={
+                "Content-Disposition": f'attachment; filename="{run_id}_full_artifact.html"',
+            },
+        )
+
+    if fmt == "pdf":
+        pdf_bytes = exporter.render_pdf(bundle)
+        return Response(
+            pdf_bytes,
+            mimetype="application/pdf",
+            headers={
+                "Content-Disposition": f'attachment; filename="{run_id}_full_artifact.pdf"',
+            },
+        )
+
+    return jsonify({
+        "success": False,
+        "error": f"Unsupported format: {fmt}. Use html, pdf, or json.",
+    }), 400
+
+
 # ── Stage 4: Thought Injection ──────────────────────────────────────
 
 
@@ -494,8 +540,6 @@ def stream_progress(run_id: str):
     Replaces 3-second polling with push-based updates.
     Client connects with EventSource('/api/research/ais/<run_id>/stream').
     """
-    from flask import Response
-
     run = PipelineRunDAO.load(run_id)
     if not run:
         return jsonify({"success": False, "error": f"Run not found: {run_id}"}), 404
@@ -1122,10 +1166,7 @@ def _run_pipeline_stages_1_2(
         )
 
     except Exception as e:
-        import traceback
         logger.error("[AiS %s] Pipeline failed: %s", run_id, e, exc_info=True)
-        print(f"[AiS PIPELINE ERROR] {run_id}: {e}", flush=True)
-        traceback.print_exc()
         PipelineRunDAO.update_status(run_id, PipelineStatus.FAILED, error=str(e))
         tm.fail_task(task_id, str(e))
 
@@ -1166,7 +1207,8 @@ def get_provider_info():
     try:
         from ..services.llm_cache import LLMCache
         cache_stats = LLMCache.stats()
-    except Exception:
+    except Exception as e:
+        logger.warning("Failed to load LLM cache stats: %s", e)
         cache_stats = {"total_entries": 0}
 
     return jsonify({
@@ -2305,7 +2347,6 @@ def export_latex(run_id: str):
         return jsonify({"success": False, "error": f"Run not found: {run_id}"}), 404
 
     from ..services.ais.paper_draft_generator import PaperDraftGenerator
-    from flask import Response
     gen = PaperDraftGenerator()
     draft = gen.get_draft_by_run(run_id)
     if not draft:
@@ -2330,7 +2371,6 @@ def export_bibtex(run_id: str):
         return jsonify({"success": False, "error": f"Run not found: {run_id}"}), 404
 
     from ..services.ais.paper_draft_generator import PaperDraftGenerator
-    from flask import Response
     gen = PaperDraftGenerator()
     draft = gen.get_draft_by_run(run_id)
     if not draft:
@@ -2421,7 +2461,7 @@ def get_knowledge_artifact(run_id: str):
     from ..models.knowledge_models import KnowledgeArtifactDAO
     artifact = KnowledgeArtifactDAO.load(run_id)
     if not artifact:
-        return jsonify({"success": False, "error": "No knowledge artifact found"}), 404
+        return jsonify({"success": True, "data": None}), 200
     return jsonify({"success": True, "data": artifact.to_dict()})
 
 
@@ -2567,6 +2607,7 @@ def create_revision_plan(run_id: str):
 
     from ..services.review.revision_planner import RevisionPlanner
     result = RevisionPlanner().create_plan(run_id, model=model)
+    PipelineRunDAO.update_stage_result(run_id, "review_revision_plan", result)
     return jsonify({"success": True, "data": result})
 
 
@@ -2582,6 +2623,7 @@ def generate_rebuttal(run_id: str):
 
     from ..services.review.revision_planner import RevisionPlanner
     result = RevisionPlanner().generate_rebuttal(run_id, model=model)
+    PipelineRunDAO.update_stage_result(run_id, "review_rebuttal", result)
     return jsonify({"success": True, "data": result})
 
 
@@ -2701,6 +2743,36 @@ def generate_figure_briefs(run_id: str):
 
 # ── P-5: Translation to Grants/IP/Commercialization ──────────────────
 
+TRANSLATION_STAGE_KEYS = {
+    "grant": "grant_translation",
+    "journal": "journal_translation",
+    "funding": "funding_translation",
+    "patent": "patent_analysis",
+    "commercial": "commercial_analysis",
+}
+
+
+def _existing_stage_dict(run, key: str) -> dict:
+    if not run or not isinstance(run.stage_results, dict):
+        return {}
+    value = run.stage_results.get(key)
+    return value if isinstance(value, dict) else {}
+
+
+def _persist_translation_output(run, run_id: str, mode: str, result: dict) -> None:
+    outputs = _existing_stage_dict(run, "translation_outputs")
+    outputs[mode] = result
+    PipelineRunDAO.update_stage_result(run_id, "translation_outputs", outputs)
+    PipelineRunDAO.update_stage_result(
+        run_id,
+        "translation_latest",
+        {"mode": mode, "result": result},
+    )
+
+    stage_key = TRANSLATION_STAGE_KEYS.get(mode)
+    if stage_key:
+        PipelineRunDAO.update_stage_result(run_id, stage_key, result)
+
 
 @ais_bp.route("/ais/translation/modes", methods=["GET"])
 def get_translation_modes():
@@ -2722,6 +2794,7 @@ def translate_artifact(run_id: str):
 
     from ..services.translation.template_engine import TemplateEngine
     result = TemplateEngine().translate(run_id, mode=mode, model=model)
+    _persist_translation_output(run, run_id, mode, result)
     return jsonify({"success": True, "data": result})
 
 
@@ -2737,6 +2810,21 @@ def translate_all(run_id: str):
 
     from ..services.translation.template_engine import TemplateEngine
     result = TemplateEngine().translate_all(run_id, model=model)
+    outputs = result.get("outputs") if isinstance(result.get("outputs"), dict) else {}
+    merged_outputs = _existing_stage_dict(run, "translation_outputs")
+    for mode_key, output in outputs.items():
+        if isinstance(output, dict):
+            merged_outputs[mode_key] = output
+            stage_key = TRANSLATION_STAGE_KEYS.get(mode_key)
+            if stage_key:
+                PipelineRunDAO.update_stage_result(run_id, stage_key, output)
+    if merged_outputs:
+        PipelineRunDAO.update_stage_result(run_id, "translation_outputs", merged_outputs)
+    PipelineRunDAO.update_stage_result(
+        run_id,
+        "translation_latest",
+        {"mode": "all", "result": result},
+    )
     return jsonify({"success": True, "data": result})
 
 
@@ -2752,6 +2840,7 @@ def generate_grant(run_id: str):
 
     from ..services.translation.grant_generator import GrantGenerator
     result = GrantGenerator().generate(run_id, model=model)
+    _persist_translation_output(run, run_id, "grant", result)
     return jsonify({"success": True, "data": result})
 
 
@@ -2767,6 +2856,7 @@ def assess_patent(run_id: str):
 
     from ..services.translation.patent_analyzer import PatentAnalyzer
     result = PatentAnalyzer().analyze(run_id, model=model)
+    _persist_translation_output(run, run_id, "patent", result)
     return jsonify({"success": True, "data": result})
 
 
@@ -2782,6 +2872,7 @@ def assess_commercial(run_id: str):
 
     from ..services.translation.patent_analyzer import CommercialAnalyzer
     result = CommercialAnalyzer().analyze(run_id, model=model)
+    _persist_translation_output(run, run_id, "commercial", result)
     return jsonify({"success": True, "data": result})
 
 

@@ -7,7 +7,7 @@ Output: problem statement, contribution, differentiators, predicted impact.
 
 import json
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from opensens_common.llm_client import LLMClient
 
@@ -16,6 +16,8 @@ from ...models.knowledge_models import (
     KnowledgeArtifact,
     KnowledgeArtifactDAO,
 )
+from .._agents.base import AgentResult, llm_call_with_retry
+from .._agents.rollout import rollout_and_aggregate
 
 logger = logging.getLogger(__name__)
 
@@ -49,12 +51,10 @@ class HypothesisBuilder:
     """Builds structured contribution hypotheses from knowledge artifacts."""
 
     def __init__(self):
-        self.llm = None
+        pass
 
-    def _get_llm(self) -> LLMClient:
-        if self.llm is None:
-            self.llm = LLMClient()
-        return self.llm
+    def _get_llm(self, model: str = "") -> LLMClient:
+        return LLMClient(model=model) if model else LLMClient()
 
     def build(self, run_id: str, model: str = "") -> Dict[str, Any]:
         """
@@ -69,8 +69,10 @@ class HypothesisBuilder:
         artifact = KnowledgeArtifactDAO.load(run_id)
         from ...models.ais_models import PipelineRunDAO
         run = PipelineRunDAO.load(run_id)
+        if not run:
+            raise ValueError(f"Run not found: {run_id}")
 
-        idea = run.research_idea if run else ""
+        idea = run.research_idea
 
         claims_text = ""
         gaps_text = ""
@@ -84,18 +86,61 @@ class HypothesisBuilder:
                 for a in artifact.novelty_assessments[:5]
             )
 
-        model = model or "claude-sonnet-4-20250514"
-        response = self._get_llm().chat(
-            HYPOTHESIS_PROMPT.format(
-                idea=idea,
-                claims=claims_text or "No claims yet.",
-                gaps=gaps_text or "No gaps identified.",
-                novelty=novelty_text or "No novelty assessment yet.",
-            ),
-            model=model,
+        prompt = HYPOTHESIS_PROMPT.format(
+            idea=idea,
+            claims=claims_text or "No claims yet.",
+            gaps=gaps_text or "No gaps identified.",
+            novelty=novelty_text or "No novelty assessment yet.",
         )
 
-        hypothesis = self._parse_response(response, artifact)
+        # UniScientist multi-rollout with grounding requirement.
+        # Rubric: reject rollouts that fail to cite at least two claims, and
+        # prefer higher self-assessed confidence when multiple rollouts
+        # pass. ``rollout_and_aggregate`` falls back cleanly when N=1.
+        min_supporting = 2 if artifact and len(artifact.claims) >= 2 else 0
+
+        def _rollout() -> AgentResult:
+            return llm_call_with_retry(
+                prompt,
+                model=model,
+                temperature=0.55,
+                expect_json=True,
+                max_retries=1,
+            )
+
+        def _rubric(result: AgentResult) -> float:
+            if not result.ok or not isinstance(result.data, dict):
+                return 0.0
+            data = result.data
+            differentiators = data.get("differentiators") or []
+            supporting = data.get("supporting_claim_ids") or []
+            # Grounding requirement
+            if min_supporting and len(supporting) < min_supporting:
+                return 0.0
+            score = 0.4
+            if len(differentiators) >= 3:
+                score += 0.2
+            if data.get("problem_statement"):
+                score += 0.2
+            if data.get("contribution"):
+                score += 0.2
+            return min(1.0, score)
+
+        aggregated = rollout_and_aggregate(_rollout, n=3, rubric=_rubric)
+
+        if aggregated.ok and isinstance(aggregated.data, dict):
+            hypothesis = self._from_dict(aggregated.data, artifact)
+            hypothesis_rollouts = aggregated.rollouts
+        else:
+            logger.info(
+                "[HypothesisBuilder] rollouts failed (%s) — falling back to single-shot",
+                aggregated.error,
+            )
+            response = self._get_llm(model).chat(
+                [{"role": "user", "content": prompt}],
+            )
+            hypothesis = self._parse_response(response, artifact)
+            hypothesis_rollouts = []
 
         # Save to artifact
         if artifact:
@@ -111,12 +156,39 @@ class HypothesisBuilder:
             ),
         }
 
-        logger.info("[HypothesisBuilder] Built hypothesis for run %s", run_id)
+        logger.info(
+            "[HypothesisBuilder] Built hypothesis for run %s (rollouts=%d)",
+            run_id, len(hypothesis_rollouts),
+        )
 
         return {
             "hypothesis": hypothesis.to_dict(),
             "supporting_context": context,
+            "rollouts": hypothesis_rollouts,
         }
+
+    def _from_dict(self, data: Dict[str, Any], artifact) -> Hypothesis:
+        """Build a ``Hypothesis`` from a successful rollout dict."""
+        # Accept both the new skill-card schema (`hypothesis`, `supporting_claim_ids`)
+        # and the legacy schema (`problem_statement`, `contribution`).
+        problem = data.get("problem_statement") or data.get("hypothesis", "")
+        contribution = data.get("contribution") or data.get("hypothesis", "")
+        differentiators = data.get("differentiators") or []
+        if not differentiators and data.get("counter_evidence_acknowledged"):
+            differentiators = [data["counter_evidence_acknowledged"]]
+        return Hypothesis(
+            problem_statement=problem,
+            contribution=contribution,
+            differentiators=differentiators,
+            predicted_impact=data.get("predicted_impact", ""),
+            supporting_gaps=data.get("addressed_gap_ids")
+                or [g.gap_id for g in (artifact.gaps if artifact else [])],
+            novelty_basis=data.get("supporting_claim_ids")
+                or [
+                    a.claim_id for a in (artifact.novelty_assessments if artifact else [])
+                    if a.novelty_score >= 0.7
+                ],
+        )
 
     def _parse_response(self, response: str, artifact) -> Hypothesis:
         try:

@@ -75,12 +75,10 @@ class ArtifactBuilder:
     """Builds KnowledgeArtifact from pipeline run outputs."""
 
     def __init__(self):
-        self.llm = None
+        pass
 
-    def _get_llm(self) -> LLMClient:
-        if self.llm is None:
-            self.llm = LLMClient()
-        return self.llm
+    def _get_llm(self, model: str = "") -> LLMClient:
+        return LLMClient(model=model) if model else LLMClient()
 
     def build(self, run_id: str, model: str = "") -> KnowledgeArtifact:
         """
@@ -114,8 +112,10 @@ class ArtifactBuilder:
             experiment=experiment[:2000],
         )
 
-        model = model or "claude-sonnet-4-20250514"
-        response = self._get_llm().chat(prompt, model=model)
+        model = model or ""
+        response = self._get_llm(model).chat(
+            [{"role": "user", "content": prompt}],
+        )
 
         # Parse LLM response
         claims, extracted_gaps = self._parse_extraction(response)
@@ -141,6 +141,21 @@ class ArtifactBuilder:
                 con = claim.metadata.get("contradicting_evidence", [])
                 if any(ev.title.lower() in c.lower() for c in con if isinstance(c, str)):
                     claim.contradicting.append(ev.evidence_id)
+
+        # Grounding flag (UniScientist). We don't drop ungrounded claims —
+        # the pipeline still needs them for completeness — but we stamp a
+        # ``grounded`` metadata flag so downstream agents (NoveltyMapper,
+        # HypothesisBuilder, ArgumentSkeleton) can weight them lower.
+        for claim in claims:
+            claim.metadata["grounded"] = bool(
+                claim.supporting or claim.contradicting or claim.extending
+            )
+        grounded_count = sum(1 for c in claims if c.metadata.get("grounded"))
+        if claims:
+            logger.info(
+                "[ArtifactBuilder] grounding: %d/%d claims have >=1 evidence link",
+                grounded_count, len(claims),
+            )
 
         # Build and save artifact
         artifact = KnowledgeArtifact(

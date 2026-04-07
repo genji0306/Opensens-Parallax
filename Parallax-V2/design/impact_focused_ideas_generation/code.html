@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Opensens Parallax | Research Command Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container-highest": "#dae3f7",
+              "on-tertiary-container": "#5a1506",
+              "on-tertiary": "#ffffff",
+              "on-surface-variant": "#3d4945",
+              "error": "#ba1a1a",
+              "surface-dim": "#d1daef",
+              "on-secondary-fixed-variant": "#244e44",
+              "outline": "#6d7a75",
+              "error-container": "#ffdad6",
+              "on-surface": "#131c2a",
+              "tertiary": "#9a4431",
+              "surface-container-high": "#dfe8fd",
+              "on-background": "#131c2a",
+              "surface-container": "#e7eeff",
+              "secondary-fixed-dim": "#a3d0c2",
+              "on-secondary": "#ffffff",
+              "on-tertiary-fixed-variant": "#7c2d1c",
+              "tertiary-fixed-dim": "#ffb4a4",
+              "surface-bright": "#f9f9ff",
+              "primary": "#006b59",
+              "on-primary-container": "#00352b",
+              "on-secondary-fixed": "#00201a",
+              "surface-container-low": "#f0f3ff",
+              "on-primary": "#ffffff",
+              "background": "#f9f9ff",
+              "on-error": "#ffffff",
+              "tertiary-fixed": "#ffdad2",
+              "surface-container-lowest": "#ffffff",
+              "on-tertiary-fixed": "#3d0600",
+              "on-secondary-container": "#416a5f",
+              "on-primary-fixed": "#00201a",
+              "surface-tint": "#006b59",
+              "primary-container": "#1ea88e",
+              "inverse-surface": "#283140",
+              "surface": "#f9f9ff",
+              "surface-variant": "#dae3f7",
+              "secondary-fixed": "#bfecde",
+              "inverse-primary": "#61dbbe",
+              "primary-fixed-dim": "#61dbbe",
+              "on-primary-fixed-variant": "#005143",
+              "tertiary-container": "#df7962",
+              "on-error-container": "#93000a",
+              "inverse-on-surface": "#ecf1ff",
+              "secondary-container": "#bce9db",
+              "secondary": "#3c665b",
+              "primary-fixed": "#7ff7da",
+              "outline-variant": "#bccac4"
+            },
+            fontFamily: {
+              "headline": ["Inter", "sans-serif"],
+              "body": ["Inter", "sans-serif"],
+              "label": ["Inter", "sans-serif"],
+              "mono": ["JetBrains Mono", "monospace"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .mono-score { font-family: 'JetBrains Mono', monospace; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .dark .glass-card {
+            background: rgba(19, 28, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body min-h-screen">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center px-6 h-16 w-full fixed top-0 z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 font-['Inter'] antialiased tracking-tight">
+<div class="flex items-center gap-8">
+<h1 class="text-xl font-bold tracking-tighter text-[#1EA88E] uppercase">Opensens Parallax</h1>
+<nav class="hidden md:flex items-center gap-6 text-sm">
+<a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors duration-200" href="#">Dashboard</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors duration-200" href="#">Projects</a>
+<a class="text-[#1EA88E] border-b-2 border-[#1EA88E] pb-1 font-semibold" href="#">Pipeline</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors duration-200" href="#">Archive</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative group">
+<span class="absolute inset-y-0 left-3 flex items-center text-slate-400">
+<span class="material-symbols-outlined text-sm">search</span>
+</span>
+<input class="pl-10 pr-4 py-1.5 bg-surface-container-low border-none rounded-lg text-sm w-64 focus:ring-2 focus:ring-primary-container" placeholder="Search parameters..." type="text"/>
+</div>
+<div class="flex items-center gap-2 px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-xs font-mono font-bold">
+<span class="material-symbols-outlined text-xs">payments</span>
+                COST: $42.50
+            </div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 rounded-full transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 rounded-full transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<img class="w-8 h-8 rounded-full border-2 border-primary-container object-cover" data-alt="Researcher Profile Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBrQLnJ0lwbHvG1KuMzuReu7EEcM3vuK5A8xRXU4T__sVs2v0YZJAFdrfCdJ5aFsP2-MA463e7XWPyfNsG3C2jOTjahT0Bu1iaGNWqaxinXLDooBVCtoPiIHXd9UqOqHbydRM6U90gT5euJUnGL_Du1hVXaov8kBRiThpWA4VToHk13L1jxb8oHpM95GTQ8AXsOOJKLztwhu74vh-Kx0qBVbNvlzsrRW8NdRBmxzfjMFT8RKNJAx7e1LVVEw_ccomxmhNJK--LzBM8"/>
+</div>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] z-40 flex flex-col w-64 border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 font-['Inter'] text-sm font-medium">
+<div class="p-6">
+<div class="flex items-center gap-3 mb-1">
+<div class="w-8 h-8 bg-primary rounded flex items-center justify-center text-white font-black">OP</div>
+<div>
+<div class="text-lg font-black text-slate-900 dark:text-white leading-none">Research Unit</div>
+<div class="text-[10px] text-slate-500 uppercase tracking-widest mt-1">Alpha-7 Cluster</div>
+</div>
+</div>
+</div>
+<nav class="flex-1 px-3 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-transform duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">dashboard</span> Command
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-transform duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">monitoring</span> Analytics
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-transform duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">sensors</span> Sensors
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-transform duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">description</span> Reports
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-transform duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">group</span> Team
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-[#1EA88E] bg-[#1EA88E]/10 font-bold border-r-4 border-[#1EA88E] rounded-l transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">menu_book</span> Library
+            </a>
+</nav>
+<div class="p-3 border-t border-slate-200 dark:border-slate-800 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-transform duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">help</span> Support
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-transform duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">terminal</span> System
+            </a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-20 pb-12 px-8 bg-surface">
+<!-- Active Project Panel -->
+<section class="max-w-7xl mx-auto space-y-8">
+<div class="flex justify-between items-end">
+<div>
+<h2 class="text-3xl font-bold tracking-tight text-on-surface">Active Project: Neural Mesh V4</h2>
+<p class="text-on-surface-variant text-sm mt-1 uppercase tracking-wider">Project ID: PRJ-NM-004-OMEGA</p>
+</div>
+<div class="flex gap-2">
+<button class="bg-primary text-on-primary px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-primary-container transition-colors">
+<span class="material-symbols-outlined text-sm">play_arrow</span> Resume Execution
+                    </button>
+<button class="bg-surface-container-highest text-on-surface px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined text-sm">share</span> Export Data
+                    </button>
+</div>
+</div>
+<!-- Pipeline Tracker -->
+<div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800">
+<div class="flex items-center justify-between relative">
+<!-- Progress Line Background -->
+<div class="absolute top-1/2 left-0 w-full h-0.5 bg-slate-100 dark:bg-slate-800 -translate-y-1/2 z-0"></div>
+<!-- Completed Progress Line -->
+<div class="absolute top-1/2 left-0 w-[44%] h-0.5 bg-primary-container -translate-y-1/2 z-0"></div>
+<!-- Pipeline Stages -->
+<div class="flex flex-col items-center gap-2 z-10 bg-white dark:bg-slate-900 px-2">
+<div class="w-8 h-8 rounded-full bg-primary-container text-white flex items-center justify-center text-xs">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-tighter text-on-surface-variant">Crawl</span>
+</div>
+<div class="flex flex-col items-center gap-2 z-10 bg-white dark:bg-slate-900 px-2">
+<div class="w-8 h-8 rounded-full bg-primary-container text-white flex items-center justify-center text-xs">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-tighter text-on-surface-variant">Map</span>
+</div>
+<div class="flex flex-col items-center gap-2 z-10 bg-white dark:bg-slate-900 px-2">
+<div class="w-8 h-8 rounded-full bg-primary-container text-white flex items-center justify-center text-xs">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-tighter text-on-surface-variant">Debate</span>
+</div>
+<div class="flex flex-col items-center gap-2 z-10 bg-white dark:bg-slate-900 px-2">
+<div class="w-8 h-8 rounded-full bg-primary-container text-white flex items-center justify-center text-xs">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-tighter text-on-surface-variant">Validate</span>
+</div>
+<!-- Active Stage -->
+<div class="flex flex-col items-center gap-2 z-10 bg-white dark:bg-slate-900 px-2">
+<div class="relative">
+<div class="absolute inset-0 bg-primary-container rounded-full animate-ping opacity-30"></div>
+<div class="w-8 h-8 rounded-full bg-primary-container text-white flex items-center justify-center relative z-20">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+</div>
+</div>
+<span class="text-[10px] font-extrabold uppercase tracking-tighter text-primary">Ideas</span>
+</div>
+<!-- Pending Stages -->
+<div class="flex flex-col items-center gap-2 z-10 bg-white dark:bg-slate-900 px-2 opacity-40">
+<div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center"></div>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Ingest</span>
+</div>
+<div class="flex flex-col items-center gap-2 z-10 bg-white dark:bg-slate-900 px-2 opacity-40">
+<div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center"></div>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Parse</span>
+</div>
+<div class="flex flex-col items-center gap-2 z-10 bg-white dark:bg-slate-900 px-2 opacity-40">
+<div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center"></div>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Draft</span>
+</div>
+<div class="flex flex-col items-center gap-2 z-10 bg-white dark:bg-slate-900 px-2 opacity-40">
+<div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center"></div>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Experiment</span>
+</div>
+<div class="flex flex-col items-center gap-2 z-10 bg-white dark:bg-slate-900 px-2 opacity-40">
+<div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center"></div>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Rehab</span>
+</div>
+</div>
+</div>
+<!-- Recommendation Banner -->
+<div class="bg-primary-container/10 border-l-4 border-primary-container p-4 rounded-r-xl flex items-center justify-between">
+<div class="flex items-center gap-4">
+<span class="text-2xl">💡</span>
+<div>
+<p class="font-bold text-on-primary-container">RECOMMENDED: Top idea (9.4) has exceptional scientific impact.</p>
+<p class="text-sm text-on-secondary-container">Proceed to Drafting stage to generate experimental protocol.</p>
+</div>
+</div>
+<div class="flex gap-3">
+<button class="bg-primary text-white px-5 py-2 rounded font-bold text-sm hover:opacity-90 transition-opacity">Start Draft →</button>
+<button class="bg-white border border-slate-200 px-5 py-2 rounded text-slate-600 font-semibold text-sm hover:bg-slate-50">Regenerate Ideas</button>
+<button class="px-5 py-2 rounded text-slate-400 font-semibold text-sm hover:text-slate-600">Skip</button>
+</div>
+</div>
+<!-- Hypotheses Cards Grid (Asymmetric Bento) -->
+<div class="grid grid-cols-12 gap-6">
+<!-- Top Hypothesis (Rank 01) -->
+<div class="col-span-12 lg:col-span-8 bg-white dark:bg-slate-900 rounded-2xl border-2 border-primary-container shadow-xl overflow-hidden relative">
+<div class="absolute top-0 right-0 p-4">
+<span class="mono-score text-6xl font-black text-primary/5 select-none">01</span>
+</div>
+<div class="p-8">
+<div class="flex justify-between items-start mb-6">
+<div>
+<span class="bg-primary-container text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4 inline-block">High Confidence | Quantum Meta</span>
+<h3 class="text-2xl font-black text-on-surface leading-tight">Quantum-Resonant Multi-Analyte Sensing Array</h3>
+</div>
+<div class="text-right">
+<div class="mono-score text-4xl font-bold text-primary">9.4</div>
+<div class="text-[10px] uppercase font-bold text-slate-400">Composite Score</div>
+</div>
+</div>
+<p class="text-on-surface-variant text-lg leading-relaxed mb-8 max-w-2xl">
+                            A breakthrough sensing paradigm leveraging quantum entanglement for sub-picomolar detection limits in complex bio-fluids.
+                        </p>
+<div class="grid grid-cols-4 gap-4 mb-8">
+<div class="bg-primary/5 p-4 rounded-xl border border-primary/10">
+<div class="text-[10px] uppercase font-bold text-primary tracking-widest mb-1">Impact</div>
+<div class="mono-score text-2xl font-black text-primary">9.8</div>
+<div class="w-full h-1 bg-slate-200 mt-2 rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 98%"></div>
+</div>
+</div>
+<div class="bg-slate-50 p-4 rounded-xl">
+<div class="text-[10px] uppercase font-bold text-slate-400 tracking-widest mb-1">Novelty</div>
+<div class="mono-score text-2xl font-bold text-slate-800">9.2</div>
+<div class="w-full h-1 bg-slate-200 mt-2 rounded-full overflow-hidden">
+<div class="h-full bg-slate-400" style="width: 92%"></div>
+</div>
+</div>
+<div class="bg-slate-50 p-4 rounded-xl">
+<div class="text-[10px] uppercase font-bold text-slate-400 tracking-widest mb-1">Feasibility</div>
+<div class="mono-score text-2xl font-bold text-tertiary">6.1</div>
+<div class="w-full h-1 bg-slate-200 mt-2 rounded-full overflow-hidden">
+<div class="h-full bg-tertiary" style="width: 61%"></div>
+</div>
+</div>
+<div class="bg-slate-50 p-4 rounded-xl flex flex-col justify-center">
+<div class="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Risk Level</div>
+<div class="text-sm font-black text-error uppercase">High Reward</div>
+</div>
+</div>
+<div class="flex items-center gap-6 pt-6 border-t border-slate-100">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400">inventory_2</span>
+<span class="text-sm font-bold text-slate-600">18 Components</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400">schedule</span>
+<span class="text-sm font-bold text-slate-600">14 Days Est.</span>
+</div>
+<div class="flex items-center gap-2 ml-auto">
+<span class="material-symbols-outlined text-primary-container">science</span>
+<span class="text-xs font-mono text-primary-container font-bold">Protocol Ready</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Hypothesis Rank 02 & 03 Column -->
+<div class="col-span-12 lg:col-span-4 space-y-6">
+<!-- Rank 02 -->
+<div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 relative">
+<div class="absolute top-2 right-4 text-slate-100 font-black text-4xl select-none">02</div>
+<div class="flex justify-between items-start mb-4">
+<div>
+<span class="text-[10px] font-mono text-slate-400">HYP-2024-092</span>
+<h4 class="font-bold text-on-surface">Unified Electrochemical Field Theory Model</h4>
+</div>
+<div class="text-right">
+<div class="mono-score font-bold text-primary">8.9</div>
+</div>
+</div>
+<p class="text-xs text-on-surface-variant mb-4 line-clamp-2">Theoretical framework for predicting electrode kinetics across non-standard interfaces.</p>
+<div class="flex gap-4">
+<div class="text-[10px]">
+<span class="text-slate-400 block uppercase font-bold">Impact</span>
+<span class="mono-score font-bold">9.5</span>
+</div>
+<div class="text-[10px]">
+<span class="text-slate-400 block uppercase font-bold">Feasibility</span>
+<span class="mono-score font-bold">5.5</span>
+</div>
+</div>
+</div>
+<!-- Rank 03 -->
+<div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 relative">
+<div class="absolute top-2 right-4 text-slate-100 font-black text-4xl select-none">03</div>
+<div class="flex justify-between items-start mb-4">
+<div>
+<span class="text-[10px] font-mono text-slate-400">HYP-2024-105</span>
+<h4 class="font-bold text-on-surface">Bio-Mimetic Solid-State Nanopores</h4>
+</div>
+<div class="text-right">
+<div class="mono-score font-bold text-primary">8.4</div>
+</div>
+</div>
+<div class="flex gap-4 mt-2">
+<div class="text-[10px]">
+<span class="text-slate-400 block uppercase font-bold">Impact</span>
+<span class="mono-score font-bold">9.1</span>
+</div>
+<div class="text-[10px]">
+<span class="text-slate-400 block uppercase font-bold">Novelty</span>
+<span class="mono-score font-bold">7.9</span>
+</div>
+<div class="text-[10px]">
+<span class="text-slate-400 block uppercase font-bold">Feasibility</span>
+<span class="mono-score font-bold">7.2</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Recent Projects List -->
+<div class="mt-12">
+<h3 class="text-lg font-bold mb-6 text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined">history</span> Recent Projects
+                </h3>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="text-[10px] uppercase tracking-widest text-slate-400 border-b border-slate-200">
+<th class="pb-3 font-bold">ID</th>
+<th class="pb-3 font-bold">Project Name</th>
+<th class="pb-3 font-bold text-center">Stage</th>
+<th class="pb-3 font-bold text-center">Score</th>
+<th class="pb-3 font-bold">Lead</th>
+<th class="pb-3 font-bold text-right">Activity</th>
+</tr>
+</thead>
+<tbody class="text-sm">
+<tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+<td class="py-4 font-mono text-xs">PRJ-24-001</td>
+<td class="py-4 font-bold">Aqueous Graphene Synthesis</td>
+<td class="py-4">
+<div class="flex justify-center">
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-bold uppercase">Experiment</span>
+</div>
+</td>
+<td class="py-4 text-center mono-score font-bold">7.2</td>
+<td class="py-4">Dr. Aris V.</td>
+<td class="py-4 text-right text-slate-400 text-xs">2 hours ago</td>
+</tr>
+<tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+<td class="py-4 font-mono text-xs">PRJ-24-012</td>
+<td class="py-4 font-bold">Isotopic Purity Indexing</td>
+<td class="py-4">
+<div class="flex justify-center">
+<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[10px] font-bold uppercase">Draft</span>
+</div>
+</td>
+<td class="py-4 text-center mono-score font-bold">8.1</td>
+<td class="py-4">System Core</td>
+<td class="py-4 text-right text-slate-400 text-xs">6 hours ago</td>
+</tr>
+<tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+<td class="py-4 font-mono text-xs">PRJ-24-009</td>
+<td class="py-4 font-bold">Multi-modal In-situ Imaging</td>
+<td class="py-4">
+<div class="flex justify-center">
+<span class="px-2 py-0.5 rounded-full bg-primary-container text-white text-[10px] font-bold uppercase">Completed</span>
+</div>
+</td>
+<td class="py-4 text-center mono-score font-bold">9.5</td>
+<td class="py-4">Dr. Sarah L.</td>
+<td class="py-4 text-right text-slate-400 text-xs">Yesterday</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer / System Status Bar -->
+<footer class="fixed bottom-0 w-full z-50 flex justify-between items-center px-4 bg-slate-900 dark:bg-black border-t border-slate-800 h-8 font-mono text-[10px] uppercase tracking-widest">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="text-[#00FF00]">●</span>
+<span class="text-white">LLM Proxy: Active</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[#00FF00]">●</span>
+<span class="text-slate-500">Anthropic</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[#FFFF00]">●</span>
+<span class="text-slate-500">ScienceClaw: local</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[#00FF00]">●</span>
+<span class="text-slate-500">AutoRes: 3 queued</span>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<span class="text-slate-500">Latency: 24ms</span>
+<span class="text-slate-500">API v2.4.1</span>
+<span class="text-[#1EA88E] font-bold">Session: $0.41</span>
+<span class="text-slate-500">© 2024 Opensens Parallax Precision Systems</span>
+</div>
+</footer>
+</body></html>

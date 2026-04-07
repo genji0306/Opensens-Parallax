@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from pydantic import BaseModel, Field
 from sqlalchemy import select
@@ -11,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..models.base import async_session
 from ..models.project import Project
 from ..models.workflow import WorkflowRun
-from ..services.workflow_engine import V3WorkflowEngine
+from ..services.workflow_engine import V3WorkflowEngine, RESEARCH_TEMPLATES
 from ..services.v2_bridge import V2Bridge
 from ..services import event_bus
 from ..middleware.audit import record_audit
@@ -38,6 +37,60 @@ class RunAction(BaseModel):
     action: str  # "start" | "pause" | "resume"
 
 
+def _requires_research_idea(template_id: str | None) -> bool:
+    return (template_id or "") in RESEARCH_TEMPLATES
+
+
+async def _validate_start_request(
+    project_id: str,
+    template_id: str | None,
+    config: dict,
+    db: AsyncSession,
+) -> None:
+    if _requires_research_idea(template_id) and not str(config.get("research_idea", "")).strip():
+        raise HTTPException(400, "research_idea is required for research templates")
+
+    from ..services.cost_recorder import CostRecorder
+
+    budget = await CostRecorder().check_budget(db, project_id)
+    if not budget["allowed"]:
+        raise HTTPException(402, f"Budget exhausted: ${budget['spent_usd']} / ${budget['cap_usd']}")
+
+
+async def _start_run(
+    run: WorkflowRun,
+    background_tasks: BackgroundTasks,
+    db: AsyncSession,
+    *,
+    validate_request: bool = True,
+) -> dict:
+    if run.status not in ("pending", "paused", "failed"):
+        raise HTTPException(400, f"Run is already {run.status}")
+
+    config = run.config or {}
+    if validate_request:
+        await _validate_start_request(run.project_id, run.template_id, config, db)
+
+    run.status = "running"
+
+    await record_audit(db, "local", "run.started", "run", run.run_id, {
+        "project_id": run.project_id,
+        "template_id": run.template_id,
+    })
+
+    await event_bus.publish_event(
+        "pipeline.started",
+        project_id=run.project_id,
+        run_id=run.run_id,
+        payload={"template_id": run.template_id},
+    )
+
+    if (run.template_id or "") in RESEARCH_TEMPLATES:
+        background_tasks.add_task(bridge.run_pipeline_background, run.run_id, run.project_id)
+
+    return {"run_id": run.run_id, "status": "running", "message": "Pipeline started"}
+
+
 @router.post("", status_code=201)
 async def create_run(
     body: RunCreate,
@@ -48,6 +101,9 @@ async def create_run(
     project = await db.get(Project, body.project_id)
     if not project:
         raise HTTPException(404, f"Project not found: {body.project_id}")
+
+    if body.auto_start:
+        await _validate_start_request(body.project_id, body.template_id, body.config, db)
 
     # Create run
     run = WorkflowRun(
@@ -80,6 +136,9 @@ async def create_run(
         run_id=run.run_id,
         payload={"template_id": body.template_id, "phase_count": len(phases)},
     )
+
+    if body.auto_start:
+        await _start_run(run, background_tasks, db, validate_request=False)
 
     result = run.to_dict()
     result["phases"] = [p.to_dict() for p in phases]
@@ -129,81 +188,7 @@ async def start_run(
     run = await db.get(WorkflowRun, run_id)
     if not run:
         raise HTTPException(404, f"Run not found: {run_id}")
-    if run.status not in ("pending", "paused", "failed"):
-        raise HTTPException(400, f"Run is already {run.status}")
-
-    # Check budget
-    from ..services.cost_recorder import CostRecorder
-    budget = await CostRecorder().check_budget(db, run.project_id)
-    if not budget["allowed"]:
-        raise HTTPException(402, f"Budget exhausted: ${budget['spent_usd']} / ${budget['cap_usd']}")
-
-    # Mark as running
-    run.status = "running"
-
-    await record_audit(db, "local", "run.started", "run", run_id, {
-        "project_id": run.project_id,
-        "template_id": run.template_id,
-    })
-
-    await event_bus.publish_event(
-        "pipeline.started",
-        project_id=run.project_id,
-        run_id=run_id,
-        payload={"template_id": run.template_id},
-    )
-
-    # Determine execution strategy
-    template = run.template_id or ""
-    if template in ("academic_research", "full_research_experiment") and run.config.get("research_idea"):
-        # Delegate to V2 SDK in background
-        project_id = run.project_id
-        background_tasks.add_task(_execute_v2_pipeline, run_id, project_id, run.config)
-    else:
-        # Non-V2 templates: mark as running, phases must be executed individually
-        pass
-
-    return {"data": {"run_id": run_id, "status": "running", "message": "Pipeline started"}}
-
-
-async def _execute_v2_pipeline(run_id: str, project_id: str, config: dict):
-    """Background task: run V2 pipeline and sync results back."""
-    async with async_session() as session:
-        async with session.begin():
-            run = await session.get(WorkflowRun, run_id)
-            if not run:
-                return
-
-    try:
-        v2_run_id = await bridge.start_research_pipeline(run, project_id)
-
-        await event_bus.publish_event(
-            "pipeline.completed",
-            source_system="v3_gateway",
-            project_id=project_id,
-            run_id=run_id,
-            payload={"v2_run_id": v2_run_id},
-        )
-    except Exception as e:
-        async with async_session() as session:
-            async with session.begin():
-                await session.execute(
-                    select(WorkflowRun).where(WorkflowRun.run_id == run_id)
-                )
-                from sqlalchemy import update as sql_update
-                await session.execute(
-                    sql_update(WorkflowRun)
-                    .where(WorkflowRun.run_id == run_id)
-                    .values(status="failed")
-                )
-
-        await event_bus.publish_event(
-            "pipeline.failed",
-            source_system="v3_gateway",
-            project_id=project_id,
-            run_id=run_id,
-            payload={"error": str(e)},
-        )
+    return {"data": await _start_run(run, background_tasks, db)}
 
 
 @router.get("/{run_id}/graph")

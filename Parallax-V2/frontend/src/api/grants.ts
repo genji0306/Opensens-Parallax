@@ -9,6 +9,8 @@ import type {
   DiscoverAllResponse,
   DiscoveryResult,
   FeedbackEventType,
+  GrantAlert,
+  GrantFilter,
   GrantOpportunity,
   GrantProfile,
   GrantSource,
@@ -84,12 +86,43 @@ export function discoverSource(
   return apiPost(`${BASE}/discover/${sourceId}`, options, { timeout: LONG_TIMEOUT })
 }
 
-export function listOpportunities(params: { source_id?: string; limit?: number } = {}): Promise<GrantOpportunity[]> {
+export function listOpportunities(
+  params: { source_id?: string; limit?: number } & GrantFilter = {},
+): Promise<GrantOpportunity[]> {
+  // Backend list_opportunities uses singular filter params (one value per
+  // field). The client takes arrays for ergonomics and picks the first
+  // entry; callers needing AND-semantics across multiple values should
+  // fetch with the unfiltered superset and refine client-side.
   const query = new URLSearchParams()
   if (params.source_id) query.set('source_id', params.source_id)
   if (params.limit) query.set('limit', String(params.limit))
+  if (params.search) query.set('search', params.search)
+  if (params.deadline_state) query.set('deadline_state', params.deadline_state)
+  const firstTheme = params.theme_tags?.[0]
+  if (firstTheme) query.set('theme_tag', firstTheme)
+  const firstRegion = params.region_codes?.[0]
+  if (firstRegion) query.set('region_code', firstRegion)
+  const firstScope = params.applicant_scopes?.[0]
+  if (firstScope) query.set('applicant_scope', firstScope)
   const qs = query.toString()
   return apiGet(`${BASE}/opportunities${qs ? `?${qs}` : ''}`)
+}
+
+export function listTimelineOpportunities(params: {
+  regions?: string[]
+  deadline_state?: string
+  limit?: number
+} = {}): Promise<{
+  count: number
+  regions: string[]
+  opportunities: GrantOpportunity[]
+}> {
+  const query = new URLSearchParams()
+  if (params.regions?.length) query.set('regions', params.regions.join(','))
+  if (params.deadline_state) query.set('deadline_state', params.deadline_state)
+  if (params.limit) query.set('limit', String(params.limit))
+  const qs = query.toString()
+  return apiGet(`${BASE}/timeline${qs ? `?${qs}` : ''}`)
 }
 
 export function getOpportunity(opportunityId: string): Promise<GrantOpportunity> {
@@ -180,4 +213,104 @@ export function recordFeedback(data: {
   payload?: Record<string, unknown>
 }): Promise<unknown> {
   return apiPost(`${BASE}/feedback`, data)
+}
+
+// ── Alerts ────────────────────────────────────────────────────────────
+
+export interface AlertListResponse {
+  count: number
+  alerts: GrantAlert[]
+}
+
+export function listAlerts(
+  profileId: string,
+  opts: { unseenOnly?: boolean; limit?: number } = {},
+): Promise<AlertListResponse> {
+  const q = new URLSearchParams({ profile_id: profileId })
+  q.set('unseen_only', opts.unseenOnly === false ? '0' : '1')
+  if (opts.limit) q.set('limit', String(opts.limit))
+  return apiGet(`${BASE}/alerts?${q.toString()}`)
+}
+
+export function markAlertSeen(alertId: string): Promise<{ alert_id: string; seen: boolean }> {
+  return apiPost(`${BASE}/alerts/${alertId}/seen`, {})
+}
+
+export function markAllAlertsSeen(profileId: string): Promise<{ marked: number }> {
+  return apiPost(`${BASE}/alerts/mark-all-seen`, { profile_id: profileId })
+}
+
+export function evaluateAlerts(data: {
+  profile_id: string
+  threshold?: number
+  run_matcher?: boolean
+  model?: string
+}): Promise<{ count: number; alerts: GrantAlert[] }> {
+  return apiPost(`${BASE}/alerts/evaluate`, data, { timeout: LONG_TIMEOUT })
+}
+
+// ── Watchlist ─────────────────────────────────────────────────────────
+
+export function getWatchlist(profileId: string): Promise<{ opportunity_ids: string[] }> {
+  return apiGet(`${BASE}/watchlist?profile_id=${encodeURIComponent(profileId)}`)
+}
+
+// ── Scheduler ─────────────────────────────────────────────────────────
+
+export interface SchedulerStatus {
+  running: boolean
+  inflight: string[]
+  failure_counts: Record<string, number>
+  tick_seconds: number
+  max_concurrent: number
+}
+
+export function getSchedulerStatus(): Promise<SchedulerStatus> {
+  return apiGet(`${BASE}/scheduler/status`)
+}
+
+export function startScheduler(): Promise<SchedulerStatus> {
+  return apiPost(`${BASE}/scheduler/start`, {})
+}
+
+export function triggerScheduler(sourceId: string): Promise<{ source_id: string; triggered: boolean }> {
+  return apiPost(`${BASE}/scheduler/trigger/${encodeURIComponent(sourceId)}`, {}, { timeout: LONG_TIMEOUT })
+}
+
+export interface CrawlRun {
+  run_id: string
+  source_id: string
+  started_at: string
+  completed_at: string | null
+  new_count: number
+  updated_count: number
+  errors: string[]
+  status: string
+}
+
+export function listSchedulerRuns(params: { source_id?: string; limit?: number } = {}): Promise<{
+  count: number
+  runs: CrawlRun[]
+}> {
+  const q = new URLSearchParams()
+  if (params.source_id) q.set('source_id', params.source_id)
+  if (params.limit) q.set('limit', String(params.limit))
+  const qs = q.toString()
+  return apiGet(`${BASE}/scheduler/runs${qs ? `?${qs}` : ''}`)
+}
+
+// ── Export ─────────────────────────────────────────────────────────────
+
+export async function exportOpportunities(params: GrantFilter): Promise<Blob> {
+  const query = new URLSearchParams()
+  if (params.search) query.set('search', params.search)
+  if (params.deadline_state) query.set('deadline_state', params.deadline_state)
+  if (params.theme_tags?.length) query.set('theme_tags', params.theme_tags.join(','))
+  if (params.region_codes?.length) query.set('region_codes', params.region_codes.join(','))
+  if (params.applicant_scopes?.length) query.set('applicant_scopes', params.applicant_scopes.join(','))
+  const qs = query.toString()
+  const res = await service.get(`${BASE}/opportunities/export${qs ? `?${qs}` : ''}`, {
+    responseType: 'blob',
+  })
+  return res.data as Blob
 }

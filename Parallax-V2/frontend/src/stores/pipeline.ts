@@ -17,6 +17,7 @@ import {
 } from '@/types/pipeline'
 import { getHistoryRunDetail, getPipelineStatus, getRunCost, getWorkflowGraph } from '@/api/ais'
 import type { WorkflowNode } from '@/api/ais'
+import { classifyRunKind, type RunKind } from '@/utils/runKind'
 
 // ── Helpers ──
 
@@ -103,6 +104,7 @@ export const usePipelineStore = defineStore('pipeline', () => {
   const projectStatus = ref<string>('')
   const projectError = ref<string | null>(null)
   const projectSource = ref<string>('')
+  const projectType = ref<RunKind>('unknown')
   const projectConfig = ref<Record<string, unknown>>({})
 
   // AIS live progress
@@ -330,9 +332,10 @@ export const usePipelineStore = defineStore('pipeline', () => {
    * Fetch the V2 workflow graph and overlay node statuses onto stages.
    * This is the authoritative source for stage status when a graph exists.
    */
-  async function fetchAndOverlayGraph(runId: string): Promise<void> {
+  async function fetchAndOverlayGraph(targetRunId: string): Promise<void> {
     try {
-      const res = await getWorkflowGraph(runId)
+      const res = await getWorkflowGraph(targetRunId)
+      if (activeRunId.value !== targetRunId) return // stale — project changed
       const graph = res.data?.data
       if (!graph?.nodes?.length) return
 
@@ -385,20 +388,36 @@ export const usePipelineStore = defineStore('pipeline', () => {
       projectStatus.value = (run.status ?? 'unknown') as string
       projectError.value = (run.error ?? null) as string | null
       projectSource.value = (run.source ?? 'platform') as string
+      projectType.value = classifyRunKind({
+        type: typeof run.type === 'string' ? run.type : null,
+        runId,
+        source: typeof run.source === 'string' ? run.source : null,
+      })
       projectConfig.value = isRecord(run.config) ? run.config : {}
       taskMessage.value = (run.task_message ?? '') as string
       taskProgress.value = (run.task_progress ?? 0) as number
 
       buildStagesFromRun(run)
 
-      // Overlay authoritative graph state (non-blocking — enhances run-based stages)
-      fetchAndOverlayGraph(runId)
+      const aisLikeRun = projectType.value === 'ais' || runId.startsWith('ais_run_')
 
-      // Fetch real cost data from backend (non-blocking)
-      fetchCost(runId)
+      if (aisLikeRun) {
+        // Overlay authoritative graph state (non-blocking — enhances run-based stages)
+        fetchAndOverlayGraph(runId)
 
-      // If it's an active AIS run, start polling for live progress
-      if (run.source === 'platform' && ACTIVE_PROJECT_STATUSES.has(projectStatus.value)) {
+        // Fetch real cost data from backend (non-blocking)
+        fetchCost(runId)
+      }
+
+      // If it's an actively progressing AIS run, start polling for live progress.
+      // Paused states (reviewing, human_review) don't need polling — they wait on user action.
+      const POLLING_SKIP = new Set(['reviewing', 'human_review', 'awaiting_selection', 'waiting_for_selection'])
+      if (
+        aisLikeRun &&
+        run.source === 'platform' &&
+        ACTIVE_PROJECT_STATUSES.has(projectStatus.value) &&
+        !POLLING_SKIP.has(projectStatus.value)
+      ) {
         startPolling(runId)
       }
 
@@ -453,8 +472,8 @@ export const usePipelineStore = defineStore('pipeline', () => {
           }
         }
 
-        // Stop polling if terminal
-        const terminalStatuses = ['completed', 'failed', 'awaiting_selection', 'waiting_for_selection']
+        // Stop polling if terminal or paused (reviewing/human_review are user-driven, not auto-progressing)
+        const terminalStatuses = ['completed', 'failed', 'awaiting_selection', 'waiting_for_selection', 'reviewing', 'human_review']
         if (terminalStatuses.includes(projectStatus.value)) {
           if (projectStatus.value === 'failed') {
             const failedStage = currentStageId ?? stageOrder.find(id => stages.value[id]?.status === 'active')
@@ -512,9 +531,10 @@ export const usePipelineStore = defineStore('pipeline', () => {
     }
   }
 
-  async function fetchCost(runId: string): Promise<void> {
+  async function fetchCost(targetRunId: string): Promise<void> {
     try {
-      const res = await getRunCost(runId)
+      const res = await getRunCost(targetRunId)
+      if (activeRunId.value !== targetRunId) return // stale — project changed
       const data = res.data?.data as unknown as Record<string, unknown> | undefined
       if (data && typeof data.total_cost_usd === 'number') {
         costEstimate.value = {
@@ -543,6 +563,7 @@ export const usePipelineStore = defineStore('pipeline', () => {
     projectStatus.value = ''
     projectError.value = null
     projectSource.value = ''
+    projectType.value = 'unknown'
     projectConfig.value = {}
     taskMessage.value = ''
     taskProgress.value = 0
@@ -552,6 +573,7 @@ export const usePipelineStore = defineStore('pipeline', () => {
     activeRunId, stages, stageResults, recommendation, costEstimate, graphNodes,
     loading, error,
     projectTitle, projectStatus, projectError, projectSource, projectConfig,
+    projectType,
     taskMessage, taskProgress,
     activeStage, completedStageCount, progressPercent,
     loadProject, refreshStages, setActiveStage, clearProject, stopPolling,

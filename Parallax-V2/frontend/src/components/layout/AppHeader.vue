@@ -3,25 +3,20 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUiStore } from '@/stores/ui'
 import { useSystemStore } from '@/stores/system'
-import { useV3Store } from '@/stores/v3'
 import StatusBadge from '@/components/shared/StatusBadge.vue'
 
 const route = useRoute()
 const ui = useUiStore()
 const system = useSystemStore()
-const v3 = useV3Store()
-
 const navItems = [
   { name: 'command-center', label: 'Command Center', icon: 'dashboard' },
   { name: 'paper-lab', label: 'Paper Lab', icon: 'description' },
+  { name: 'grant-hunt', label: 'Grant Hunt', icon: 'payments' },
   { name: 'history', label: 'History', icon: 'history' },
 ] as const
 
 const sessionCost = computed(() => {
-  // Prefer V3 real cost if available, fall back to V2 system store
-  const v3Cost = v3.totalCostUsd
-  const cost = v3Cost > 0 ? v3Cost : system.sessionCost
-  return `$${cost.toFixed(2)}`
+  return `$${system.sessionCost.toFixed(2)}`
 })
 
 const overallStatus = computed<'online' | 'degraded' | 'offline'>(() => {
@@ -62,25 +57,7 @@ const themeIcon = computed(() =>
 
     <!-- Right: Controls -->
     <div class="app-header__controls">
-      <span
-        class="app-header__cost font-mono"
-        :class="{ 'app-header__cost--warning': v3.budgetPct >= 80 }"
-        :title="`Budget: ${v3.budgetPct}% used`"
-      >{{ sessionCost }}</span>
-
-      <span
-        v-if="v3.pendingApprovalCount > 0"
-        class="app-header__approvals"
-        title="Pending approvals"
-      >
-        {{ v3.pendingApprovalCount }}
-      </span>
-
-      <span
-        v-if="v3.eventStreamConnected"
-        class="app-header__live-dot"
-        title="DRVP event stream connected"
-      />
+      <span class="app-header__cost font-mono">{{ sessionCost }}</span>
 
       <button
         class="app-header__icon-btn"
@@ -191,31 +168,6 @@ const themeIcon = computed(() =>
   border-radius: var(--radius-pill);
   letter-spacing: -0.01em;
   transition: color var(--transition-fast), background var(--transition-fast);
-}
-
-.app-header__cost--warning {
-  color: #f59e0b;
-  background: rgba(245, 158, 11, 0.12);
-}
-
-.app-header__approvals {
-  font-size: 11px;
-  font-weight: 700;
-  color: #fff;
-  background: #ef4444;
-  padding: 2px 7px;
-  border-radius: var(--radius-pill);
-  min-width: 18px;
-  text-align: center;
-}
-
-.app-header__live-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #22c55e;
-  box-shadow: 0 0 4px #22c55e;
-  flex-shrink: 0;
 }
 
 .app-header__icon-btn {

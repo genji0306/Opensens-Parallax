@@ -48,12 +48,10 @@ class NoveltyMapper:
     """Maps novelty scores across all claims in a knowledge artifact."""
 
     def __init__(self):
-        self.llm = None
+        pass
 
-    def _get_llm(self) -> LLMClient:
-        if self.llm is None:
-            self.llm = LLMClient()
-        return self.llm
+    def _get_llm(self, model: str = "") -> LLMClient:
+        return LLMClient(model=model) if model else LLMClient()
 
     def map_novelty(self, run_id: str, model: str = "") -> Dict[str, Any]:
         """
@@ -70,15 +68,14 @@ class NoveltyMapper:
         if not artifact or not artifact.claims:
             return {"assessments": [], "heatmap": [], "stats": {"avg_novelty": 0, "novel_count": 0, "covered_count": 0}}
 
-        literature = self._get_literature_context(run_id)
+        literature = self._get_literature_context(run_id, claims=artifact.claims)
         claims_text = "\n".join(
             f"[{i}] {c.text}" for i, c in enumerate(artifact.claims)
         )
 
-        model = model or "claude-sonnet-4-20250514"
-        response = self._get_llm().chat(
-            NOVELTY_PROMPT.format(claims=claims_text[:3000], literature=literature[:3000]),
-            model=model,
+        prompt = NOVELTY_PROMPT.format(claims=claims_text[:3000], literature=literature[:3000])
+        response = self._get_llm(model).chat(
+            [{"role": "user", "content": prompt}],
         )
 
         assessments = self._parse_response(response, artifact)
@@ -116,7 +113,16 @@ class NoveltyMapper:
             "stats": stats,
         }
 
-    def _get_literature_context(self, run_id: str) -> str:
+    def _get_literature_context(self, run_id: str, claims: Any = None) -> str:
+        """
+        Build the literature context passed to the novelty prompt.
+
+        First tries to fetch the top ingested papers for this run from the
+        local DB (fast, free). If there are fewer than 5 papers cached we
+        supplement with a live ``literature.search`` call through the
+        ToolUniverse-style registry using the first claim as the query —
+        this widens the context without blowing the prompt budget.
+        """
         from ...db import get_connection
         conn = get_connection()
         rows = conn.execute("""
@@ -125,9 +131,32 @@ class NoveltyMapper:
             WHERE rp.run_id = ?
             ORDER BY p.citation_count DESC LIMIT 15
         """, (run_id,)).fetchall()
-        return "\n".join(
+        local_lines = [
             f"- {r['title']}: {(r['abstract'] or '')[:150]}" for r in rows
-        )
+        ]
+
+        # Live-tool supplement only when the local cache is thin and the
+        # caller provided at least one claim to search against.
+        if len(local_lines) < 5 and claims:
+            try:
+                from ..tools import default_registry  # lazy to avoid cycles
+                registry = default_registry()
+                query = getattr(claims[0], "text", "") if claims else ""
+                if query:
+                    call = registry.call_tool(
+                        "literature.search",
+                        {"query": query[:200], "max_results": 8},
+                    )
+                    if call.result and call.result.get("ok"):
+                        for paper in call.result.get("papers", [])[:8]:
+                            local_lines.append(
+                                f"- {paper.get('title', '')}: "
+                                f"{(paper.get('abstract') or '')[:150]}"
+                            )
+            except Exception as exc:  # noqa: BLE001
+                logger.debug("[NoveltyMapper] live-tool supplement failed: %s", exc)
+
+        return "\n".join(local_lines)
 
     def _parse_response(self, response: str, artifact: KnowledgeArtifact) -> List[NoveltyAssessment]:
         assessments = []

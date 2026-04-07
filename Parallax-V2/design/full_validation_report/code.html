@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Validation Report - Opensens Parallax</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary-fixed": "#7ff7da",
+                        "on-secondary-container": "#416a5f",
+                        "inverse-primary": "#61dbbe",
+                        "on-surface": "#131c2a",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-fixed": "#3d0600",
+                        "on-secondary-fixed-variant": "#244e44",
+                        "background": "#f9f9ff",
+                        "secondary-fixed": "#bfecde",
+                        "tertiary-container": "#df7962",
+                        "surface-tint": "#006b59",
+                        "error-container": "#ffdad6",
+                        "primary-container": "#1ea88e",
+                        "on-error": "#ffffff",
+                        "surface-dim": "#d1daef",
+                        "surface-bright": "#f9f9ff",
+                        "inverse-surface": "#283140",
+                        "on-primary-fixed-variant": "#005143",
+                        "outline-variant": "#bccac4",
+                        "surface": "#f9f9ff",
+                        "tertiary-fixed": "#ffdad2",
+                        "surface-container-highest": "#dae3f7",
+                        "secondary": "#3c665b",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#ecf1ff",
+                        "surface-variant": "#dae3f7",
+                        "on-primary-container": "#00352b",
+                        "surface-container": "#e7eeff",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed": "#00201a",
+                        "on-surface-variant": "#3d4945",
+                        "primary": "#006b59",
+                        "surface-container-high": "#dfe8fd",
+                        "secondary-container": "#bce9db",
+                        "on-tertiary-container": "#5a1506",
+                        "primary-fixed-dim": "#61dbbe",
+                        "on-primary-fixed": "#00201a",
+                        "tertiary": "#9a4431",
+                        "on-background": "#131c2a",
+                        "error": "#ba1a1a",
+                        "outline": "#6d7a75",
+                        "on-tertiary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed-dim": "#ffb4a4",
+                        "on-tertiary-fixed-variant": "#7c2d1c",
+                        "secondary-fixed-dim": "#a3d0c2",
+                        "surface-container-low": "#f0f3ff"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"],
+                        "mono": ["JetBrains Mono", "monospace"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body antialiased">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 shadow-sm flex justify-between items-center w-full px-6 py-3 font-['Inter'] antialiased tracking-tight">
+<div class="flex items-center gap-8">
+<span class="text-xl font-black tracking-tighter text-[#1EA88E] uppercase">Opensens Parallax</span>
+<div class="hidden md:flex gap-6">
+<a class="text-slate-500 dark:text-slate-400 hover:text-[#1EA88E] transition-colors" href="#">Dashboard</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-[#1EA88E] transition-colors" href="#">Projects</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-[#1EA88E] transition-colors" href="#">Literature</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-[#1EA88E] transition-colors" href="#">Analytics</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden lg:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+<input class="pl-10 pr-4 py-1.5 bg-slate-100 border-none rounded-full text-sm focus:ring-2 focus:ring-[#1EA88E] w-64" placeholder="Search research..." type="text"/>
+</div>
+<button class="text-slate-500 hover:bg-slate-50 p-2 rounded-full transition-all">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-slate-500 hover:bg-slate-50 p-2 rounded-full transition-all">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="h-8 w-8 rounded-full overflow-hidden border border-slate-200">
+<img alt="Researcher Profile" class="w-full h-full object-cover" data-alt="Headshot of a professional male scientist researcher" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdrrexmQRxmvVdLRd7qclToCzusXZR1B56x_XkhM8MAvr6LFTlhql9DcfSiaXhpLaxmyJAFOsm7ghhT2wVxPQyRyIXBremq5XIxi-vEkSR5zI8WjninigEPh7SD0tdcAbATGbUp30SHxnmajeOxFlLCFaunyVoosjlwOB18DAglmwrkmmIXgiNtl8hDVJMSLZqPAhTFcYO6Srfr9e6VpGjCJ0C6zLJf-GKwAsS4txb5bpspMHisLo3TQTvA2l4xUFCgvT9zyD_ql8"/>
+</div>
+</div>
+</nav>
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 pt-16 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col gap-2 p-4 font-['Inter'] text-sm font-medium">
+<div class="mb-6 px-2">
+<h2 class="text-on-surface font-bold text-base">Validation Report</h2>
+<p class="text-slate-500 text-xs font-mono uppercase tracking-wider">ID: RES-88421</p>
+</div>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 mx-2 my-1 rounded-lg hover:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined text-[#1EA88E]">analytics</span>
+<span>Overview</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 bg-white dark:bg-slate-800 text-[#1EA88E] shadow-sm rounded-lg mx-2 my-1 scale-[0.98]" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star_border</span>
+<span>Novelty Score</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 mx-2 my-1 rounded-lg hover:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined">biotech</span>
+<span>Gap Analysis</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 mx-2 my-1 rounded-lg hover:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span>Citations</span>
+</a>
+<div class="pt-4 mt-4 border-t border-slate-200">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 mx-2 my-1 rounded-lg hover:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined">ios_share</span>
+<span>Export</span>
+</a>
+</div>
+</nav>
+</aside>
+<!-- Main Content -->
+<main class="pl-64 pt-16 min-h-screen">
+<div class="max-w-7xl mx-auto px-8 py-8">
+<!-- Header Section -->
+<div class="flex justify-between items-end mb-8">
+<div>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#1EA88E]/10 text-[#1EA88E] mb-3">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">verified</span>
+                        STRICT VALIDATION ACTIVE
+                    </span>
+<h1 class="text-3xl font-extrabold text-on-surface tracking-tight max-w-2xl leading-tight">
+                        Combine Multiple Electrochemical Techniques for Material Research
+                    </h1>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-all">
+<span class="material-symbols-outlined text-lg">download</span>
+                        Export PDF
+                    </button>
+<button class="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-all">
+<span class="material-symbols-outlined text-lg">share</span>
+                        Share Report
+                    </button>
+</div>
+</div>
+<!-- Hero Section: Novelty Score -->
+<div class="grid grid-cols-12 gap-6 mb-8">
+<div class="col-span-12 lg:col-span-5 bg-white rounded-xl border border-slate-200 p-8 flex flex-col items-center justify-center relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-br from-[#1EA88E]/5 via-transparent to-transparent opacity-50"></div>
+<div class="relative z-10 text-center">
+<p class="text-slate-500 font-bold tracking-[0.2em] text-xs mb-4 uppercase">Novelty Score</p>
+<div class="flex items-baseline justify-center">
+<span class="text-8xl font-black text-on-surface tracking-tighter">92</span>
+<span class="text-3xl font-bold text-[#1EA88E] ml-1">%</span>
+</div>
+<div class="mt-6">
+<span class="inline-flex items-center px-4 py-1.5 rounded-full bg-[#1EA88E] text-white text-sm font-bold uppercase tracking-widest shadow-lg shadow-[#1EA88E]/20">
+                                CONFIRMED
+                            </span>
+</div>
+</div>
+</div>
+<div class="col-span-12 lg:col-span-7 bg-[#131c2a] text-white rounded-xl p-8 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-20">
+<span class="material-symbols-outlined text-6xl">psychology</span>
+</div>
+<div class="relative z-10">
+<div class="flex items-center gap-3 mb-4">
+<div class="p-2 bg-[#1EA88E] rounded-lg">
+<span class="material-symbols-outlined text-white">bolt</span>
+</div>
+<h3 class="font-bold text-lg">ScienceClaw Intelligence Summary</h3>
+</div>
+<p class="text-slate-300 text-lg leading-relaxed mb-6 font-medium">
+                            "No prior art exists combining simultaneous multi-frequency EIS with real-time latent space mapping for battery degradation."
+                        </p>
+<button class="flex items-center gap-2 px-6 py-3 bg-[#1EA88E] text-white rounded-lg font-bold hover:bg-[#198f79] transition-all transform hover:scale-[1.02] active:scale-[0.98]">
+                            Generate Research Ideas
+                            <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Gap Analysis: Bento Grid -->
+<div class="mb-12">
+<h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-[#1EA88E]">analytics</span>
+                    Gap Analysis
+                </h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+<!-- Card 1 -->
+<div class="bg-white border border-slate-200 p-5 rounded-xl hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start mb-3">
+<span class="px-2 py-0.5 bg-red-50 text-red-600 text-[10px] font-bold rounded uppercase">High severity</span>
+<span class="font-mono text-xs text-slate-400">#01</span>
+</div>
+<h4 class="font-bold text-on-surface mb-4 leading-snug">Cross-modal alignment in low-data regimes</h4>
+<div class="flex items-center justify-between">
+<div class="w-full bg-slate-100 h-1.5 rounded-full mr-4">
+<div class="bg-red-500 h-1.5 rounded-full" style="width: 88%"></div>
+</div>
+<span class="font-mono text-sm font-bold text-slate-700">88%</span>
+</div>
+<p class="text-[10px] text-slate-400 mt-2 uppercase tracking-wide">Confidence Score</p>
+</div>
+<!-- Card 2 -->
+<div class="bg-white border border-slate-200 p-5 rounded-xl hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start mb-3">
+<span class="px-2 py-0.5 bg-orange-50 text-orange-600 text-[10px] font-bold rounded uppercase">Medium severity</span>
+<span class="font-mono text-xs text-slate-400">#02</span>
+</div>
+<h4 class="font-bold text-on-surface mb-4 leading-snug">Temporal dynamics of latent features</h4>
+<div class="flex items-center justify-between">
+<div class="w-full bg-slate-100 h-1.5 rounded-full mr-4">
+<div class="bg-orange-400 h-1.5 rounded-full" style="width: 72%"></div>
+</div>
+<span class="font-mono text-sm font-bold text-slate-700">72%</span>
+</div>
+<p class="text-[10px] text-slate-400 mt-2 uppercase tracking-wide">Confidence Score</p>
+</div>
+<!-- Card 3 -->
+<div class="bg-white border border-slate-200 p-5 rounded-xl hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start mb-3">
+<span class="px-2 py-0.5 bg-red-50 text-red-600 text-[10px] font-bold rounded uppercase">High severity</span>
+<span class="font-mono text-xs text-slate-400">#03</span>
+</div>
+<h4 class="font-bold text-on-surface mb-4 leading-snug">Bio-inspired loss functions</h4>
+<div class="flex items-center justify-between">
+<div class="w-full bg-slate-100 h-1.5 rounded-full mr-4">
+<div class="bg-red-500 h-1.5 rounded-full" style="width: 94%"></div>
+</div>
+<span class="font-mono text-sm font-bold text-slate-700">94%</span>
+</div>
+<p class="text-[10px] text-slate-400 mt-2 uppercase tracking-wide">Confidence Score</p>
+</div>
+<!-- Card 4 -->
+<div class="bg-white border border-slate-200 p-5 rounded-xl hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start mb-3">
+<span class="px-2 py-0.5 bg-green-50 text-green-600 text-[10px] font-bold rounded uppercase">Low severity</span>
+<span class="font-mono text-xs text-slate-400">#04</span>
+</div>
+<h4 class="font-bold text-on-surface mb-4 leading-snug">Hardware-level EIS synchronization</h4>
+<div class="flex items-center justify-between">
+<div class="w-full bg-slate-100 h-1.5 rounded-full mr-4">
+<div class="bg-green-500 h-1.5 rounded-full" style="width: 60%"></div>
+</div>
+<span class="font-mono text-sm font-bold text-slate-700">60%</span>
+</div>
+<p class="text-[10px] text-slate-400 mt-2 uppercase tracking-wide">Confidence Score</p>
+</div>
+<!-- Card 5 -->
+<div class="bg-white border border-slate-200 p-5 rounded-xl hover:shadow-md transition-shadow md:col-span-2 lg:col-span-1">
+<div class="flex justify-between items-start mb-3">
+<span class="px-2 py-0.5 bg-orange-50 text-orange-600 text-[10px] font-bold rounded uppercase">Medium severity</span>
+<span class="font-mono text-xs text-slate-400">#05</span>
+</div>
+<h4 class="font-bold text-on-surface mb-4 leading-snug">Multi-frequency data fusion latency</h4>
+<div class="flex items-center justify-between">
+<div class="w-full bg-slate-100 h-1.5 rounded-full mr-4">
+<div class="bg-orange-400 h-1.5 rounded-full" style="width: 81%"></div>
+</div>
+<span class="font-mono text-sm font-bold text-slate-700">81%</span>
+</div>
+<p class="text-[10px] text-slate-400 mt-2 uppercase tracking-wide">Confidence Score</p>
+</div>
+</div>
+</div>
+<!-- Literature Table -->
+<div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+<div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+<h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">menu_book</span>
+                        Comparative Literature
+                    </h2>
+<span class="text-xs font-mono text-slate-500">Source: OpenAlex, CrossRef (15 results)</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+<th class="px-6 py-3 border-b border-slate-100">Title</th>
+<th class="px-6 py-3 border-b border-slate-100">DOI / Source</th>
+<th class="px-6 py-3 border-b border-slate-100">Year</th>
+<th class="px-6 py-3 border-b border-slate-100">Relevance</th>
+<th class="px-6 py-3 border-b border-slate-100 text-right">Action</th>
+</tr>
+</thead>
+<tbody class="text-sm">
+<tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+<td class="px-6 py-4 font-semibold text-on-surface">Novel Electrochemical Impedance Analysis for Lithium-Ion Batteries</td>
+<td class="px-6 py-4 font-mono text-xs text-slate-500">10.1016/j.jpowsour.2023.2334</td>
+<td class="px-6 py-4 text-slate-600">2023</td>
+<td class="px-6 py-4">
+<span class="text-[#1EA88E] font-bold">88%</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-[#1EA88E] hover:underline font-medium">View Paper</button>
+</td>
+</tr>
+<tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+<td class="px-6 py-4 font-semibold text-on-surface">Machine Learning in Battery Management Systems: A Review</td>
+<td class="px-6 py-4 font-mono text-xs text-slate-500">10.1109/TIE.2022.314</td>
+<td class="px-6 py-4 text-slate-600">2022</td>
+<td class="px-6 py-4">
+<span class="text-[#1EA88E] font-bold">74%</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-[#1EA88E] hover:underline font-medium">View Paper</button>
+</td>
+</tr>
+<tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+<td class="px-6 py-4 font-semibold text-on-surface">Real-time health monitoring of energy storage devices</td>
+<td class="px-6 py-4 font-mono text-xs text-slate-500">10.1038/s41560-021-008</td>
+<td class="px-6 py-4 text-slate-600">2021</td>
+<td class="px-6 py-4">
+<span class="text-[#1EA88E] font-bold">69%</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-[#1EA88E] hover:underline font-medium">View Paper</button>
+</td>
+</tr>
+<tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+<td class="px-6 py-4 font-semibold text-on-surface">Simultaneous voltammetry and impedance spectroscopy</td>
+<td class="px-6 py-4 font-mono text-xs text-slate-500">10.1021/acs.analchem.0c0</td>
+<td class="px-6 py-4 text-slate-600">2020</td>
+<td class="px-6 py-4">
+<span class="text-orange-500 font-bold">42%</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-[#1EA88E] hover:underline font-medium">View Paper</button>
+</td>
+</tr>
+<!-- Repeat placeholders for 15 total items simulation -->
+<tr class="bg-slate-50/30">
+<td class="px-6 py-3 text-center" colspan="5">
+<button class="text-xs font-bold text-slate-400 hover:text-[#1EA88E] uppercase tracking-widest flex items-center justify-center gap-2 mx-auto">
+                                        Show 11 more papers
+                                        <span class="material-symbols-outlined text-sm">keyboard_arrow_down</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Footer Meta -->
+<div class="mt-12 pt-8 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center text-slate-400 text-xs font-medium">
+<div class="flex items-center gap-4 mb-4 md:mb-0">
+<p>© 2024 Opensens Parallax Precision Systems</p>
+<div class="h-1 w-1 bg-slate-300 rounded-full"></div>
+<p>Compliance: ISO-27001 Certified</p>
+</div>
+<div class="flex gap-6">
+<a class="hover:text-[#1EA88E]" href="#">Terms of Analysis</a>
+<a class="hover:text-[#1EA88E]" href="#">Privacy Policy</a>
+<a class="hover:text-[#1EA88E]" href="#">Contact Support</a>
+</div>
+</div>
+</div>
+</main>
+<!-- FAB (Suppressed as per rules for Details/Report screen) -->
+</body></html>

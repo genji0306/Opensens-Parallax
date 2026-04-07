@@ -49,18 +49,44 @@ class ExperimentRunnerV2:
 
     # ── Public API ────────────────────────────────────────────────────
 
+    # Agent-Laboratory-style repair loop — up to 3 attempts with progressively
+    # simpler BFTS configs when a run fails for a recoverable reason
+    # (config parse error, resource exhaustion, timeout). Fatal errors are
+    # surfaced immediately.
+    MAX_REPAIR_ATTEMPTS = 3
+    _RECOVERABLE_HINTS = (
+        "timeout", "timed out", "out of memory", "cuda", "resource",
+        "config", "yaml", "parse", "invalid", "max_children",
+    )
+
+    def _is_recoverable(self, error: str) -> bool:
+        if not error:
+            return False
+        lowered = error.lower()
+        return any(hint in lowered for hint in self._RECOVERABLE_HINTS)
+
+    def _simplify_config(self, bfts_config: "BFTSConfig") -> None:
+        """Shrink a BFTS config in place for a repair retry."""
+        try:
+            if getattr(bfts_config, "max_steps", 0) and bfts_config.max_steps > 4:
+                bfts_config.max_steps = max(4, bfts_config.max_steps // 2)
+            if getattr(bfts_config, "num_children", 0) and bfts_config.num_children > 1:
+                bfts_config.num_children = max(1, bfts_config.num_children - 1)
+            if getattr(bfts_config, "max_depth", 0) and bfts_config.max_depth > 2:
+                bfts_config.max_depth = max(2, bfts_config.max_depth - 1)
+        except Exception:  # defensive — config shape may vary
+            pass
+
     def run_experiment(self, spec: ExperimentSpec, task_id: str):
         """
-        Execute a V2 (BFTS) experiment end-to-end.
-
-        Steps:
-        1. Resolve BFTS config from spec settings.
-        2. Write seed ideas and config to work directory.
-        3. Invoke launch_scientist_bfts.py.
-        4. Parse V2 results (tree, tokens, paper).
-        5. Persist ExperimentResult.
+        Execute a V2 (BFTS) experiment end-to-end with an Agent-Laboratory-style
+        repair loop. Up to ``MAX_REPAIR_ATTEMPTS`` attempts; each retry
+        simplifies the BFTS config (fewer steps / children / depth) based on
+        the error message from the previous attempt.
         """
         work_dir = None
+        attempt = 0
+        last_error: Optional[str] = None
         try:
             self._update_spec_status(spec.spec_id, ExperimentStatus.RUNNING)
             self.tm.update_task(
@@ -87,12 +113,63 @@ class ExperimentRunnerV2:
                 message=f"V2 Experiment {spec.spec_id}: BFTS config written. Starting tree search...",
             )
 
-            if self._v2_available:
-                result = self._run_bfts(spec, work_dir, config_path, bfts_config, task_id)
-            else:
-                result = self._run_v2_stub(spec, work_dir, bfts_config)
+            # ── Repair loop ──────────────────────────────────────────
+            result = None
+            for attempt in range(1, self.MAX_REPAIR_ATTEMPTS + 1):
+                try:
+                    if self._v2_available:
+                        result = self._run_bfts(
+                            spec, work_dir, config_path, bfts_config, task_id
+                        )
+                    else:
+                        result = self._run_v2_stub(spec, work_dir, bfts_config)
+                except Exception as attempt_err:  # noqa: BLE001
+                    last_error = f"{type(attempt_err).__name__}: {attempt_err}"
+                    logger.warning(
+                        "[ExperimentRunnerV2] attempt %d/%d failed: %s",
+                        attempt, self.MAX_REPAIR_ATTEMPTS, last_error,
+                    )
+                    if attempt < self.MAX_REPAIR_ATTEMPTS and self._is_recoverable(last_error):
+                        self._simplify_config(bfts_config)
+                        try:
+                            config_path = bfts_config.write_yaml(work_dir)
+                        except Exception:
+                            pass
+                        self.tm.update_task(
+                            task_id, progress=10,
+                            message=f"V2 Experiment {spec.spec_id}: retrying with simplified config (attempt {attempt + 1})...",
+                        )
+                        continue
+                    raise
+
+                # If the runner returned a failed result object (rather than
+                # raising) treat it as a soft failure and retry once.
+                if (
+                    result
+                    and getattr(result, "status", None) == ExperimentStatus.FAILED
+                    and attempt < self.MAX_REPAIR_ATTEMPTS
+                    and self._is_recoverable(getattr(result, "error", "") or "")
+                ):
+                    last_error = result.error
+                    logger.info(
+                        "[ExperimentRunnerV2] soft-failure on attempt %d — simplifying config",
+                        attempt,
+                    )
+                    self._simplify_config(bfts_config)
+                    try:
+                        config_path = bfts_config.write_yaml(work_dir)
+                    except Exception:
+                        pass
+                    continue
+                break
+
+            if result is None:
+                raise RuntimeError(last_error or "experiment produced no result")
 
             # Persist
+            if attempt > 1 and hasattr(result, "metrics"):
+                result.metrics = dict(result.metrics or {})
+                result.metrics["repair_attempts"] = attempt
             self._save_result(result)
             self._update_spec_status(spec.spec_id, ExperimentStatus.COMPLETED)
 

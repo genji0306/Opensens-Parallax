@@ -61,12 +61,10 @@ class ConflictDetector:
     """Detects conflicts between reviewers and clusters comments into themes."""
 
     def __init__(self):
-        self.llm = None
+        pass
 
-    def _get_llm(self) -> LLMClient:
-        if self.llm is None:
-            self.llm = LLMClient()
-        return self.llm
+    def _get_llm(self, model: str = "") -> LLMClient:
+        return LLMClient(model=model) if model else LLMClient()
 
     def analyze(self, run_id: str, model: str = "") -> Dict[str, Any]:
         """
@@ -96,10 +94,9 @@ class ConflictDetector:
             for i, c in enumerate(all_comments)
         )
 
-        model = model or "claude-sonnet-4-20250514"
-        response = self._get_llm().chat(
-            CONFLICT_PROMPT.format(comments=comments_text[:5000]),
-            model=model,
+        prompt = CONFLICT_PROMPT.format(comments=comments_text[:5000])
+        response = self._get_llm(model).chat(
+            [{"role": "user", "content": prompt}],
         )
 
         conflicts, themes = self._parse_response(response, all_comments)
@@ -121,6 +118,72 @@ class ConflictDetector:
                 "conflict_count": len(conflicts),
                 "theme_count": len(themes),
                 "critical_themes": critical_themes,
+            },
+        }
+
+    def detect_conflicts(
+        self,
+        revision_round: RevisionRound,
+        *,
+        model: str = "",
+    ) -> Dict[str, Any]:
+        """
+        In-memory variant of :meth:`analyze` that takes a ``RevisionRound``
+        directly (without round-tripping through the DAO). Used by the
+        AgentReview 5-phase pipeline in ``BoardManager``.
+
+        Returns the same dict shape as ``analyze`` plus two AgentReview-
+        inspired bias flags:
+
+        * ``bias.groupthink`` — True when scores cluster within a tight
+          window despite reviewers having very different personas
+          (27.2% convergence effect reported in AgentReview).
+        * ``bias.authority`` — True when an expert reviewer's score
+          dominates the cluster by more than 1.5 points.
+        """
+        all_comments: List[ReviewComment] = []
+        for result in revision_round.results:
+            all_comments.extend(result.comments)
+
+        conflicts: List[ReviewConflict] = []
+        themes: List[RevisionTheme] = []
+
+        if all_comments:
+            comments_text = "\n".join(
+                f"[{i}] ({c.reviewer_type}, {c.severity}) {c.section}: {c.text}"
+                for i, c in enumerate(all_comments)
+            )
+            prompt = CONFLICT_PROMPT.format(comments=comments_text[:5000])
+            try:
+                response = self._get_llm(model).chat(
+                    [{"role": "user", "content": prompt}],
+                )
+                conflicts, themes = self._parse_response(response, all_comments)
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("[ConflictDetector] detect_conflicts LLM call failed: %s", exc)
+
+        # Bias heuristics — AgentReview findings
+        scores = [r.overall_score for r in revision_round.results if r.overall_score > 0]
+        bias: Dict[str, Any] = {"groupthink": False, "authority": False}
+        if len(scores) >= 3:
+            spread = max(scores) - min(scores)
+            if spread <= 1.0:
+                bias["groupthink"] = True
+            # Authority: one reviewer more than 1.5 from the mean
+            mean = sum(scores) / len(scores)
+            if any(abs(s - mean) >= 1.5 for s in scores):
+                bias["authority"] = True
+
+        return {
+            "conflicts": [c.to_dict() for c in conflicts],
+            "themes": [t.to_dict() for t in themes],
+            "bias": bias,
+            "stats": {
+                "conflict_count": len(conflicts),
+                "theme_count": len(themes),
+                "critical_themes": sum(
+                    1 for t in themes if t.priority <= 2 and t.impact == "high"
+                ),
             },
         }
 

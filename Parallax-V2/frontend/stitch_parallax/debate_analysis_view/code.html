@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "secondary-fixed": "#cfe6f2",
+              "surface-container": "#eceef0",
+              "secondary": "#4c616c",
+              "on-error": "#ffffff",
+              "tertiary-fixed": "#ffdad2",
+              "on-secondary-fixed-variant": "#354a53",
+              "on-secondary-container": "#526772",
+              "on-primary": "#ffffff",
+              "on-error-container": "#93000a",
+              "on-primary-container": "#00352b",
+              "on-primary-fixed": "#00201a",
+              "surface-variant": "#e0e3e5",
+              "primary-container": "#1ea88e",
+              "on-tertiary-container": "#5a1506",
+              "on-surface-variant": "#3d4945",
+              "background": "#f7f9fb",
+              "surface-tint": "#006b59",
+              "primary": "#006b59",
+              "inverse-on-surface": "#eff1f3",
+              "surface-bright": "#f7f9fb",
+              "secondary-fixed-dim": "#b4cad6",
+              "error": "#ba1a1a",
+              "on-secondary": "#ffffff",
+              "surface-dim": "#d8dadc",
+              "on-secondary-fixed": "#071e27",
+              "tertiary-fixed-dim": "#ffb4a4",
+              "on-surface": "#191c1e",
+              "surface-container-low": "#f2f4f6",
+              "surface-container-highest": "#e0e3e5",
+              "on-background": "#191c1e",
+              "on-tertiary": "#ffffff",
+              "outline-variant": "#bccac4",
+              "inverse-surface": "#2d3133",
+              "primary-fixed": "#7ff7da",
+              "on-primary-fixed-variant": "#005143",
+              "inverse-primary": "#61dbbe",
+              "tertiary-container": "#df7962",
+              "secondary-container": "#cfe6f2",
+              "tertiary": "#9a4431",
+              "surface-container-lowest": "#ffffff",
+              "on-tertiary-fixed": "#3d0600",
+              "error-container": "#ffdad6",
+              "surface-container-high": "#e6e8ea",
+              "surface": "#f7f9fb",
+              "outline": "#6d7a75",
+              "on-tertiary-fixed-variant": "#7c2d1c",
+              "primary-fixed-dim": "#61dbbe"
+            },
+            fontFamily: {
+              "headline": ["Inter"],
+              "body": ["Inter"],
+              "label": ["Inter"],
+              "mono": ["JetBrains Mono"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f7f9fb;
+      }
+      .glass-panel {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px);
+      }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #bccac4;
+        border-radius: 10px;
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface">
+<!-- Navigation Drawer (Shared Component) -->
+<aside class="h-full w-64 fixed left-0 top-0 bg-slate-100 dark:bg-slate-900 flex flex-col py-8 px-4 z-50">
+<div class="mb-10 px-4">
+<span class="font-['Inter'] font-black text-teal-600 text-xl tracking-tighter">OPENSENS</span>
+</div>
+<div class="space-y-1">
+<p class="font-['JetBrains_Mono'] text-xs uppercase tracking-widest text-slate-500 mb-4 px-4">Analysis Modules</p>
+<a class="flex items-center gap-3 px-4 py-3 rounded-sm bg-teal-50 dark:bg-teal-950/30 text-teal-700 dark:text-teal-300 font-bold border-r-2 border-teal-500 transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span class="text-sm">Stance Heatmap</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-sm text-slate-600 dark:text-slate-400 hover:text-teal-600 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+<span class="text-sm">Coalition Groups</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-sm text-slate-600 dark:text-slate-400 hover:text-teal-600 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="text-sm">Argument Highlights</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-sm text-slate-600 dark:text-slate-400 hover:text-teal-600 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="segment">segment</span>
+<span class="text-sm">Transcript</span>
+</a>
+</div>
+</aside>
+<main class="ml-64 min-h-screen">
+<!-- TopAppBar (Shared Component) -->
+<header class="w-full top-0 sticky z-40 bg-slate-50 dark:bg-slate-950 flex flex-col">
+<div class="flex items-center justify-between px-6 py-3 w-full">
+<div class="flex items-center gap-4">
+<button class="text-teal-600 dark:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-900 p-2 rounded-full transition-colors duration-200">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-['Inter'] font-semibold tracking-tight text-slate-900 dark:text-slate-100 text-lg">Debate Analysis: Electrochemical Techniques</h1>
+</div>
+<button class="text-teal-600 dark:text-teal-400 font-['Inter'] font-semibold text-sm hover:underline">
+                    Back to Command Center
+                </button>
+</div>
+<div class="bg-slate-200/50 dark:bg-slate-800/50 h-[1px] w-full"></div>
+</header>
+<!-- Main Content Canvas -->
+<div class="p-8 space-y-8 max-w-7xl mx-auto">
+<!-- Summary Metrics Section -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-surface-container-low p-6 rounded-md flex flex-col justify-between">
+<span class="text-xs font-mono uppercase tracking-widest text-outline">Active Agents</span>
+<div class="flex items-baseline gap-2 mt-2">
+<span class="text-4xl font-mono font-bold text-primary">20</span>
+<span class="text-sm text-on-surface-variant">Instances</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-md flex flex-col justify-between">
+<span class="text-xs font-mono uppercase tracking-widest text-outline">Debate Rounds</span>
+<div class="flex items-baseline gap-2 mt-2">
+<span class="text-4xl font-mono font-bold text-primary">5</span>
+<span class="text-sm text-on-surface-variant">Iterations</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-md space-y-4">
+<div class="flex justify-between items-center">
+<span class="text-xs font-mono uppercase tracking-widest text-outline">Consensus Vector</span>
+<span class="font-mono font-bold text-primary">72%</span>
+</div>
+<div class="w-full bg-surface-variant h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[72%]"></div>
+</div>
+</div>
+</section>
+<!-- Bento Layout for Analysis -->
+<div class="grid grid-cols-12 gap-6">
+<!-- Stance Heatmap (8 columns) -->
+<div class="col-span-12 lg:col-span-8 bg-surface-container-lowest p-8 rounded-xl shadow-sm border border-outline-variant/10">
+<div class="flex justify-between items-end mb-8">
+<div>
+<h2 class="text-xl font-bold tracking-tight mb-1">Stance Heatmap</h2>
+<p class="text-sm text-on-surface-variant">Distribution of agent perspectives on electrochemical scaling.</p>
+</div>
+<div class="flex gap-4 text-[10px] font-mono uppercase tracking-tighter">
+<div class="flex items-center gap-1.5"><div class="w-3 h-3 bg-primary"></div> Proponent</div>
+<div class="flex items-center gap-1.5"><div class="w-3 h-3 bg-primary-fixed"></div> Neutral</div>
+<div class="flex items-center gap-1.5"><div class="w-3 h-3 bg-surface-container-highest"></div> Opponent</div>
+</div>
+</div>
+<div class="grid grid-cols-5 md:grid-cols-10 gap-3">
+<!-- 20 squares generated representing agents -->
+<div class="aspect-square bg-primary rounded-sm opacity-100 flex items-center justify-center text-[10px] text-white font-mono">01</div>
+<div class="aspect-square bg-primary rounded-sm opacity-80 flex items-center justify-center text-[10px] text-white font-mono">02</div>
+<div class="aspect-square bg-primary-fixed rounded-sm flex items-center justify-center text-[10px] text-on-primary-container font-mono">03</div>
+<div class="aspect-square bg-surface-container-highest rounded-sm flex items-center justify-center text-[10px] text-on-surface-variant font-mono">04</div>
+<div class="aspect-square bg-primary rounded-sm opacity-90 flex items-center justify-center text-[10px] text-white font-mono">05</div>
+<div class="aspect-square bg-primary rounded-sm opacity-100 flex items-center justify-center text-[10px] text-white font-mono">06</div>
+<div class="aspect-square bg-primary-fixed rounded-sm flex items-center justify-center text-[10px] text-on-primary-container font-mono">07</div>
+<div class="aspect-square bg-primary rounded-sm opacity-70 flex items-center justify-center text-[10px] text-white font-mono">08</div>
+<div class="aspect-square bg-surface-container-highest rounded-sm flex items-center justify-center text-[10px] text-on-surface-variant font-mono">09</div>
+<div class="aspect-square bg-primary rounded-sm opacity-100 flex items-center justify-center text-[10px] text-white font-mono">10</div>
+<div class="aspect-square bg-primary rounded-sm opacity-95 flex items-center justify-center text-[10px] text-white font-mono">11</div>
+<div class="aspect-square bg-primary-fixed rounded-sm flex items-center justify-center text-[10px] text-on-primary-container font-mono">12</div>
+<div class="aspect-square bg-primary rounded-sm opacity-85 flex items-center justify-center text-[10px] text-white font-mono">13</div>
+<div class="aspect-square bg-primary rounded-sm opacity-100 flex items-center justify-center text-[10px] text-white font-mono">14</div>
+<div class="aspect-square bg-surface-container-highest rounded-sm flex items-center justify-center text-[10px] text-on-surface-variant font-mono">15</div>
+<div class="aspect-square bg-primary rounded-sm opacity-75 flex items-center justify-center text-[10px] text-white font-mono">16</div>
+<div class="aspect-square bg-primary-fixed rounded-sm flex items-center justify-center text-[10px] text-on-primary-container font-mono">17</div>
+<div class="aspect-square bg-primary rounded-sm opacity-100 flex items-center justify-center text-[10px] text-white font-mono">18</div>
+<div class="aspect-square bg-primary rounded-sm opacity-90 flex items-center justify-center text-[10px] text-white font-mono">19</div>
+<div class="aspect-square bg-surface-container-highest rounded-sm flex items-center justify-center text-[10px] text-on-surface-variant font-mono">20</div>
+</div>
+</div>
+<!-- Coalition Analysis (4 columns) -->
+<div class="col-span-12 lg:col-span-4 space-y-6">
+<div class="bg-surface-container-low p-6 rounded-xl">
+<h3 class="text-sm font-bold uppercase tracking-widest text-outline mb-6">Coalition Groups</h3>
+<div class="space-y-6">
+<div class="space-y-3">
+<div class="flex justify-between items-center">
+<span class="text-sm font-semibold">The Optimization Group</span>
+<span class="text-xs font-mono text-primary bg-primary/10 px-2 py-0.5 rounded">12 AGENTS</span>
+</div>
+<div class="flex -space-x-2">
+<div class="w-8 h-8 rounded-full bg-primary-container border-2 border-surface-container-low flex items-center justify-center text-[10px] font-bold text-white">01</div>
+<div class="w-8 h-8 rounded-full bg-primary-container border-2 border-surface-container-low flex items-center justify-center text-[10px] font-bold text-white">05</div>
+<div class="w-8 h-8 rounded-full bg-primary-container border-2 border-surface-container-low flex items-center justify-center text-[10px] font-bold text-white">06</div>
+<div class="w-8 h-8 rounded-full bg-primary-container border-2 border-surface-container-low flex items-center justify-center text-[10px] font-bold text-white">10</div>
+<div class="w-8 h-8 rounded-full bg-surface-variant border-2 border-surface-container-low flex items-center justify-center text-[10px] font-bold text-on-surface">+8</div>
+</div>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between items-center">
+<span class="text-sm font-semibold">The Validity Group</span>
+<span class="text-xs font-mono text-secondary bg-secondary/10 px-2 py-0.5 rounded">4 AGENTS</span>
+</div>
+<div class="flex -space-x-2">
+<div class="w-8 h-8 rounded-full bg-secondary border-2 border-surface-container-low flex items-center justify-center text-[10px] font-bold text-white">04</div>
+<div class="w-8 h-8 rounded-full bg-secondary border-2 border-surface-container-low flex items-center justify-center text-[10px] font-bold text-white">09</div>
+<div class="w-8 h-8 rounded-full bg-secondary border-2 border-surface-container-low flex items-center justify-center text-[10px] font-bold text-white">15</div>
+<div class="w-8 h-8 rounded-full bg-secondary border-2 border-surface-container-low flex items-center justify-center text-[10px] font-bold text-white">20</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Key Arguments (5 columns) -->
+<div class="col-span-12 lg:col-span-5 bg-surface-container-highest/40 p-8 rounded-xl">
+<h3 class="font-mono text-xs uppercase tracking-[0.2em] text-outline mb-6">Key Arguments</h3>
+<ul class="space-y-4">
+<li class="flex gap-4">
+<span class="text-primary material-symbols-outlined text-sm mt-1" data-icon="terminal">terminal</span>
+<p class="font-mono text-xs leading-relaxed text-on-surface">Orthogonal data fusion reduces noise floors by <span class="text-primary font-bold">12%</span> in high-frequency environments.</p>
+</li>
+<li class="flex gap-4">
+<span class="text-primary material-symbols-outlined text-sm mt-1" data-icon="terminal">terminal</span>
+<p class="font-mono text-xs leading-relaxed text-on-surface">Kinetic overpotential thresholds require recalibration for <span class="text-primary font-bold">nanoscale</span> interface dynamics.</p>
+</li>
+<li class="flex gap-4">
+<span class="text-primary material-symbols-outlined text-sm mt-1" data-icon="terminal">terminal</span>
+<p class="font-mono text-xs leading-relaxed text-on-surface">Proposed scale-up factor of <span class="text-primary font-bold">x2.5</span> is thermodynamically unstable under current load parameters.</p>
+</li>
+<li class="flex gap-4">
+<span class="text-primary material-symbols-outlined text-sm mt-1" data-icon="terminal">terminal</span>
+<p class="font-mono text-xs leading-relaxed text-on-surface">Signal-to-drift ratio improved by <span class="text-primary font-bold">0.85</span> using active Bayesian feedback loops.</p>
+</li>
+</ul>
+</div>
+<!-- Transcript Preview (7 columns) -->
+<div class="col-span-12 lg:col-span-7 bg-surface-container-lowest border border-outline-variant/15 p-8 rounded-xl flex flex-col h-[400px]">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-lg font-bold">Transcript Preview</h3>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-error animate-pulse"></span>
+<span class="text-[10px] font-mono uppercase text-outline">Real-time Stream</span>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar pr-4 space-y-6">
+<div class="flex gap-4">
+<div class="w-10 h-10 rounded-sm bg-primary-container flex-shrink-0 flex items-center justify-center font-mono text-xs font-bold text-white">A04</div>
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<span class="text-xs font-bold">Agent_04</span>
+<span class="text-[10px] font-mono text-outline">14:22:01.042</span>
+</div>
+<p class="text-sm leading-relaxed text-on-surface-variant">I disagree with the proposed scale-up factor. The electrochemical impedance data from Round 3 suggests a non-linear degradation of the catalyst layer at densities above 400mA/cm².</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="w-10 h-10 rounded-sm bg-secondary flex-shrink-0 flex items-center justify-center font-mono text-xs font-bold text-white">A11</div>
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<span class="text-xs font-bold">Agent_11</span>
+<span class="text-[10px] font-mono text-outline">14:22:15.901</span>
+</div>
+<p class="text-sm leading-relaxed text-on-surface-variant">Data from Agent_04 is consistent with my spectral analysis. However, if we introduce the pulsed modulation protocol discussed in Round 2, we might mitigate the transport limitations.</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="w-10 h-10 rounded-sm bg-primary flex-shrink-0 flex items-center justify-center font-mono text-xs font-bold text-white">A01</div>
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<span class="text-xs font-bold">Agent_01</span>
+<span class="text-[10px] font-mono text-outline">14:22:42.110</span>
+</div>
+<p class="text-sm leading-relaxed text-on-surface-variant">Counter-proposal: Integrating a secondary sensor array for real-time pH monitoring. This addresses the drift concerns raised by the Validity Group while maintaining the current throughput.</p>
+</div>
+</div>
+<div class="flex gap-4 opacity-50">
+<div class="w-10 h-10 rounded-sm bg-primary-container flex-shrink-0 flex items-center justify-center font-mono text-xs font-bold text-white">A05</div>
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<span class="text-xs font-bold">Agent_05</span>
+<span class="text-[10px] font-mono text-outline">14:23:02.339</span>
+</div>
+<p class="text-sm leading-relaxed text-on-surface-variant italic">Analyzing proposal from Agent_01... Simulating thermal variance...</p>
+</div>
+</div>
+</div>
+<div class="mt-4 pt-4 border-t border-outline-variant/10">
+<button class="w-full py-2 bg-surface-container-high hover:bg-surface-variant text-xs font-bold uppercase tracking-widest transition-colors">
+                            View Full Transcript (42,019 lines)
+                        </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- FAB Suppression Logic: Not rendering FAB on Detail/Analysis Screen per instructions -->
+</body></html>

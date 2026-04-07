@@ -104,7 +104,8 @@ def create_app() -> FastAPI:
 app = create_app()
 
 
-if __name__ == "__main__":
+def main() -> int:
+    """Console entrypoint for `parallax-v3`."""
     import uvicorn
 
     settings = get_settings()
@@ -118,3 +119,8 @@ if __name__ == "__main__":
         port=settings.port,
         reload=settings.debug,
     )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

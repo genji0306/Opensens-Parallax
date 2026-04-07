@@ -5,6 +5,7 @@ Parallax V2 Debug Agent
 High-level orchestrator for local platform verification:
 - frontend typecheck, tests, and optional build
 - backend pytest
+- V3 gateway pytest and entrypoint import smoke
 - existing backend diagnostics (`cli_debug.py --quick`)
 - in-process Flask API smoke tests across the main platform surfaces
 - optional live HTTP checks against running dev servers
@@ -28,6 +29,8 @@ ROOT = Path(__file__).resolve().parent
 FRONTEND_DIR = ROOT / "frontend"
 BACKEND_DIR = (ROOT / "backend").resolve()
 COMMON_DIR = (ROOT / "opensens-common").resolve()
+V3_GATEWAY_DIR = ROOT / "v3_gateway"
+V3_GATEWAY_PYTHON = V3_GATEWAY_DIR / ".venv" / "bin" / "python"
 
 GREEN = "\033[92m"
 RED = "\033[91m"
@@ -203,6 +206,11 @@ def run_static_smoke(reporter: Reporter) -> None:
     else:
         reporter.warn(f"Common package symlink not found at {COMMON_DIR}")
 
+    if V3_GATEWAY_DIR.exists():
+        reporter.ok(f"V3 gateway directory: {V3_GATEWAY_DIR}")
+    else:
+        reporter.fail("Missing V3 gateway directory", str(V3_GATEWAY_DIR))
+
 
 def run_frontend_checks(reporter: Reporter, quick: bool, skip_build: bool) -> None:
     reporter.section("Frontend")
@@ -224,6 +232,37 @@ def run_backend_checks(reporter: Reporter) -> None:
     reporter.section("Backend")
     run_command_check(reporter, "pytest backend/tests -q", ["pytest", "backend/tests", "-q"], ROOT, timeout=600)
     run_command_check(reporter, "python3 cli_debug.py --quick", ["python3", "cli_debug.py", "--quick"], ROOT, timeout=600)
+
+
+def run_v3_gateway_checks(reporter: Reporter) -> None:
+    reporter.section("V3 Gateway")
+
+    if not V3_GATEWAY_DIR.exists():
+        reporter.fail("V3 gateway checks skipped", f"{V3_GATEWAY_DIR} is missing")
+        return
+
+    if not V3_GATEWAY_PYTHON.exists():
+        reporter.warn(f"Gateway virtualenv missing; skipped V3 checks ({V3_GATEWAY_PYTHON})")
+        return
+
+    run_command_check(
+        reporter,
+        "V3 console entrypoint import",
+        [
+            str(V3_GATEWAY_PYTHON),
+            "-c",
+            "import v3_gateway.main as m; assert callable(m.main); assert m.app is not None",
+        ],
+        ROOT,
+        timeout=60,
+    )
+    run_command_check(
+        reporter,
+        "pytest v3_gateway/tests -q",
+        [str(V3_GATEWAY_PYTHON), "-m", "pytest", "v3_gateway/tests", "-q"],
+        ROOT,
+        timeout=600,
+    )
 
 
 def run_inprocess_api_smoke(reporter: Reporter) -> None:
@@ -484,6 +523,7 @@ def main() -> int:
     run_static_smoke(reporter)
     run_frontend_checks(reporter, quick=args.quick, skip_build=args.skip_build)
     run_backend_checks(reporter)
+    run_v3_gateway_checks(reporter)
     run_inprocess_api_smoke(reporter)
 
     if args.live:

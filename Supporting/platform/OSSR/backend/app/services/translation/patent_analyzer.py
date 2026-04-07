@@ -7,7 +7,7 @@ commercialization brief (market potential, applications, differentiators).
 
 import json
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from opensens_common.llm_client import LLMClient
 
@@ -80,12 +80,10 @@ class PatentAnalyzer:
     """Assesses patentability of research findings."""
 
     def __init__(self):
-        self.llm = None
+        pass
 
-    def _get_llm(self) -> LLMClient:
-        if self.llm is None:
-            self.llm = LLMClient()
-        return self.llm
+    def _get_llm(self, model: str = "") -> LLMClient:
+        return LLMClient(model=model) if model else LLMClient()
 
     def analyze(self, run_id: str, model: str = "") -> Dict[str, Any]:
         artifact = KnowledgeArtifactDAO.load(run_id)
@@ -97,12 +95,51 @@ class PatentAnalyzer:
             for a in (artifact.novelty_assessments if artifact else [])[:5]
         )
 
-        model = model or "claude-sonnet-4-20250514"
-        response = self._get_llm().chat(
-            PATENT_PROMPT.format(idea=idea, contribution=contribution, novelty=novelty or "None."),
-            model=model,
+        # Prior-art lookup via the ToolUniverse-style LiteratureTool.
+        # Fixes the "High: prior art search is incomplete" inventory TODO by
+        # actually querying PubMed/CrossRef/Europe PMC rather than relying
+        # on the LLM's pretrained memory alone.
+        prior_art = self._fetch_prior_art(idea, contribution)
+        novelty_with_prior = novelty
+        if prior_art:
+            prior_lines = "\n".join(
+                f"- {p.get('title', '')} ({p.get('doi', '')})"
+                for p in prior_art[:10]
+            )
+            novelty_with_prior = (
+                (novelty + "\n" if novelty else "")
+                + "PRIOR ART CANDIDATES (from literature search):\n"
+                + prior_lines
+            )
+
+        prompt = PATENT_PROMPT.format(
+            idea=idea,
+            contribution=contribution,
+            novelty=novelty_with_prior or "None.",
         )
-        return self._parse(response)
+        response = self._get_llm(model).chat(
+            [{"role": "user", "content": prompt}],
+        )
+        parsed = self._parse(response)
+        parsed["prior_art"] = prior_art
+        return parsed
+
+    def _fetch_prior_art(self, idea: str, contribution: str) -> List[Dict[str, Any]]:
+        query = (contribution or idea or "").strip()
+        if not query:
+            return []
+        try:
+            from ..tools import default_registry  # lazy import to avoid cycles
+            registry = default_registry()
+            call = registry.call_tool(
+                "literature.search",
+                {"query": query[:240], "max_results": 10},
+            )
+            if call.result and call.result.get("ok"):
+                return call.result.get("papers", []) or []
+        except Exception as exc:  # noqa: BLE001
+            logger.debug("[PatentAnalyzer] prior-art lookup failed: %s", exc)
+        return []
 
     def _parse(self, response: str) -> Dict[str, Any]:
         try:
@@ -121,12 +158,10 @@ class CommercialAnalyzer:
     """Assesses commercial potential of research findings."""
 
     def __init__(self):
-        self.llm = None
+        pass
 
-    def _get_llm(self) -> LLMClient:
-        if self.llm is None:
-            self.llm = LLMClient()
-        return self.llm
+    def _get_llm(self, model: str = "") -> LLMClient:
+        return LLMClient(model=model) if model else LLMClient()
 
     def analyze(self, run_id: str, model: str = "") -> Dict[str, Any]:
         artifact = KnowledgeArtifactDAO.load(run_id)
@@ -135,10 +170,9 @@ class CommercialAnalyzer:
         contribution = hyp.contribution if hyp else ""
         differentiators = ", ".join(hyp.differentiators) if hyp else ""
 
-        model = model or "claude-sonnet-4-20250514"
-        response = self._get_llm().chat(
-            COMMERCIAL_PROMPT.format(idea=idea, contribution=contribution, differentiators=differentiators or "None."),
-            model=model,
+        prompt = COMMERCIAL_PROMPT.format(idea=idea, contribution=contribution, differentiators=differentiators or "None.")
+        response = self._get_llm(model).chat(
+            [{"role": "user", "content": prompt}],
         )
         return self._parse(response)
 

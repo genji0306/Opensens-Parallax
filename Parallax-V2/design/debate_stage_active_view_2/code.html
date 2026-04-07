@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Opensens Parallax | Research Command Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "outline": "#6d7a75",
+                        "inverse-on-surface": "#ecf1ff",
+                        "surface-container": "#e7eeff",
+                        "secondary-container": "#bce9db",
+                        "surface-dim": "#d1daef",
+                        "surface-bright": "#f9f9ff",
+                        "secondary": "#3c665b",
+                        "on-primary-fixed-variant": "#005143",
+                        "error-container": "#ffdad6",
+                        "tertiary": "#9a4431",
+                        "surface-container-high": "#dfe8fd",
+                        "primary-fixed-dim": "#61dbbe",
+                        "tertiary-fixed": "#ffdad2",
+                        "on-tertiary-fixed": "#3d0600",
+                        "tertiary-fixed-dim": "#ffb4a4",
+                        "on-primary-container": "#00352b",
+                        "tertiary-container": "#df7962",
+                        "secondary-fixed": "#bfecde",
+                        "on-secondary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed-dim": "#a3d0c2",
+                        "error": "#ba1a1a",
+                        "primary": "#006b59",
+                        "inverse-primary": "#61dbbe",
+                        "primary-container": "#1ea88e",
+                        "on-surface-variant": "#3d4945",
+                        "on-error": "#ffffff",
+                        "outline-variant": "#bccac4",
+                        "surface": "#f9f9ff",
+                        "on-tertiary-container": "#5a1506",
+                        "surface-container-highest": "#dae3f7",
+                        "surface-container-low": "#f0f3ff",
+                        "background": "#f9f9ff",
+                        "on-tertiary-fixed-variant": "#7c2d1c",
+                        "on-error-container": "#93000a",
+                        "surface-tint": "#006b59",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed": "#00201a",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed": "#00201a",
+                        "on-background": "#131c2a",
+                        "inverse-surface": "#283140",
+                        "surface-variant": "#dae3f7",
+                        "primary-fixed": "#7ff7da",
+                        "on-secondary-container": "#416a5f",
+                        "on-secondary-fixed-variant": "#244e44",
+                        "on-surface": "#131c2a"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["JetBrains Mono", "monospace"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glow-primary {
+            box-shadow: 0 0 15px rgba(30, 168, 142, 0.4);
+        }
+        body { font-family: 'Inter', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+    </style>
+</head>
+<body class="bg-background text-on-background selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top Navigation -->
+<nav class="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm font-sans antialiased text-sm tracking-tight">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-2">
+<img alt="Opensens Parallax Logo" class="w-8 h-8" data-alt="Scientific laboratory abstract geometric logo teal" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdY0RfrWCmqteZLdC3S2SmENYQbp6DmYrdLAX_kQ05MaMS5vR6-y317P-AdfW8xpaQMo22NJbFWX_i9dnSSvB22x-u2dmLX4_0clVkTazX_cTO8hjbIz-hcFPJdOyW5gfa3C2l6mj5D0IEoStisDngLfRqRXPl0L9Kip8tVTJNDMhOZF_I5VO7jQWyZWW5WmMCCAXKux5j8E8cSZh8p7V9_7H7aZrsMKzqel-41TtPibBU9VvU_biXXAUY91FkePji4iCHnMmDNo0"/>
+<span class="text-xl font-bold tracking-tighter text-slate-900 dark:text-white">Opensens Parallax</span>
+</div>
+<div class="hidden md:flex items-center gap-6">
+<a class="text-teal-600 dark:text-teal-400 font-semibold border-b-2 border-teal-600 pb-1" href="#">Pipeline</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors" href="#">Projects</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors" href="#">Archive</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="bg-primary hover:bg-primary-container text-white px-4 py-2 rounded font-medium transition-colors Active:opacity-80 duration-150">New Research</button>
+<div class="flex gap-2 border-l border-slate-200 pl-4">
+<span class="material-symbols-outlined p-2 text-slate-500 hover:bg-slate-50 rounded-full cursor-pointer" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="material-symbols-outlined p-2 text-slate-500 hover:bg-slate-50 rounded-full cursor-pointer" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined p-2 text-slate-500 hover:bg-slate-50 rounded-full cursor-pointer" data-icon="settings">settings</span>
+</div>
+</div>
+</nav>
+<main class="pt-24 pb-12 px-6 max-w-7xl mx-auto">
+<!-- Pipeline Tracker -->
+<section class="mb-10">
+<div class="flex items-center justify-between gap-2 overflow-x-auto pb-4 no-scrollbar">
+<!-- 1. Crawl (Done) -->
+<div class="flex flex-col items-center gap-2 min-w-[100px] flex-1">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-primary relative">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<div class="absolute -right-1/2 top-1/2 w-full h-[2px] bg-secondary-container"></div>
+</div>
+<span class="text-[10px] font-bold tracking-widest uppercase text-primary">Crawl</span>
+</div>
+<!-- 2. Map (Done) -->
+<div class="flex flex-col items-center gap-2 min-w-[100px] flex-1">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-primary relative">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<div class="absolute -right-1/2 top-1/2 w-full h-[2px] bg-secondary-container"></div>
+</div>
+<span class="text-[10px] font-bold tracking-widest uppercase text-primary">Map</span>
+</div>
+<!-- 3. Debate (Active) -->
+<div class="flex flex-col items-center gap-2 min-w-[100px] flex-1">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white glow-primary z-10 animate-pulse relative">
+<span class="material-symbols-outlined text-lg">change_history</span>
+<div class="absolute -right-1/2 top-1/2 w-full h-[2px] bg-outline-variant"></div>
+</div>
+<span class="text-[10px] font-bold tracking-widest uppercase text-primary">Debate</span>
+</div>
+<!-- 4. Validate (Pending) -->
+<div class="flex flex-col items-center gap-2 min-w-[100px] flex-1">
+<div class="w-10 h-10 rounded-full border-2 border-outline-variant flex items-center justify-center text-outline-variant relative">
+<span class="font-bold text-xs">4</span>
+<div class="absolute -right-1/2 top-1/2 w-full h-[2px] bg-outline-variant"></div>
+</div>
+<span class="text-[10px] font-bold tracking-widest uppercase text-outline">Validate</span>
+</div>
+<!-- 5. Ideas -->
+<div class="flex flex-col items-center gap-2 min-w-[100px] flex-1">
+<div class="w-10 h-10 rounded-full border-2 border-outline-variant flex items-center justify-center text-outline-variant relative">
+<span class="font-bold text-xs">5</span>
+<div class="absolute -right-1/2 top-1/2 w-full h-[2px] bg-outline-variant"></div>
+</div>
+<span class="text-[10px] font-bold tracking-widest uppercase text-outline">Ideas</span>
+</div>
+<!-- 6. Draft -->
+<div class="flex flex-col items-center gap-2 min-w-[100px] flex-1">
+<div class="w-10 h-10 rounded-full border-2 border-outline-variant flex items-center justify-center text-outline-variant relative">
+<span class="font-bold text-xs">6</span>
+<div class="absolute -right-1/2 top-1/2 w-full h-[2px] bg-outline-variant"></div>
+</div>
+<span class="text-[10px] font-bold tracking-widest uppercase text-outline">Draft</span>
+</div>
+<!-- 7. Experiment -->
+<div class="flex flex-col items-center gap-2 min-w-[100px] flex-1">
+<div class="w-10 h-10 rounded-full border-2 border-outline-variant flex items-center justify-center text-outline-variant relative">
+<span class="font-bold text-xs">7</span>
+<div class="absolute -right-1/2 top-1/2 w-full h-[2px] bg-outline-variant"></div>
+</div>
+<span class="text-[10px] font-bold tracking-widest uppercase text-outline">Experiment</span>
+</div>
+<!-- 8. Rehab -->
+<div class="flex flex-col items-center gap-2 min-w-[100px] flex-1">
+<div class="w-10 h-10 rounded-full border-2 border-outline-variant flex items-center justify-center text-outline-variant">
+<span class="font-bold text-xs">8</span>
+</div>
+<span class="text-[10px] font-bold tracking-widest uppercase text-outline">Rehab</span>
+</div>
+</div>
+</section>
+<!-- Recommendation Banner -->
+<div class="mb-10 bg-surface-container border-l-4 border-primary p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex items-start gap-4">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="lightbulb">lightbulb</span>
+<div>
+<h3 class="font-bold text-on-surface">RECOMMENDED ACTION</h3>
+<p class="text-sm text-on-surface-variant max-w-2xl">The debate is currently in round 4/5. Once complete, proceed to Validation to check for novelty against 250M+ papers.</p>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="bg-primary text-white px-4 py-2 text-xs font-bold rounded shadow-sm hover:bg-on-primary-fixed-variant transition-all">Proceed to Validation</button>
+<button class="border border-outline-variant text-on-surface px-4 py-2 text-xs font-bold rounded hover:bg-white transition-all">Wait for Complete</button>
+<button class="text-outline text-xs font-bold px-4 py-2 hover:underline">Skip</button>
+</div>
+</div>
+<!-- Dashboard Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Debate Card (Expanded/Featured) -->
+<div class="md:col-span-2 bg-white border border-slate-200 p-8 shadow-sm flex flex-col justify-between relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4">
+<span class="bg-primary-fixed text-on-primary-fixed text-[10px] font-bold uppercase tracking-widest px-2 py-1">Active Stage</span>
+</div>
+<div>
+<div class="flex items-center gap-3 mb-6">
+<div class="p-2 bg-secondary-container text-primary rounded-lg">
+<span class="material-symbols-outlined" data-icon="forum">forum</span>
+</div>
+<h2 class="text-2xl font-bold tracking-tight text-on-background">Multi-Agent Debate</h2>
+</div>
+<div class="grid grid-cols-3 gap-8 mb-8">
+<div>
+<p class="text-[10px] font-bold uppercase tracking-widest text-outline mb-1">Participants</p>
+<p class="text-3xl font-light text-on-background mono">20 agents</p>
+</div>
+<div>
+<p class="text-[10px] font-bold uppercase tracking-widest text-outline mb-1">Iteration</p>
+<p class="text-3xl font-light text-on-background mono">5 rounds</p>
+</div>
+<div>
+<p class="text-[10px] font-bold uppercase tracking-widest text-outline mb-1">Generated Output</p>
+<p class="text-3xl font-light text-on-background mono">27,261 words</p>
+</div>
+</div>
+<div class="mb-8">
+<div class="flex justify-between items-end mb-2">
+<p class="text-[10px] font-bold uppercase tracking-widest text-outline">Consensus Threshold</p>
+<p class="text-sm font-bold text-primary mono">72%</p>
+</div>
+<div class="h-3 bg-surface-container-low w-full rounded-full overflow-hidden">
+<div class="h-full bg-primary-container" style="width: 72%"></div>
+</div>
+</div>
+</div>
+<div class="flex gap-4">
+<button class="bg-primary-container text-on-primary-container px-6 py-3 font-bold text-sm flex items-center gap-2 hover:opacity-90 transition-all">View 3D <span class="material-symbols-outlined text-sm" data-icon="trending_flat">trending_flat</span></button>
+<button class="border border-outline-variant text-on-surface px-6 py-3 font-bold text-sm hover:bg-slate-50 transition-all">Transcript</button>
+</div>
+</div>
+<!-- Map Card -->
+<div class="bg-white border border-slate-200 p-6 shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-6">
+<div class="p-2 bg-slate-100 text-slate-600 rounded-lg">
+<span class="material-symbols-outlined" data-icon="hub">hub</span>
+</div>
+<span class="text-[10px] font-bold tracking-widest uppercase text-primary">Done</span>
+</div>
+<h3 class="text-lg font-bold mb-4">Topic Map</h3>
+<div class="space-y-4">
+<div class="flex justify-between items-center border-b border-slate-100 pb-2">
+<span class="text-sm text-outline">Topics identified</span>
+<span class="font-bold mono">3</span>
+</div>
+<div class="flex justify-between items-center border-b border-slate-100 pb-2">
+<span class="text-sm text-outline">Knowledge clusters</span>
+<span class="font-bold mono">12</span>
+</div>
+</div>
+</div>
+<div class="mt-6 flex items-center gap-2 text-xs font-bold text-primary group cursor-pointer">
+                    RE-MAP SYSTEM <span class="material-symbols-outlined text-xs" data-icon="refresh">refresh</span>
+</div>
+</div>
+<!-- Validation Card -->
+<div class="bg-white border border-slate-200 p-6 shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-6">
+<div class="p-2 bg-slate-100 text-slate-600 rounded-lg">
+<span class="material-symbols-outlined" data-icon="verified">verified</span>
+</div>
+<span class="text-[10px] font-bold tracking-widest uppercase text-outline">Queued</span>
+</div>
+<h3 class="text-lg font-bold mb-4">Novelty Validation</h3>
+<div class="space-y-4">
+<div class="flex justify-between items-center border-b border-slate-100 pb-2">
+<span class="text-sm text-outline">Indexed papers</span>
+<span class="font-bold mono">48 papers</span>
+</div>
+<div class="flex justify-between items-center border-b border-slate-100 pb-2">
+<span class="text-sm text-outline">Research gaps</span>
+<span class="font-bold mono">5 gaps</span>
+</div>
+</div>
+</div>
+<button class="mt-6 w-full border border-slate-200 py-2 text-xs font-bold text-outline hover:bg-slate-50 transition-all uppercase">Start Early</button>
+</div>
+<!-- Ideas Card -->
+<div class="bg-white border border-slate-200 p-6 shadow-sm">
+<div class="p-2 bg-slate-100 text-slate-400 rounded-lg w-fit mb-6">
+<span class="material-symbols-outlined" data-icon="emoji_objects">emoji_objects</span>
+</div>
+<h3 class="text-lg font-bold mb-2">Ideas Engine</h3>
+<p class="text-sm text-outline mb-4">Synthesizing potential breakthrough paths.</p>
+<div class="bg-surface-container px-3 py-2 rounded">
+<p class="text-xs font-bold text-primary mono">3 ideas generated</p>
+</div>
+</div>
+<!-- Draft Card -->
+<div class="bg-slate-50 border border-slate-200 border-dashed p-6 shadow-sm flex flex-col items-center justify-center text-center">
+<span class="material-symbols-outlined text-slate-300 text-4xl mb-2" data-icon="edit_note">edit_note</span>
+<h3 class="text-sm font-bold text-slate-500 uppercase tracking-widest">Drafting</h3>
+<p class="text-xs text-slate-400">Not yet started</p>
+</div>
+</div>
+<!-- Experiment & Other info (Small Grid) -->
+<div class="mt-6 grid grid-cols-1 md:grid-cols-4 gap-6">
+<div class="bg-slate-50 border border-slate-200 border-dashed p-6 flex flex-col items-center justify-center text-center">
+<h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Experiments</h3>
+<p class="text-xs text-slate-400">Pending</p>
+</div>
+<div class="md:col-span-3 bg-surface-container-lowest border border-slate-200 p-6 flex items-center justify-between">
+<div class="flex gap-12">
+<div>
+<p class="text-[10px] font-bold text-outline uppercase tracking-widest mb-2">Current Spend</p>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-bold mono text-on-background">$0.41</span>
+<span class="text-xs text-primary font-bold">93% saved</span>
+</div>
+</div>
+<div>
+<p class="text-[10px] font-bold text-outline uppercase tracking-widest mb-2">Run Efficiency</p>
+<p class="text-2xl font-bold mono text-on-background">98.2%</p>
+</div>
+</div>
+<div class="h-12 w-[1px] bg-slate-200"></div>
+<div class="flex items-center gap-4">
+<span class="text-xs font-bold text-outline uppercase tracking-widest">AutoResearch</span>
+<div class="flex items-center gap-2 bg-white px-3 py-1 rounded border border-slate-200">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="text-xs font-bold mono">3 queued</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom System Status Bar -->
+<footer class="fixed bottom-0 w-full z-50 flex justify-start items-center px-6 h-8 gap-8 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 font-mono text-[10px] uppercase tracking-widest">
+<div class="flex items-center gap-2 text-slate-500">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span>LLM Proxy: Active</span>
+</div>
+<div class="flex items-center gap-2 text-slate-500">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span>Anthropic</span>
+</div>
+<div class="flex items-center gap-2 text-slate-500">
+<span class="w-2 h-2 rounded-full bg-tertiary-container"></span>
+<span>ScienceClaw: local fallback</span>
+</div>
+<div class="flex items-center gap-2 text-teal-600 dark:text-teal-400 font-bold">
+<span class="material-symbols-outlined text-xs" data-icon="analytics">analytics</span>
+<span>System Health: Nominal</span>
+</div>
+<div class="ml-auto flex items-center gap-2 text-slate-400">
+<span class="material-symbols-outlined text-xs" data-icon="terminal">terminal</span>
+<span>API Status: 200 OK</span>
+</div>
+</footer>
+</body></html>

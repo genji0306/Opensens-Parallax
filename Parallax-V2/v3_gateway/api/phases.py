@@ -2,18 +2,20 @@
 
 from __future__ import annotations
 
-import asyncio
 import logging
 from datetime import datetime, timezone
 
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from ..models.approval import ApprovalRequest
 from ..models.base import async_session
 from ..models.workflow import WorkflowRun, Phase, PhaseEdge
-from ..services.workflow_engine import V3WorkflowEngine
+from ..services.workflow_engine import V3WorkflowEngine, RESEARCH_TEMPLATES
 from ..services.v2_bridge import V2Bridge
 from ..services.cost_recorder import CostRecorder
 from ..services import event_bus
@@ -25,6 +27,17 @@ bridge = V2Bridge()
 cost_recorder = CostRecorder()
 
 logger = logging.getLogger(__name__)
+
+
+class PhaseCompleteBody(BaseModel):
+    outputs: dict = Field(default_factory=dict)
+    score: Optional[float] = None
+    model_used: str = ""
+    cost_usd: float = 0.0
+
+
+class PhaseFailBody(BaseModel):
+    error: str = "Unknown error"
 
 
 async def get_db():
@@ -90,9 +103,22 @@ async def execute_next_phases(
         return {"data": {"message": "No phases ready to execute", "ready": []}}
 
     executed = []
+    launched_research_backend = False
+    uses_research_bridge = (run.template_id or "") in RESEARCH_TEMPLATES
     for phase in ready:
         if phase.phase_type == "approval_gate":
             # Approval gates pause — don't auto-execute
+            approval = ApprovalRequest(
+                project_id=run.project_id,
+                run_id=run_id,
+                phase_id=phase.phase_id,
+                reason=f"Approval required for {phase.label}",
+                risk_class="medium",
+                details={"phase_type": phase.phase_type, "config": phase.config or {}},
+                requested_by="system",
+            )
+            db.add(approval)
+            await db.flush()
             await db.execute(
                 update(Phase)
                 .where(Phase.phase_id == phase.phase_id)
@@ -103,10 +129,20 @@ async def execute_next_phases(
                 project_id=run.project_id,
                 run_id=run_id,
                 phase_id=phase.phase_id,
-                payload={"phase_type": phase.phase_type, "label": phase.label},
+                payload={
+                    "phase_type": phase.phase_type,
+                    "label": phase.label,
+                    "approval_id": approval.approval_id,
+                },
             )
-            executed.append({"phase_id": phase.phase_id, "status": "awaiting_approval"})
-        elif bridge.can_handle(phase.phase_type):
+            executed.append({
+                "phase_id": phase.phase_id,
+                "status": "awaiting_approval",
+                "approval_id": approval.approval_id,
+            })
+        elif uses_research_bridge and bridge.can_handle(phase.phase_type):
+            if not str((run.config or {}).get("research_idea", "")).strip():
+                raise HTTPException(400, "research_idea is required for research templates")
             # Mark running
             await engine.mark_phase_running(db, phase.phase_id)
             await event_bus.publish_event(
@@ -117,6 +153,9 @@ async def execute_next_phases(
                 payload={"phase_type": phase.phase_type},
             )
             executed.append({"phase_id": phase.phase_id, "status": "running", "backend": "v2"})
+            if not launched_research_backend and run.status != "running":
+                background_tasks.add_task(bridge.run_pipeline_background, run_id, run.project_id)
+                launched_research_backend = True
         else:
             # Non-V2 phases (experiment_execute, compute_*, simulate_*) — mark as pending
             # These will be handled by future execution backends
@@ -139,7 +178,7 @@ async def execute_next_phases(
 @router.post("/{phase_id}/complete")
 async def complete_phase(
     phase_id: str,
-    body: dict,
+    body: PhaseCompleteBody,
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -150,10 +189,10 @@ async def complete_phase(
     if not phase:
         raise HTTPException(404, f"Phase not found: {phase_id}")
 
-    outputs = body.get("outputs", {})
-    score = body.get("score")
-    model_used = body.get("model_used", "")
-    cost_usd = body.get("cost_usd", 0.0)
+    outputs = body.outputs
+    score = body.score
+    model_used = body.model_used
+    cost_usd = body.cost_usd
 
     await engine.complete_phase(db, phase_id, outputs, score=score, model_used=model_used, cost_usd=cost_usd)
 
@@ -201,7 +240,7 @@ async def complete_phase(
 @router.post("/{phase_id}/fail")
 async def fail_phase(
     phase_id: str,
-    body: dict,
+    body: PhaseFailBody,
     db: AsyncSession = Depends(get_db),
 ):
     """Mark a phase as failed."""
@@ -209,7 +248,7 @@ async def fail_phase(
     if not phase:
         raise HTTPException(404, f"Phase not found: {phase_id}")
 
-    error = body.get("error", "Unknown error")
+    error = body.error
     await engine.fail_phase(db, phase_id, error)
 
     await event_bus.publish_event(

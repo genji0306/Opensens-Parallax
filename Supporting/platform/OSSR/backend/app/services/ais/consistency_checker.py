@@ -52,12 +52,10 @@ class ConsistencyChecker:
     """Detects inconsistencies between paper text and visual elements."""
 
     def __init__(self):
-        self.llm = None
+        pass
 
-    def _get_llm(self) -> LLMClient:
-        if self.llm is None:
-            self.llm = LLMClient()
-        return self.llm
+    def _get_llm(self, model: str = "") -> LLMClient:
+        return LLMClient(model=model) if model else LLMClient()
 
     def check(
         self,
@@ -81,13 +79,12 @@ class ConsistencyChecker:
             for i, f in enumerate(figure_descriptions)
         )
 
-        model = model or "claude-sonnet-4-20250514"
-        response = self._get_llm().chat(
-            CONSISTENCY_PROMPT.format(
-                text=text_content[:5000],
-                figures=figs_text[:3000],
-            ),
-            model=model,
+        prompt = CONSISTENCY_PROMPT.format(
+            text=text_content[:5000],
+            figures=figs_text[:3000],
+        )
+        response = self._get_llm(model).chat(
+            [{"role": "user", "content": prompt}],
         )
 
         result = self._parse(response)

@@ -78,7 +78,7 @@ class V2Bridge:
         config = run.config or {}
 
         # Thread-safe event collection
-        event_queue: deque[dict] = deque(maxlen=500)
+        event_queue: deque[dict] = deque(maxlen=5000)
         done_event = threading.Event()
 
         # Start async event pump
@@ -104,7 +104,14 @@ class V2Bridge:
         # Update V3 run with results
         v2_run_id = v2_result.get("run_id", "")
         summary = v2_result.get("summary", {})
-        status = "completed" if summary.get("progress_pct", 0) == 100 else "failed"
+        progress_pct = summary.get("progress_pct", 0)
+        failed_count = summary.get("failed", 0)
+        if v2_result.get("error") or failed_count:
+            status = "failed"
+        elif progress_pct == 100:
+            status = "completed"
+        else:
+            status = "paused"
 
         async with async_session() as session:
             async with session.begin():
@@ -122,6 +129,33 @@ class V2Bridge:
                     await self._sync_v3_phases(session, run.run_id, v2_result["nodes"], project_id)
 
         return v2_run_id
+
+    async def run_pipeline_background(self, run_id: str, project_id: str) -> None:
+        """Load a V3 run and execute it through the V2 bridge."""
+        async with async_session() as session:
+            async with session.begin():
+                run = await session.get(WorkflowRun, run_id)
+                if not run:
+                    return
+
+        try:
+            await self.start_research_pipeline(run, project_id)
+        except Exception as e:
+            async with async_session() as session:
+                async with session.begin():
+                    await session.execute(
+                        update(WorkflowRun)
+                        .where(WorkflowRun.run_id == run_id)
+                        .values(status="failed")
+                    )
+
+            await event_bus.publish_event(
+                "pipeline.failed",
+                source_system="v3_gateway",
+                project_id=project_id,
+                run_id=run_id,
+                payload={"error": str(e)},
+            )
 
     def _run_v2_sync(
         self,
@@ -148,6 +182,8 @@ class V2Bridge:
             # Collect events into the thread-safe queue
             class EventCollector:
                 def _push(self, event_type: str, event: PipelineEvent):
+                    if len(event_queue) == event_queue.maxlen:
+                        logger.warning("Event queue full — dropping oldest event for run %s", run.run_id)
                     event_queue.append({
                         "event_type": event_type,
                         "node_type": event.node_type,

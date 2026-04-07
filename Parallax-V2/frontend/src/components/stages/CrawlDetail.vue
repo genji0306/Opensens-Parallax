@@ -26,12 +26,14 @@ const sortBy = ref<PaperSortBy>('citations')
 const sourceFilter = ref('')
 const availableSources = ref<string[]>([])
 
-function formatAuthors(authors: string[]): string {
+function formatAuthors(authors: unknown[]): string {
   if (!authors || authors.length === 0) return 'Unknown'
-  if (authors.length === 1) return authors[0] ?? 'Unknown'
-  const firstAuthor = authors[0] ?? 'Unknown'
-  const first = firstAuthor.split(' ').pop() ?? firstAuthor
-  return `${first} et al.`
+  const toName = (a: unknown): string =>
+    typeof a === 'string' ? a : (a as Record<string, string>)?.name ?? 'Unknown'
+  const firstName = toName(authors[0])
+  if (authors.length === 1) return firstName
+  const last = firstName.split(' ').pop() ?? firstName
+  return `${last} et al.`
 }
 
 function toggleAbstract(paperId: string) {
@@ -39,7 +41,7 @@ function toggleAbstract(paperId: string) {
 }
 
 async function fetchPapers() {
-  if (!props.runId) return
+  if (!props.runId || papersLoading.value) return
   papersLoading.value = true
   papersError.value = null
   try {
@@ -105,8 +107,10 @@ onUnmounted(() => {
   if (searchTimeout) clearTimeout(searchTimeout)
 })
 
+let lastFetchedRunId = ''
 watch(() => props.runId, (id) => {
-  if (id) {
+  if (id && id !== lastFetchedRunId) {
+    lastFetchedRunId = id
     papersPage.value = 1
     papersSearch.value = ''
     fetchPapers()

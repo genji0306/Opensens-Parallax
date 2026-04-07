@@ -21,6 +21,8 @@ from ..models.workflow import WorkflowRun, Phase, PhaseEdge
 
 logger = logging.getLogger(__name__)
 
+# Templates whose phases are delegated to the V2 research backend
+RESEARCH_TEMPLATES = {"academic_research", "full_research_experiment"}
 
 # ── Protocol Templates ───────────────────────────────────────────
 
@@ -265,7 +267,7 @@ class V3WorkflowEngine:
 
         executable = []
         for phase in phases:
-            if phase.status != "pending":
+            if phase.status not in ("pending", "invalidated"):
                 continue
 
             parents = incoming.get(phase.phase_id, [])

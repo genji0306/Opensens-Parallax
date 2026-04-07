@@ -4,6 +4,8 @@ import { computed, ref } from 'vue'
 import * as api from '@/api/grants'
 import type {
   FeedbackEventType,
+  GrantAlert,
+  GrantFilter,
   GrantOpportunity,
   GrantProfile,
   GrantSource,
@@ -33,6 +35,10 @@ export const useGrantsStore = defineStore('grants', () => {
     lastRun: string | null
   }>({ running: false, lastCount: 0, lastRun: null })
 
+  const alerts = ref<GrantAlert[]>([])
+  const watchlistIds = ref<string[]>([])
+  const activeFilter = ref<GrantFilter>({})
+
   // ── Getters ────────────────────────────────────────────────────────
   const activeProfile = computed<GrantProfile | null>(() =>
     profiles.value.find(p => p.profile_id === activeProfileId.value) ?? null,
@@ -45,6 +51,8 @@ export const useGrantsStore = defineStore('grants', () => {
   const enabledSources = computed(() => sources.value.filter(s => s.enabled))
 
   const topMatches = computed(() => matches.value.slice(0, 50))
+
+  const unseenAlertCount = computed(() => alerts.value.filter(a => !a.seen_at).length)
 
   // ── Helpers ────────────────────────────────────────────────────────
   function setLoading(key: string, value: boolean): void {
@@ -242,6 +250,53 @@ export const useGrantsStore = defineStore('grants', () => {
     })
   }
 
+  // ── Alerts ─────────────────────────────────────────────────────────
+  async function fetchAlerts(profileId: string, unseenOnly = false): Promise<void> {
+    const res = await run('alerts', () => api.listAlerts(profileId, { unseenOnly }))
+    if (res) alerts.value = res.alerts ?? []
+  }
+
+  async function markAlertSeen(alertId: string): Promise<void> {
+    await run('alerts', () => api.markAlertSeen(alertId))
+    alerts.value = alerts.value.map(a =>
+      a.alert_id === alertId ? { ...a, seen_at: new Date().toISOString() } : a,
+    )
+  }
+
+  async function markAllAlertsSeen(): Promise<void> {
+    const profileId = activeProfileId.value
+    if (!profileId) return
+    await run('alerts', () => api.markAllAlertsSeen(profileId))
+    alerts.value = alerts.value.map(a => ({
+      ...a,
+      seen_at: a.seen_at ?? new Date().toISOString(),
+    }))
+  }
+
+  async function evaluateAlerts(runMatcher = false): Promise<void> {
+    const profileId = activeProfileId.value
+    if (!profileId) return
+    await run('alerts', () =>
+      api.evaluateAlerts({ profile_id: profileId, run_matcher: runMatcher }),
+    )
+    await fetchAlerts(profileId)
+  }
+
+  // ── Watchlist ──────────────────────────────────────────────────────
+  async function fetchWatchlist(profileId: string): Promise<void> {
+    const res = await run('watchlist', () => api.getWatchlist(profileId))
+    if (res) watchlistIds.value = res.opportunity_ids ?? []
+  }
+
+  // ── Filter ─────────────────────────────────────────────────────────
+  function setFilter(filter: GrantFilter): void {
+    activeFilter.value = { ...filter }
+  }
+
+  function clearFilter(): void {
+    activeFilter.value = {}
+  }
+
   // ── Bootstrap ──────────────────────────────────────────────────────
   async function bootstrap(): Promise<void> {
     await Promise.all([loadProfiles(), loadSources(), loadOpportunities()])
@@ -259,11 +314,15 @@ export const useGrantsStore = defineStore('grants', () => {
     loading,
     errors,
     discoveryStatus,
+    alerts,
+    watchlistIds,
+    activeFilter,
     // getters
     activeProfile,
     activeProposal,
     enabledSources,
     topMatches,
+    unseenAlertCount,
     // actions
     loadProfiles,
     createProfile,
@@ -286,6 +345,13 @@ export const useGrantsStore = defineStore('grants', () => {
     runPackager,
     selectProposal,
     recordFeedback,
+    fetchAlerts,
+    markAlertSeen,
+    markAllAlertsSeen,
+    evaluateAlerts,
+    fetchWatchlist,
+    setFilter,
+    clearFilter,
     bootstrap,
   }
 })

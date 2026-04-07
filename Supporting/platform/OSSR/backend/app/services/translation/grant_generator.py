@@ -56,12 +56,10 @@ class GrantGenerator:
     """Generates grant concept notes from knowledge artifacts."""
 
     def __init__(self):
-        self.llm = None
+        pass
 
-    def _get_llm(self) -> LLMClient:
-        if self.llm is None:
-            self.llm = LLMClient()
-        return self.llm
+    def _get_llm(self, model: str = "") -> LLMClient:
+        return LLMClient(model=model) if model else LLMClient()
 
     def generate(self, run_id: str, model: str = "") -> Dict[str, Any]:
         artifact = KnowledgeArtifactDAO.load(run_id)
@@ -73,14 +71,13 @@ class GrantGenerator:
         claims = "\n".join(f"- {c.text}" for c in (artifact.claims if artifact else [])[:6])
         gaps = "\n".join(f"- {g.description}" for g in (artifact.gaps if artifact else [])[:4])
 
-        model = model or "claude-sonnet-4-20250514"
-        response = self._get_llm().chat(
-            GRANT_PROMPT.format(
-                idea=idea, contribution=contribution,
-                differentiators=differentiators,
-                claims=claims or "None.", gaps=gaps or "None.",
-            ),
-            model=model,
+        prompt = GRANT_PROMPT.format(
+            idea=idea, contribution=contribution,
+            differentiators=differentiators,
+            claims=claims or "None.", gaps=gaps or "None.",
+        )
+        response = self._get_llm(model).chat(
+            [{"role": "user", "content": prompt}],
         )
 
         return self._parse(response)

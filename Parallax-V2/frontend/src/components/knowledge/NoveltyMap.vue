@@ -4,15 +4,60 @@
  * Shows novel (green) vs well-covered (gray) zones.
  */
 
-import { ref } from 'vue'
-import { mapNovelty } from '@/api/ais'
-import type { NoveltyMapData } from '@/api/ais'
+import { ref, watch } from 'vue'
+import { getKnowledgeArtifact, mapNovelty } from '@/api/ais'
+import type { KnowledgeArtifact, NoveltyMapData } from '@/api/ais'
 
 const props = defineProps<{ runId: string }>()
 
 const data = ref<NoveltyMapData | null>(null)
 const loading = ref(false)
 const error = ref<string | null>(null)
+
+function buildNoveltyMap(artifact: KnowledgeArtifact | null | undefined): NoveltyMapData | null {
+  if (!artifact) return null
+
+  const claims = Array.isArray(artifact.claims) ? artifact.claims : []
+  const assessments = Array.isArray(artifact.novelty_assessments) ? artifact.novelty_assessments : []
+  if (!assessments.length) return null
+
+  const claimById = new Map(claims.map(claim => [claim.claim_id, claim]))
+  const heatmap = assessments.map((assessment) => {
+    const score = Number(assessment.novelty_score ?? 0)
+    return {
+      claim_id: assessment.claim_id,
+      text: claimById.get(assessment.claim_id)?.text ?? '',
+      novelty_score: score,
+      zone: score >= 0.7 ? 'novel' : score >= 0.3 ? 'partial' : 'covered',
+      explanation: assessment.explanation ?? '',
+    } as NoveltyMapData['heatmap'][number]
+  })
+
+  const scores = heatmap.map(item => item.novelty_score)
+  return {
+    assessments,
+    heatmap,
+    stats: {
+      avg_novelty: scores.length ? Number((scores.reduce((sum, score) => sum + score, 0) / scores.length).toFixed(2)) : 0,
+      novel_count: heatmap.filter(item => item.zone === 'novel').length,
+      covered_count: heatmap.filter(item => item.zone === 'covered').length,
+    },
+  }
+}
+
+async function hydrateNoveltyMap() {
+  if (!props.runId) {
+    data.value = null
+    return
+  }
+
+  try {
+    const res = await getKnowledgeArtifact(props.runId)
+    data.value = buildNoveltyMap(res.data?.data ?? null)
+  } catch {
+    data.value = null
+  }
+}
 
 async function runNoveltyMap() {
   if (!props.runId) return
@@ -27,6 +72,10 @@ async function runNoveltyMap() {
     loading.value = false
   }
 }
+
+watch(() => props.runId, () => {
+  hydrateNoveltyMap()
+}, { immediate: true })
 
 function zoneColor(zone: string): string {
   return zone === 'novel' ? 'var(--success, #22c55e)'

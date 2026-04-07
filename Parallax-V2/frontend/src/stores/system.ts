@@ -22,8 +22,15 @@ export const useSystemStore = defineStore('system', () => {
   const loading = ref(false)
   const backendOnline = ref(false)
 
-  let pollHandle: ReturnType<typeof setInterval> | null = null
-  let controller: AbortController | null = null
+let pollHandle: ReturnType<typeof setInterval> | null = null
+let controller: AbortController | null = null
+let _pipelineModule: typeof import('@/stores/pipeline') | null = null
+
+import('@/stores/pipeline').then((m) => {
+  _pipelineModule = m
+}).catch(() => {
+  _pipelineModule = null
+})
 
   async function fetchProviders(signal?: AbortSignal): Promise<void> {
     try {
@@ -113,8 +120,8 @@ export const useSystemStore = defineStore('system', () => {
   /** Update session cost from the active pipeline run's cost estimate */
   function updateSessionCost(): void {
     try {
-      // Import lazily to avoid circular dependency at module load time
-      const { usePipelineStore } = require('@/stores/pipeline') as typeof import('@/stores/pipeline')
+      if (!_pipelineModule) return
+      const { usePipelineStore } = _pipelineModule
       const pipeline = usePipelineStore()
       if (pipeline.costEstimate && pipeline.costEstimate.total > 0) {
         sessionCost.value = pipeline.costEstimate.total

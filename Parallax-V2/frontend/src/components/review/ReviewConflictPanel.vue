@@ -3,8 +3,8 @@
  * ReviewConflictPanel — Display conflicts between reviewers and revision themes (Sprint 10).
  */
 
-import { ref } from 'vue'
-import { detectConflicts } from '@/api/ais'
+import { ref, watch } from 'vue'
+import { detectConflicts, getRevisionHistory } from '@/api/ais'
 import type { ReviewConflict, RevisionTheme } from '@/api/ais'
 
 const props = defineProps<{ runId: string }>()
@@ -15,21 +15,54 @@ const stats = ref<{ conflict_count: number; theme_count: number; critical_themes
 const loading = ref(false)
 const error = ref<string | null>(null)
 
+function applyConflictState(nextConflicts: ReviewConflict[], nextThemes: RevisionTheme[]) {
+  conflicts.value = nextConflicts
+  themes.value = nextThemes
+  if (!nextConflicts.length && !nextThemes.length) {
+    stats.value = null
+    return
+  }
+  stats.value = {
+    conflict_count: nextConflicts.length,
+    theme_count: nextThemes.length,
+    critical_themes: nextThemes.filter(theme => theme.priority <= 2 && theme.impact === 'high').length,
+  }
+}
+
+async function hydrateConflictState() {
+  if (!props.runId) {
+    applyConflictState([], [])
+    return
+  }
+
+  try {
+    const res = await getRevisionHistory(props.runId)
+    const rounds = res.data?.data?.rounds ?? []
+    const latest = Array.isArray(rounds) && rounds.length ? rounds[rounds.length - 1] : null
+    applyConflictState(latest?.conflicts ?? [], latest?.themes ?? [])
+  } catch {
+    applyConflictState([], [])
+  }
+}
+
 async function analyze() {
+  if (!props.runId) return
   loading.value = true
   error.value = null
   try {
     const res = await detectConflicts(props.runId)
     const data = res.data?.data
-    conflicts.value = data?.conflicts ?? []
-    themes.value = data?.themes ?? []
-    stats.value = data?.stats ?? null
+    applyConflictState(data?.conflicts ?? [], data?.themes ?? [])
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Analysis failed'
   } finally {
     loading.value = false
   }
 }
+
+watch(() => props.runId, () => {
+  hydrateConflictState()
+}, { immediate: true })
 
 function severityColor(impact: string): string {
   return impact === 'high' ? 'var(--danger, #ef4444)' : impact === 'medium' ? 'var(--warning, #f59e0b)' : 'var(--text-tertiary)'

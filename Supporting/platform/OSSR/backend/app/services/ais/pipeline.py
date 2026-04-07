@@ -281,7 +281,7 @@ class AisPipeline:
                 "draft_id": draft.draft_id,
                 "title": draft.title,
                 "section_count": len(draft.sections),
-                "section_titles": [s.title for s in draft.sections],
+                "section_titles": [s.name.replace("_", " ").title() for s in draft.sections],
                 "total_word_count": sum(s.word_count for s in draft.sections),
                 "citation_count": len(draft.bibliography),
                 "review_overall": review.get("overall", 0),

@@ -6,7 +6,7 @@
  * Links: supports (green), contradicts (red), extends (blue), gap_for (orange).
  */
 
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, nextTick } from 'vue'
 import { getClaimGraph } from '@/api/ais'
 import type { ClaimGraphData } from '@/api/ais'
 import * as d3 from 'd3'
@@ -147,8 +147,8 @@ function renderGraph() {
 }
 
 watch(() => props.runId, fetchGraph, { immediate: true })
-watch(graphData, renderGraph)
-onMounted(() => { if (graphData.value) renderGraph() })
+watch(graphData, () => { nextTick(() => renderGraph()) })
+onMounted(() => { if (graphData.value) nextTick(() => renderGraph()) })
 </script>
 
 <template>

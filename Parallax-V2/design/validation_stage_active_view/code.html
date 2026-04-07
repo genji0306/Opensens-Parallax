@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Opensens Parallax | Research Command Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-bright": "#f9f9ff",
+                        "secondary": "#3c665b",
+                        "on-tertiary-fixed": "#3d0600",
+                        "on-secondary-container": "#416a5f",
+                        "secondary-container": "#bce9db",
+                        "on-error": "#ffffff",
+                        "surface-tint": "#006b59",
+                        "background": "#f9f9ff",
+                        "on-secondary-fixed-variant": "#244e44",
+                        "tertiary-container": "#df7962",
+                        "surface-variant": "#dae3f7",
+                        "tertiary-fixed": "#ffdad2",
+                        "surface-container-highest": "#dae3f7",
+                        "on-tertiary-container": "#5a1506",
+                        "on-primary-container": "#00352b",
+                        "error": "#ba1a1a",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-high": "#dfe8fd",
+                        "surface": "#f9f9ff",
+                        "on-secondary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "primary-fixed": "#7ff7da",
+                        "surface-container-low": "#f0f3ff",
+                        "on-tertiary-fixed-variant": "#7c2d1c",
+                        "surface-container": "#e7eeff",
+                        "primary": "#006b59",
+                        "inverse-surface": "#283140",
+                        "inverse-primary": "#61dbbe",
+                        "on-tertiary": "#ffffff",
+                        "on-surface-variant": "#3d4945",
+                        "primary-container": "#1ea88e",
+                        "outline": "#6d7a75",
+                        "on-surface": "#131c2a",
+                        "secondary-fixed": "#bfecde",
+                        "inverse-on-surface": "#ecf1ff",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb4a4",
+                        "outline-variant": "#bccac4",
+                        "on-secondary-fixed": "#00201a",
+                        "surface-dim": "#d1daef",
+                        "secondary-fixed-dim": "#a3d0c2",
+                        "primary-fixed-dim": "#61dbbe",
+                        "on-primary-fixed-variant": "#005143",
+                        "on-error-container": "#93000a",
+                        "tertiary": "#9a4431",
+                        "on-background": "#131c2a",
+                        "on-primary-fixed": "#00201a"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"],
+                        "mono": ["JetBrains Mono", "monospace"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .mono-technical { font-family: 'JetBrains Mono', monospace; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(218, 227, 247, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-surface-bright font-body text-on-surface min-h-screen pb-20">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full border-b bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between px-6 h-16 z-50">
+<div class="flex items-center gap-8">
+<span class="text-xl font-bold tracking-tighter text-slate-900 dark:text-white font-headline">Opensens Parallax</span>
+<div class="hidden md:flex items-center gap-6">
+<a class="text-teal-600 dark:text-teal-400 border-b-2 border-teal-600 px-1 py-4 font-medium transition-colors" href="#">Workspace</a>
+<a class="text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 px-3 py-1 rounded transition-colors" href="#">Datasets</a>
+<a class="text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 px-3 py-1 rounded transition-colors" href="#">Archive</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 px-3 py-1.5 bg-surface-container rounded-lg font-mono text-xs font-semibold">
+<span class="material-symbols-outlined text-teal-600 text-sm">account_balance_wallet</span>
+<span class="text-teal-600">$42.08</span>
+</div>
+<button class="material-symbols-outlined p-2 text-slate-500 hover:bg-slate-50 rounded-full transition-colors">monitoring</button>
+<div class="h-8 w-8 rounded-full bg-primary-container flex items-center justify-center text-white overflow-hidden ring-2 ring-surface-variant">
+<img class="w-full h-full object-cover" data-alt="User profile portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC23XT62CCZiUf7Yqjc-bGHz_GK6qL8IbeBPb9NdUNwzkWuYRxMis9bt406ujTNYZlS1szDkaEP85Z77eQIZ-EhWcfFIZSZ8lZOBrSuZZgTdNGFWMMjTfUlPlkmYGxDP2G55shalwYFr-VXDZPi9KQ-Xx96UfBOsRAsWKnmvizRpuLKptC_bqZZ1dqElsz7ac5pH9oVMxz_IvW-HT-MnrK2-diLzk9N8OiWEre3JDtV_p63wYcoGM1m7q8nMVs92g8SYtEaX9JMokk"/>
+</div>
+</div>
+</nav>
+<main class="pt-24 px-6 max-w-7xl mx-auto space-y-8">
+<!-- Pipeline Tracker -->
+<section class="w-full overflow-x-auto pb-4 no-scrollbar">
+<div class="flex items-center justify-between min-w-[800px] relative">
+<div class="absolute top-1/2 left-0 w-full h-0.5 bg-surface-container -translate-y-1/2 -z-10"></div>
+<!-- Steps -->
+<div class="flex flex-col items-center gap-2 group">
+<div class="w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center border-2 border-white shadow-sm">
+<span class="material-symbols-outlined text-sm" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<span class="text-[10px] font-mono uppercase tracking-tighter text-on-surface-variant opacity-60">Crawl</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center border-2 border-white shadow-sm">
+<span class="material-symbols-outlined text-sm" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<span class="text-[10px] font-mono uppercase tracking-tighter text-on-surface-variant opacity-60">Map</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center border-2 border-white shadow-sm">
+<span class="material-symbols-outlined text-sm" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<span class="text-[10px] font-mono uppercase tracking-tighter text-on-surface-variant opacity-60">Debate</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center border-4 border-primary-container shadow-lg scale-110">
+<span class="material-symbols-outlined text-base">magnification_small</span>
+</div>
+<span class="text-[10px] font-mono uppercase tracking-widest text-primary font-bold">Validate</span>
+</div>
+<div class="flex flex-col items-center gap-2 opacity-40">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center border-2 border-white">
+<span class="material-symbols-outlined text-sm">lightbulb</span>
+</div>
+<span class="text-[10px] font-mono uppercase tracking-tighter">Ideas</span>
+</div>
+<div class="flex flex-col items-center gap-2 opacity-40">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center border-2 border-white">
+<span class="material-symbols-outlined text-sm">edit_note</span>
+</div>
+<span class="text-[10px] font-mono uppercase tracking-tighter">Draft</span>
+</div>
+<div class="flex flex-col items-center gap-2 opacity-40">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center border-2 border-white">
+<span class="material-symbols-outlined text-sm">science</span>
+</div>
+<span class="text-[10px] font-mono uppercase tracking-tighter">Exp</span>
+</div>
+<div class="flex flex-col items-center gap-2 opacity-40">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center border-2 border-white">
+<span class="material-symbols-outlined text-sm">medical_services</span>
+</div>
+<span class="text-[10px] font-mono uppercase tracking-tighter">Rehab</span>
+</div>
+</div>
+</section>
+<!-- Main Bento Content -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Validation Card Expanded -->
+<section class="lg:col-span-4 glass-card p-6 rounded-xl space-y-6">
+<div class="flex justify-between items-start">
+<div class="space-y-1">
+<h2 class="text-sm font-mono text-primary font-bold uppercase tracking-wider">Analysis Engine</h2>
+<h3 class="text-2xl font-bold text-on-surface">Validate Stage</h3>
+</div>
+<span class="bg-primary-container/20 text-primary px-3 py-1 rounded-full text-xs font-bold border border-primary-container/30 flex items-center gap-1">
+                        NOVEL <span class="material-symbols-outlined text-xs">done_all</span>
+</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-low p-4 rounded-lg">
+<div class="text-xs text-on-surface-variant font-medium">Analyzed Papers</div>
+<div class="text-3xl font-bold text-on-surface mt-1">15</div>
+</div>
+<div class="bg-error-container/30 p-4 rounded-lg">
+<div class="text-xs text-on-error-container font-medium">Gaps Identified</div>
+<div class="text-3xl font-bold text-on-error-container mt-1">5</div>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between items-end">
+<span class="text-xs font-mono font-medium text-on-surface-variant uppercase">Novelty Confidence</span>
+<span class="text-lg font-mono font-bold text-primary">92%</span>
+</div>
+<div class="h-2 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[92%]"></div>
+</div>
+</div>
+<div class="pt-4 border-t border-outline-variant/30">
+<span class="text-[10px] font-mono uppercase text-on-surface-variant tracking-widest block mb-3">Indexed Sources</span>
+<div class="flex gap-4">
+<div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded border border-surface-variant">
+<span class="w-4 h-4 bg-teal-500 rounded-sm"></span>
+<span class="text-xs font-semibold">OpenAlex</span>
+</div>
+<div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded border border-surface-variant">
+<span class="w-4 h-4 bg-orange-500 rounded-sm"></span>
+<span class="text-xs font-semibold">CrossRef</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Table/List of Papers -->
+<section class="lg:col-span-8 space-y-4">
+<div class="flex items-center justify-between">
+<h3 class="text-lg font-bold flex items-center gap-2">
+                        Validated Literature 
+                        <span class="text-xs font-normal text-on-surface-variant bg-surface-container px-2 py-0.5 rounded">15 Active Matches</span>
+</h3>
+<button class="text-xs font-mono text-primary flex items-center gap-1 hover:underline">
+                        EXPORT CSV <span class="material-symbols-outlined text-sm">download</span>
+</button>
+</div>
+<div class="bg-white rounded-xl border border-surface-variant overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-low border-b border-surface-variant">
+<tr>
+<th class="px-6 py-3 text-[10px] font-mono uppercase tracking-widest text-on-surface-variant">Paper Title / DOI</th>
+<th class="px-6 py-3 text-[10px] font-mono uppercase tracking-widest text-on-surface-variant">Methodology</th>
+<th class="px-6 py-3 text-[10px] font-mono uppercase tracking-widest text-on-surface-variant text-right">Relevance</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-variant/50">
+<tr class="hover:bg-surface-container-lowest transition-colors group">
+<td class="px-6 py-4">
+<div class="font-semibold text-sm group-hover:text-primary transition-colors cursor-pointer">Dynamic Latency in Parallax Mesh Networks</div>
+<div class="text-xs text-on-surface-variant font-mono mt-0.5">10.1038/s41586-024-0012</div>
+</td>
+<td class="px-6 py-4 text-xs font-medium text-on-secondary-fixed-variant">Monte Carlo Sim</td>
+<td class="px-6 py-4 text-right">
+<span class="font-mono text-sm font-bold bg-secondary-container/30 text-secondary px-2 py-1 rounded">0.98</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors group">
+<td class="px-6 py-4">
+<div class="font-semibold text-sm group-hover:text-primary transition-colors cursor-pointer">Cross-spectral Interference Patterns in Sensor Arrays</div>
+<div class="text-xs text-on-surface-variant font-mono mt-0.5">10.1103/PhysRevX.14.031021</div>
+</td>
+<td class="px-6 py-4 text-xs font-medium text-on-secondary-fixed-variant">Fourier Transform</td>
+<td class="px-6 py-4 text-right">
+<span class="font-mono text-sm font-bold bg-secondary-container/30 text-secondary px-2 py-1 rounded">0.94</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors group">
+<td class="px-6 py-4">
+<div class="font-semibold text-sm group-hover:text-primary transition-colors cursor-pointer">Validation of Autonomous Signal Verification Protocols</div>
+<div class="text-xs text-on-surface-variant font-mono mt-0.5">10.1016/j.jneumeth.2023.109852</div>
+</td>
+<td class="px-6 py-4 text-xs font-medium text-on-secondary-fixed-variant">Bayesian Infer</td>
+<td class="px-6 py-4 text-right">
+<span class="font-mono text-sm font-bold bg-secondary-container/20 text-on-surface-variant px-2 py-1 rounded">0.89</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors group">
+<td class="px-6 py-4">
+<div class="font-semibold text-sm group-hover:text-primary transition-colors cursor-pointer">Zero-Knowledge Proofs for Data Integrity in Research</div>
+<div class="text-xs text-on-surface-variant font-mono mt-0.5">10.1145/3631461.3631522</div>
+</td>
+<td class="px-6 py-4 text-xs font-medium text-on-secondary-fixed-variant">Cryptography</td>
+<td class="px-6 py-4 text-right">
+<span class="font-mono text-sm font-bold bg-secondary-container/10 text-on-surface-variant px-2 py-1 rounded">0.82</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors group">
+<td class="px-6 py-4">
+<div class="font-semibold text-sm group-hover:text-primary transition-colors cursor-pointer">Longitudinal Study of Decentralized Peer Review</div>
+<div class="text-xs text-on-surface-variant font-mono mt-0.5">10.7554/eLife.89432</div>
+</td>
+<td class="px-6 py-4 text-xs font-medium text-on-secondary-fixed-variant">Qualitative Anal</td>
+<td class="px-6 py-4 text-right">
+<span class="font-mono text-sm font-bold bg-secondary-container/10 text-on-surface-variant px-2 py-1 rounded">0.76</span>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="p-3 bg-surface-container-lowest text-center">
+<button class="text-[10px] font-mono font-bold text-primary-container tracking-widest uppercase hover:underline">Show 10 More Results</button>
+</div>
+</div>
+</section>
+</div>
+<!-- Recommendation Banner -->
+<section class="w-full bg-primary/5 border border-primary-container/20 p-8 rounded-2xl flex flex-col md:flex-row items-center gap-8 shadow-inner">
+<div class="h-16 w-16 bg-primary text-white flex items-center justify-center rounded-2xl shrink-0 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-3xl">psychology</span>
+</div>
+<div class="flex-1 space-y-4">
+<div class="space-y-1 text-center md:text-left">
+<h4 class="text-lg font-bold text-on-surface">Insight Engine Recommendation</h4>
+<p class="text-on-surface-variant leading-relaxed">
+<span class="font-bold text-primary">💡 RECOMMENDED:</span> Consensus is high <span class="font-mono font-bold">(72%)</span> and novelty is confirmed. Your research trajectory bypasses current established limitations. Proceed to Idea Generation.
+                    </p>
+</div>
+<div class="flex flex-wrap items-center gap-3 justify-center md:justify-start">
+<button class="bg-primary hover:bg-on-primary-fixed-variant text-white px-6 py-2.5 rounded-lg font-bold text-sm shadow-md transition-all active:scale-95 flex items-center gap-2">
+                        Generate Research Ideas
+                        <span class="material-symbols-outlined text-sm">auto_awesome</span>
+</button>
+<button class="bg-white border border-surface-variant hover:bg-surface-container-lowest text-on-surface px-6 py-2.5 rounded-lg font-bold text-sm transition-all flex items-center gap-2">
+                        Full Validation Report
+                        <span class="material-symbols-outlined text-sm">description</span>
+</button>
+<button class="text-on-surface-variant hover:text-on-surface px-4 py-2.5 font-bold text-sm transition-all">
+                        Skip
+                    </button>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-start items-center px-4 gap-8 bg-slate-900 h-10 border-t border-slate-800">
+<div class="text-teal-400 flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest">
+<span class="material-symbols-outlined text-sm">sensors</span>
+<span>Connectivity</span>
+</div>
+<div class="text-slate-500 hover:text-white flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-sm">timer</span>
+<span>Session</span>
+</div>
+<div class="text-slate-500 hover:text-white flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-sm">speed</span>
+<span>Latency</span>
+</div>
+<div class="text-slate-500 hover:text-white flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-sm">payments</span>
+<span>Cost</span>
+</div>
+<div class="ml-auto flex items-center gap-4 text-slate-500 font-mono text-[9px] opacity-60">
+<span>SYS: 0.12.4</span>
+<div class="flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-teal-500"></span>
+<span>STATUS: STABLE</span>
+</div>
+</div>
+</nav>
+</body></html>

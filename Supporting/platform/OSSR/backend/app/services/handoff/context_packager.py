@@ -20,7 +20,20 @@ logger = logging.getLogger(__name__)
 class ContextPackager:
     """Packages all run artifacts into a single handoff bundle."""
 
-    def package(self, run_id: str, target_platform: str = "") -> Dict[str, Any]:
+    # ToolUniverse-style compact-mode budget. When callers request
+    # ``compact=True`` the packager elides large fields (full paper list,
+    # full revision comments, full stage traces) and returns a small
+    # summary safe to pass through an LLM context window.
+    COMPACT_PAPER_CAP = 10
+    COMPACT_REVISION_KEYS = ("round_number", "avg_score", "rewrite_mode")
+
+    def package(
+        self,
+        run_id: str,
+        target_platform: str = "",
+        *,
+        compact: bool = False,
+    ) -> Dict[str, Any]:
         """
         Bundle all artifacts for a pipeline run.
 
@@ -78,10 +91,63 @@ class ContextPackager:
             },
         }
 
-        logger.info("[ContextPackager] Packaged run %s for %s: %d artifacts",
-                     run_id, target_platform or "generic", artifact_count)
+        if compact:
+            package = self._compact(package)
+
+        logger.info(
+            "[ContextPackager] Packaged run %s for %s: %d artifacts (compact=%s)",
+            run_id, target_platform or "generic", artifact_count, compact,
+        )
 
         return package
+
+    def _compact(self, package: Dict[str, Any]) -> Dict[str, Any]:
+        """Shrink a package for LLM-friendly context (ToolUniverse pattern)."""
+        compacted = dict(package)
+        # Paper list → top-N with only essential fields
+        papers = compacted.get("papers") or []
+        compacted["papers"] = [
+            {
+                "title": p.get("title", ""),
+                "doi": p.get("doi", ""),
+                "citation_count": p.get("citation_count", 0),
+            }
+            for p in papers[: self.COMPACT_PAPER_CAP]
+        ]
+        # Revision history → scalar summary only
+        compacted["revision_history"] = [
+            {k: rev.get(k) for k in self.COMPACT_REVISION_KEYS if k in rev}
+            for rev in (compacted.get("revision_history") or [])
+        ]
+        # Draft → section headings only
+        draft = compacted.get("draft") or {}
+        if isinstance(draft, dict) and draft.get("sections"):
+            compacted["draft"] = {
+                "title": draft.get("title"),
+                "section_headings": [
+                    s.get("heading", "") for s in draft["sections"]
+                ],
+                "word_count": sum(
+                    len((s.get("content") or "").split())
+                    for s in draft["sections"]
+                ),
+            }
+        # Knowledge artifact → claim/gap counts only
+        artifact = compacted.get("knowledge_artifact") or {}
+        if isinstance(artifact, dict) and artifact.get("claims") is not None:
+            compacted["knowledge_artifact"] = {
+                "claim_count": len(artifact.get("claims") or []),
+                "evidence_count": len(artifact.get("evidence") or []),
+                "gap_count": len(artifact.get("gaps") or []),
+                "hypothesis": (artifact.get("hypothesis") or {}).get("contribution", ""),
+            }
+        # Strip stage_results — too large
+        compacted["stage_results"] = {
+            "summary": "elided_in_compact_mode",
+            "keys": list((package.get("stage_results") or {}).keys()),
+        }
+        compacted.setdefault("metadata", {})["compact"] = True
+        return compacted
 
     def _get_draft(self, run) -> Dict[str, Any] | None:
         sr = run.stage_results or {}

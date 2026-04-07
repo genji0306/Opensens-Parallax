@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Opensens Parallax - Research Command Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "tertiary-fixed": "#ffdad2",
+              "surface-container-lowest": "#ffffff",
+              "outline": "#6d7a75",
+              "inverse-surface": "#283140",
+              "tertiary": "#9a4431",
+              "surface-container-highest": "#dae3f7",
+              "secondary-container": "#bce9db",
+              "surface-dim": "#d1daef",
+              "primary": "#006b59",
+              "error": "#ba1a1a",
+              "surface-container-high": "#dfe8fd",
+              "on-secondary-fixed-variant": "#244e44",
+              "on-tertiary-fixed-variant": "#7c2d1c",
+              "on-error": "#ffffff",
+              "primary-fixed": "#7ff7da",
+              "primary-container": "#1ea88e",
+              "surface-bright": "#f9f9ff",
+              "inverse-on-surface": "#ecf1ff",
+              "surface-tint": "#006b59",
+              "secondary-fixed-dim": "#a3d0c2",
+              "on-background": "#131c2a",
+              "tertiary-fixed-dim": "#ffb4a4",
+              "surface": "#f9f9ff",
+              "secondary": "#3c665b",
+              "on-error-container": "#93000a",
+              "error-container": "#ffdad6",
+              "on-tertiary": "#ffffff",
+              "on-primary-fixed-variant": "#005143",
+              "on-primary-container": "#00352b",
+              "primary-fixed-dim": "#61dbbe",
+              "on-surface": "#131c2a",
+              "background": "#f9f9ff",
+              "outline-variant": "#bccac4",
+              "secondary-fixed": "#bfecde",
+              "on-secondary-container": "#416a5f",
+              "surface-variant": "#dae3f7",
+              "on-secondary": "#ffffff",
+              "on-surface-variant": "#3d4945",
+              "on-primary-fixed": "#00201a",
+              "surface-container-low": "#f0f3ff",
+              "tertiary-container": "#df7962",
+              "on-secondary-fixed": "#00201a",
+              "surface-container": "#e7eeff",
+              "on-primary": "#ffffff",
+              "on-tertiary-fixed": "#3d0600",
+              "on-tertiary-container": "#5a1506",
+              "inverse-primary": "#61dbbe"
+            },
+            fontFamily: {
+              "headline": ["Inter"],
+              "body": ["Inter"],
+              "label": ["Inter"],
+              "mono": ["JetBrains Mono"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        @keyframes pulse-teal {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(30, 168, 142, 0.4); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(30, 168, 142, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(30, 168, 142, 0); }
+        }
+        .active-pulse {
+            animation: pulse-teal 2s infinite;
+        }
+    </style>
+</head>
+<body class="bg-background font-body text-on-surface min-h-screen flex flex-col">
+<!-- TopAppBar from JSON -->
+<header class="flex justify-between items-center w-full px-6 py-3 sticky top-0 z-50 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md shadow-sm dark:shadow-none font-inter tracking-tight antialiased border-b border-zinc-200 dark:border-zinc-800">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-3">
+<img alt="Opensens Logo" class="h-8 w-8 object-contain" data-alt="Technical geometric logo for research laboratory" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDkFTxj0HLnzDwXdShWU9R0YlOPHhWvZytMA7SipkB-D4woDtRoC4cL_f5zVfMzEPrF3tGyXCC5qeO7T64FH00t2Bm6cjg8duhjMfuuNemhDxYv9kqDv8BOCdJlhIhDL1dnJbqmsxfoxJYl1sixPLsWE7frP1mcS7oixz30JjaYoSoKouv1oN0bHbtHjrOuQl0nEpzl9wi8dLijoTwMqJdDpj3Nxqs9j1XM4g1e28d_zgBZ7cb55dbQBw7HgA9j3I8ciLq4vglVQGk"/>
+<span class="text-lg font-mono font-bold tracking-tighter text-zinc-900 dark:text-zinc-50">Opensens Parallax</span>
+</div>
+<nav class="hidden md:flex items-center gap-6 ml-8">
+<a class="text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 pb-2 transition-colors" href="#">Crawl</a>
+<a class="text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 pb-2 transition-colors" href="#">Map</a>
+<a class="text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 pb-2 transition-colors" href="#">Debate</a>
+<a class="text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 pb-2 transition-colors" href="#">Validate</a>
+<a class="text-teal-600 dark:text-teal-400 border-b-2 border-teal-600 dark:border-teal-400 pb-2 font-semibold" href="#">Ideas</a>
+<a class="text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 pb-2 transition-colors" href="#">Draft</a>
+<a class="text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 pb-2 transition-colors" href="#">Experiment</a>
+<a class="text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 pb-2 transition-colors" href="#">Rehab</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden lg:flex items-center px-3 py-1 bg-zinc-100 dark:bg-zinc-900 rounded-full">
+<span class="material-symbols-outlined text-sm mr-2" style="font-variation-settings: 'opsz' 18;">search</span>
+<input class="bg-transparent border-none text-xs focus:ring-0 w-32" placeholder="Search parameters..." type="text"/>
+</div>
+<div class="font-mono text-sm font-bold text-teal-600 dark:text-teal-400">$4,250.00</div>
+<button class="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-full transition-all">
+<span class="material-symbols-outlined text-zinc-600" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-full transition-all">
+<span class="material-symbols-outlined text-zinc-600" data-icon="settings">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-zinc-200">
+<img alt="Researcher Profile" class="w-full h-full object-cover" data-alt="Researcher Profile avatar professional headshot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBoWA1PTKHwVrYUpjNi4N1swgHtujod1VRNZLC9bG1k-LuCIbvk8dz9C0BPBPaty7Lsvj0mlQTOVdbI501zBJdRuLP0dshqK7wrxZWliuVWNUAEB0tPwJqQA2oaMRM77B6bUJXMsSnDxd4qbjEVNLIUTHgV5kEa0qmSBcCoHflzkxMDXUcmTC2LCnrk7x-m9FW1fF4XWbOcLPIO0HL-TmE9ZEnuYcjf_XLimXKnCg82Vzs8xL8J2tpiytIaD3U0qAMWee1-wCbBq9o"/>
+</div>
+</div>
+</header>
+<main class="flex-grow p-6 lg:p-10 max-w-7xl mx-auto w-full">
+<!-- Pipeline Tracker -->
+<section class="mb-12">
+<div class="flex justify-between items-start overflow-x-auto pb-4 gap-4 no-scrollbar">
+<!-- Done: Crawl -->
+<div class="flex flex-col items-center min-w-[100px] group">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center mb-3">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<span class="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant">Crawl</span>
+<span class="text-[9px] text-primary mt-1 font-bold">DONE</span>
+</div>
+<div class="h-[1px] bg-outline-variant flex-grow mt-5 min-w-[20px]"></div>
+<!-- Done: Map -->
+<div class="flex flex-col items-center min-w-[100px]">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center mb-3">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<span class="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant">Map</span>
+<span class="text-[9px] text-primary mt-1 font-bold">DONE</span>
+</div>
+<div class="h-[1px] bg-outline-variant flex-grow mt-5 min-w-[20px]"></div>
+<!-- Done: Debate -->
+<div class="flex flex-col items-center min-w-[100px]">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center mb-3">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<span class="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant">Debate</span>
+<span class="text-[9px] text-primary mt-1 font-bold">DONE</span>
+</div>
+<div class="h-[1px] bg-outline-variant flex-grow mt-5 min-w-[20px]"></div>
+<!-- Done: Validate -->
+<div class="flex flex-col items-center min-w-[100px]">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center mb-3">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<span class="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant">Validate</span>
+<span class="text-[9px] text-primary mt-1 font-bold">DONE</span>
+</div>
+<div class="h-[1px] bg-outline-variant flex-grow mt-5 min-w-[20px]"></div>
+<!-- Active: Ideas -->
+<div class="flex flex-col items-center min-w-[120px]">
+<div class="w-12 h-12 rounded-full border-4 border-primary-container flex items-center justify-center mb-2 active-pulse bg-surface">
+<span class="material-symbols-outlined text-primary text-2xl">lightbulb</span>
+</div>
+<span class="text-[10px] font-mono uppercase tracking-widest text-primary font-bold">Ideas</span>
+<span class="text-[9px] text-primary-container mt-1 animate-pulse">ACTIVE</span>
+</div>
+<div class="h-[1px] bg-outline-variant border-dashed border-t flex-grow mt-5 min-w-[20px]"></div>
+<!-- Pending: Draft -->
+<div class="flex flex-col items-center min-w-[100px] opacity-40">
+<div class="w-10 h-10 rounded-full border border-outline flex items-center justify-center mb-3">
+<span class="material-symbols-outlined text-xl">edit_note</span>
+</div>
+<span class="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant">Draft</span>
+<span class="text-[9px] mt-1">PENDING</span>
+</div>
+<div class="h-[1px] bg-outline-variant border-dashed border-t flex-grow mt-5 min-w-[20px]"></div>
+<!-- Pending: Experiment -->
+<div class="flex flex-col items-center min-w-[100px] opacity-40">
+<div class="w-10 h-10 rounded-full border border-outline flex items-center justify-center mb-3">
+<span class="material-symbols-outlined text-xl">science</span>
+</div>
+<span class="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant">Experiment</span>
+<span class="text-[9px] mt-1">PENDING</span>
+</div>
+<div class="h-[1px] bg-outline-variant border-dashed border-t flex-grow mt-5 min-w-[20px]"></div>
+<!-- Pending: Rehab -->
+<div class="flex flex-col items-center min-w-[100px] opacity-40">
+<div class="w-10 h-10 rounded-full border border-outline flex items-center justify-center mb-3">
+<span class="material-symbols-outlined text-xl">healing</span>
+</div>
+<span class="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant">Rehab</span>
+<span class="text-[9px] mt-1">PENDING</span>
+</div>
+</div>
+</section>
+<!-- Ideas Stage Card Expanded -->
+<section class="space-y-6">
+<div class="flex items-end justify-between border-b-2 border-primary pb-2">
+<h1 class="text-3xl font-extrabold tracking-tight text-on-surface">Phase 05: Idea Generation</h1>
+<div class="flex gap-4">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="text-[10px] font-mono uppercase tracking-widest">Sort by:</span>
+<select class="bg-transparent border-none text-[10px] font-bold py-0 focus:ring-0 cursor-pointer">
+<option>Feasibility</option>
+<option>Composite</option>
+<option>Impact</option>
+</select>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Hypothesis 1 (The Winner) -->
+<div class="lg:col-span-12 glass-panel p-6 rounded-xl border-l-8 border-l-primary shadow-xl ring-1 ring-primary/10 transition-transform hover:-translate-y-1">
+<div class="flex flex-col md:flex-row justify-between gap-6">
+<div class="flex-grow">
+<div class="flex items-center gap-3 mb-2">
+<span class="bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-sm">RANK 01</span>
+<span class="text-primary font-mono text-xs font-bold">ID: HYP-2024-081</span>
+</div>
+<h2 class="text-2xl font-bold mb-4 text-on-surface">Direct-Injection Multi-Analyte Flow Cell</h2>
+<p class="text-on-surface-variant text-sm max-w-2xl leading-relaxed">
+                                A paradigm shift in calibration stability, utilizing a microfluidic manifold that minimizes reagent consumption while maintaining pressure-stable electrochemical environments for simultaneous multi-metal detection.
+                            </p>
+</div>
+<div class="flex flex-col md:items-end gap-4 min-w-[240px]">
+<div class="text-right">
+<div class="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant mb-1">Composite Score</div>
+<div class="text-5xl font-extrabold text-primary font-mono">8.6</div>
+</div>
+<div class="grid grid-cols-3 gap-3 w-full">
+<div class="text-center p-2 bg-surface-container rounded">
+<div class="text-[8px] font-mono text-on-surface-variant mb-1">NOVELTY</div>
+<div class="text-sm font-bold text-on-surface">7.2</div>
+</div>
+<div class="text-center p-2 bg-primary-container rounded">
+<div class="text-[8px] font-mono text-on-primary-container mb-1">FEASIB.</div>
+<div class="text-sm font-bold text-on-primary-container">9.4</div>
+</div>
+<div class="text-center p-2 bg-surface-container rounded">
+<div class="text-[8px] font-mono text-on-surface-variant mb-1">IMPACT</div>
+<div class="text-sm font-bold text-on-surface">8.1</div>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-6 pt-4 border-t border-outline-variant flex justify-between items-center">
+<div class="flex gap-4">
+<span class="flex items-center gap-1 text-[10px] font-medium text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">inventory_2</span> 12 Components Req.
+                            </span>
+<span class="flex items-center gap-1 text-[10px] font-medium text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">schedule</span> 4 Days Est.
+                            </span>
+</div>
+<button class="bg-primary hover:bg-on-primary-fixed-variant text-white px-6 py-2 rounded-lg font-bold text-sm transition-all flex items-center gap-2">
+                            Start Draft <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Hypothesis 2 -->
+<div class="lg:col-span-6 bg-surface-container-low p-5 rounded-xl border border-outline-variant transition-all hover:border-primary/50 group">
+<div class="flex justify-between items-start mb-4">
+<span class="text-[10px] font-mono text-on-surface-variant bg-surface px-2 py-0.5 rounded border border-outline-variant">ID: HYP-2024-092</span>
+<div class="text-right">
+<div class="text-[8px] font-mono text-on-surface-variant">COMPOSITE</div>
+<div class="text-xl font-bold font-mono">8.2</div>
+</div>
+</div>
+<h3 class="text-lg font-bold mb-3 text-on-surface group-hover:text-primary transition-colors">Benchtop Potentiostatic Calibration Matrix</h3>
+<div class="grid grid-cols-3 gap-2 mb-4">
+<div class="border border-outline-variant rounded p-1.5 text-center">
+<div class="text-[7px] font-mono text-on-surface-variant">NOV</div>
+<div class="text-xs font-bold">6.8</div>
+</div>
+<div class="border border-primary-container bg-primary-container/10 rounded p-1.5 text-center">
+<div class="text-[7px] font-mono text-primary">FEAS</div>
+<div class="text-xs font-bold text-primary">9.2</div>
+</div>
+<div class="border border-outline-variant rounded p-1.5 text-center">
+<div class="text-[7px] font-mono text-on-surface-variant">IMP</div>
+<div class="text-xs font-bold">7.5</div>
+</div>
+</div>
+<p class="text-xs text-on-surface-variant line-clamp-2">Standardizes current measurements across a 64-point grid for rapid hardware validation during initial assembly.</p>
+</div>
+<!-- Hypothesis 3 -->
+<div class="lg:col-span-6 bg-surface-container-low p-5 rounded-xl border border-outline-variant transition-all hover:border-primary/50 group">
+<div class="flex justify-between items-start mb-4">
+<span class="text-[10px] font-mono text-on-surface-variant bg-surface px-2 py-0.5 rounded border border-outline-variant">ID: HYP-2024-105</span>
+<div class="text-right">
+<div class="text-[8px] font-mono text-on-surface-variant">COMPOSITE</div>
+<div class="text-xl font-bold font-mono">8.1</div>
+</div>
+</div>
+<h3 class="text-lg font-bold mb-3 text-on-surface group-hover:text-primary transition-colors">Surface-Modified Standard Electrodes</h3>
+<div class="grid grid-cols-3 gap-2 mb-4">
+<div class="border border-outline-variant rounded p-1.5 text-center">
+<div class="text-[7px] font-mono text-on-surface-variant">NOV</div>
+<div class="text-xs font-bold">7.5</div>
+</div>
+<div class="border border-primary-container bg-primary-container/10 rounded p-1.5 text-center">
+<div class="text-[7px] font-mono text-primary">FEAS</div>
+<div class="text-xs font-bold text-primary">8.8</div>
+</div>
+<div class="border border-outline-variant rounded p-1.5 text-center">
+<div class="text-[7px] font-mono text-on-surface-variant">IMP</div>
+<div class="text-xs font-bold">7.9</div>
+</div>
+</div>
+<p class="text-xs text-on-surface-variant line-clamp-2">Uses graphene-ink doping to enhance signal-to-noise ratios in field-deployed sensors without full-scale redesign.</p>
+</div>
+</div>
+</section>
+</main>
+<!-- Recommendation Banner -->
+<div class="sticky bottom-10 left-0 right-0 max-w-4xl mx-auto px-6 z-40">
+<div class="bg-inverse-surface text-inverse-on-surface p-4 rounded-full flex flex-col md:flex-row items-center justify-between gap-4 shadow-2xl border border-white/10 ring-4 ring-primary/5">
+<div class="flex items-center gap-4 px-2">
+<div class="bg-primary text-white p-2 rounded-full">
+<span class="material-symbols-outlined block">auto_awesome</span>
+</div>
+<div class="text-xs md:text-sm leading-tight">
+<span class="font-bold block md:inline">Top idea (8.6) has exceptional feasibility.</span>
+<span class="opacity-80">Recommended: Proceed to Drafting stage to generate experimental protocol.</span>
+</div>
+</div>
+<div class="flex items-center gap-2 pr-2">
+<button class="text-xs font-bold uppercase tracking-wider px-4 py-2 hover:bg-white/10 rounded-full transition-colors">Skip</button>
+<button class="text-xs font-bold uppercase tracking-wider px-4 py-2 hover:bg-white/10 rounded-full transition-colors">Regenerate Ideas</button>
+<button class="bg-primary text-white text-xs font-bold uppercase tracking-wider px-6 py-2 rounded-full hover:bg-primary-container transition-all">Start Draft →</button>
+</div>
+</div>
+</div>
+<!-- BottomNavBar (Status Bar) from JSON -->
+<footer class="fixed bottom-0 w-full z-50 flex justify-start items-center px-4 py-1.5 gap-8 bg-zinc-50 dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 font-mono text-[10px] uppercase tracking-widest cursor-default">
+<div class="text-teal-600 dark:text-teal-400 flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]" data-icon="check_circle">check_circle</span>
+            System Status: Optimal
+        </div>
+<div class="text-zinc-400 dark:text-zinc-500 flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]" data-icon="memory">memory</span>
+            Compute: 84%
+        </div>
+<div class="text-zinc-400 dark:text-zinc-500 flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]" data-icon="speed">speed</span>
+            Latency: 12ms
+        </div>
+<div class="text-zinc-400 dark:text-zinc-500 flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]" data-icon="verified">verified</span>
+            Uptime: 99.9%
+        </div>
+</footer>
+</body></html>

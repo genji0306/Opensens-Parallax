@@ -3,8 +3,8 @@
  * RevisionPlanView — Prioritized revision plan + rebuttal generator (Sprint 11).
  */
 
-import { ref } from 'vue'
-import { createRevisionPlan, generateRebuttal } from '@/api/ais'
+import { ref, watch } from 'vue'
+import { createRevisionPlan, generateRebuttal, getPipelineStatus } from '@/api/ais'
 
 const props = defineProps<{ runId: string }>()
 
@@ -14,7 +14,38 @@ const planLoading = ref(false)
 const rebuttalLoading = ref(false)
 const error = ref<string | null>(null)
 
+function readPersistedPlan(raw: unknown) {
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return []
+  const planItems = (raw as { plan?: typeof plan.value }).plan
+  return Array.isArray(planItems) ? planItems : []
+}
+
+function readPersistedRebuttal(raw: unknown) {
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return []
+  const responses = (raw as { responses?: typeof rebuttal.value }).responses
+  return Array.isArray(responses) ? responses : []
+}
+
+async function hydrateRevisionArtifacts() {
+  if (!props.runId) {
+    plan.value = []
+    rebuttal.value = []
+    return
+  }
+
+  try {
+    const res = await getPipelineStatus(props.runId)
+    const stageResults = res.data?.data?.stage_results as Record<string, unknown> | undefined
+    plan.value = readPersistedPlan(stageResults?.review_revision_plan)
+    rebuttal.value = readPersistedRebuttal(stageResults?.review_rebuttal)
+  } catch {
+    plan.value = []
+    rebuttal.value = []
+  }
+}
+
 async function loadPlan() {
+  if (!props.runId) return
   planLoading.value = true
   error.value = null
   try {
@@ -28,6 +59,7 @@ async function loadPlan() {
 }
 
 async function loadRebuttal() {
+  if (!props.runId) return
   rebuttalLoading.value = true
   error.value = null
   try {
@@ -47,6 +79,10 @@ function effortColor(effort: string): string {
 function statusIcon(status: string): string {
   return status === 'addressed' ? 'check_circle' : status === 'partially_addressed' ? 'pending' : 'cancel'
 }
+
+watch(() => props.runId, () => {
+  hydrateRevisionArtifacts()
+}, { immediate: true })
 </script>
 
 <template>

@@ -650,14 +650,12 @@ def _get_migrations():
             CREATE INDEX IF NOT EXISTS idx_revision_history_run ON revision_history(run_id);
         """),
         (5, "AI Scientist V2 (BFTS) columns", """
-            -- experiment_specs: V2 planner fields
-            ALTER TABLE experiment_specs ADD COLUMN planner_version TEXT NOT NULL DEFAULT 'v1';
-            ALTER TABLE experiment_specs ADD COLUMN bfts_config TEXT NOT NULL DEFAULT '{}';
-
-            -- experiment_results: V2 tree search + cost tracking
-            ALTER TABLE experiment_results ADD COLUMN tree_structure TEXT NOT NULL DEFAULT '{}';
-            ALTER TABLE experiment_results ADD COLUMN token_usage TEXT NOT NULL DEFAULT '{}';
-            ALTER TABLE experiment_results ADD COLUMN self_review TEXT NOT NULL DEFAULT '';
+            -- V2 columns are now included in the CREATE TABLE statements above.
+            -- This migration is a no-op marker for databases created after the
+            -- schema was updated inline.  Existing databases that already ran
+            -- the original ALTER TABLEs will simply skip this migration because
+            -- their schema_versions already records version 5.
+            SELECT 1;
         """),
         (6, "Grant Hunt module tables", """
             CREATE TABLE IF NOT EXISTS grant_profiles (
@@ -715,6 +713,59 @@ def _get_migrations():
 
             CREATE INDEX IF NOT EXISTS idx_grant_feedback_profile
                 ON grant_feedback(profile_id, created_at DESC);
+        """),
+        (7, "Grant Hunt v2 typed fields, crawl infrastructure, alerts", """
+            -- Add typed columns to grant_opportunities
+            ALTER TABLE grant_opportunities ADD COLUMN deadline_date TEXT DEFAULT '';
+            ALTER TABLE grant_opportunities ADD COLUMN deadline_state TEXT DEFAULT 'unknown';
+            ALTER TABLE grant_opportunities ADD COLUMN grant_size_min_usd REAL;
+            ALTER TABLE grant_opportunities ADD COLUMN grant_size_max_usd REAL;
+            ALTER TABLE grant_opportunities ADD COLUMN theme_tags TEXT DEFAULT '[]';
+            ALTER TABLE grant_opportunities ADD COLUMN region_codes TEXT DEFAULT '[]';
+            ALTER TABLE grant_opportunities ADD COLUMN applicant_scopes TEXT DEFAULT '[]';
+            ALTER TABLE grant_opportunities ADD COLUMN source_url_canonical TEXT DEFAULT '';
+            ALTER TABLE grant_opportunities ADD COLUMN content_hash TEXT DEFAULT '';
+
+            CREATE INDEX IF NOT EXISTS idx_grant_opps_deadline
+                ON grant_opportunities(deadline_date);
+            CREATE INDEX IF NOT EXISTS idx_grant_opps_state
+                ON grant_opportunities(deadline_state);
+            CREATE INDEX IF NOT EXISTS idx_grant_opps_hash
+                ON grant_opportunities(content_hash);
+
+            -- Crawl cache (incremental crawl)
+            CREATE TABLE IF NOT EXISTS grant_crawl_cache (
+                url TEXT PRIMARY KEY,
+                content_hash TEXT NOT NULL,
+                last_seen_at TEXT NOT NULL
+            );
+
+            -- Crawl run log (resume + history)
+            CREATE TABLE IF NOT EXISTS grant_crawl_runs (
+                run_id TEXT PRIMARY KEY,
+                source_id TEXT NOT NULL,
+                started_at TEXT NOT NULL,
+                completed_at TEXT,
+                new_count INTEGER DEFAULT 0,
+                updated_count INTEGER DEFAULT 0,
+                errors TEXT DEFAULT '[]',
+                status TEXT DEFAULT 'running'
+            );
+            CREATE INDEX IF NOT EXISTS idx_grant_runs_source
+                ON grant_crawl_runs(source_id, started_at DESC);
+
+            -- Alerts
+            CREATE TABLE IF NOT EXISTS grant_alerts (
+                alert_id TEXT PRIMARY KEY,
+                profile_id TEXT NOT NULL,
+                alert_type TEXT NOT NULL,
+                target_id TEXT NOT NULL,
+                fired_at TEXT NOT NULL,
+                seen_at TEXT,
+                data TEXT NOT NULL DEFAULT '{}'
+            );
+            CREATE INDEX IF NOT EXISTS idx_grant_alerts_profile
+                ON grant_alerts(profile_id, fired_at DESC);
         """),
     ]
 

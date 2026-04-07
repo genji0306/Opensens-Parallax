@@ -1,6 +1,7 @@
 """Tests for costs, budget, approvals, and audit."""
 
 import pytest
+import v3_gateway.main as gateway_main
 from httpx import AsyncClient
 
 
@@ -97,6 +98,7 @@ async def test_approval_gate_creates_awaiting(client: AsyncClient, project: dict
         "project_id": project["project_id"],
         "template_id": "experiment",
         "config": {},
+        "auto_start": False,
     })
     run = r.json()["data"]
     rid = run["run_id"]
@@ -114,6 +116,14 @@ async def test_approval_gate_creates_awaiting(client: AsyncClient, project: dict
     gate = next((e for e in executed if e["status"] == "awaiting_approval"), None)
     assert gate is not None
 
+    approvals = await client.get("/api/v3/approvals", params={
+        "project_id": project["project_id"],
+        "status": "pending",
+    })
+    data = approvals.json()["data"]
+    assert len(data) == 1
+    assert data[0]["phase_id"] == gate["phase_id"]
+
 
 @pytest.mark.asyncio
 async def test_health_endpoint(client: AsyncClient):
@@ -123,3 +133,7 @@ async def test_health_endpoint(client: AsyncClient):
     assert data["status"] == "healthy"
     assert data["service"] == "parallax-v3-gateway"
     assert "integrations" in data
+
+
+def test_console_entrypoint_exported():
+    assert callable(gateway_main.main)

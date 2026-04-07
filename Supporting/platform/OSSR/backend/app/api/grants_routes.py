@@ -66,6 +66,8 @@ from ..services.grants.profile_parser import (
     profile_summary,
 )
 from ..services.grants.sources import BUILTIN_SOURCES
+from ..services.grants import alerts as alerts_engine
+from ..services.grants.scheduler import get_scheduler
 from ..services.grants.store import (
     delete_profile,
     delete_source,
@@ -73,10 +75,16 @@ from ..services.grants.store import (
     get_profile,
     get_proposal,
     get_source,
+    get_watchlist,
+    list_alerts,
+    list_crawl_runs,
     list_opportunities,
+    list_opportunities_by_region_bloc,
     list_profiles,
     list_proposals,
     list_sources,
+    mark_alert_seen,
+    mark_all_alerts_seen,
     record_feedback,
     save_opportunity,
     save_profile,
@@ -259,9 +267,29 @@ def api_discover_one(source_id: str):
 
 @grants_bp.route("/grants/opportunities", methods=["GET"])
 def api_list_opportunities():
+    """
+    List opportunities with v2 typed filters.
+
+    Query params:
+        source_id        restrict to one source
+        limit            default 200
+        theme_tag        canonical theme enum, e.g. energy_efficiency
+        region_code      ISO country code or bloc (ASEAN, EU, GLOBAL…)
+        deadline_state   open|closing_soon|closed|rolling|unknown
+        applicant_scope  startup|sme|researcher|ngo|university|…
+        search           free-text keyword over title/blob
+    """
     source_id = request.args.get("source_id")
     limit = int(request.args.get("limit", 200))
-    opps = list_opportunities(source_id=source_id, limit=limit)
+    opps = list_opportunities(
+        source_id=source_id,
+        limit=limit,
+        theme_tag=request.args.get("theme_tag"),
+        region_code=request.args.get("region_code"),
+        deadline_state=request.args.get("deadline_state"),
+        applicant_scope=request.args.get("applicant_scope"),
+        search=request.args.get("search"),
+    )
     return _ok([o.to_dict() for o in opps])
 
 
@@ -490,3 +518,197 @@ def api_record_feedback():
     )
     record_feedback(event)
     return _ok(event.to_dict(), status=201)
+
+
+# ── Alerts (Phase E) ─────────────────────────────────────────────────
+
+
+@grants_bp.route("/grants/alerts", methods=["GET"])
+def api_list_alerts():
+    """List alerts for a profile. Query params: profile_id, unseen_only=1|0, limit."""
+    profile_id = request.args.get("profile_id")
+    if not profile_id:
+        return _err("profile_id required")
+    unseen_only = request.args.get("unseen_only", "1") in ("1", "true", "yes")
+    limit = int(request.args.get("limit", 100))
+    rows = list_alerts(profile_id=profile_id, unseen_only=unseen_only, limit=limit)
+    return _ok({"count": len(rows), "alerts": rows})
+
+
+@grants_bp.route("/grants/alerts/evaluate", methods=["POST"])
+def api_evaluate_alerts():
+    """
+    Force-evaluate alerts for a profile. Runs matcher over current
+    opportunities, fires new_match alerts ≥ threshold, and sweeps the
+    watchlist for deadline alerts. Primarily used by the scheduler and
+    the UI refresh button.
+    """
+    body = request.get_json(silent=True) or {}
+    profile_id = body.get("profile_id")
+    if not profile_id:
+        return _err("profile_id required")
+    profile = get_profile(profile_id)
+    if not profile:
+        return _err("profile not found", 404)
+
+    threshold = float(body.get("threshold", alerts_engine.DEFAULT_MATCH_THRESHOLD))
+    matches = None
+    if body.get("run_matcher"):
+        matcher = ProfileMatcher(model=body.get("model", ""))
+        matches = matcher.match_all(profile, list_opportunities(limit=500))
+
+    fired = alerts_engine.evaluate_alerts(
+        profile_id=profile_id,
+        matches=matches,
+        threshold=threshold,
+    )
+    return _ok({"count": len(fired), "alerts": [a.to_dict() for a in fired]})
+
+
+@grants_bp.route("/grants/alerts/<alert_id>/seen", methods=["POST"])
+def api_mark_alert_seen(alert_id: str):
+    mark_alert_seen(alert_id)
+    return _ok({"alert_id": alert_id, "seen": True})
+
+
+@grants_bp.route("/grants/alerts/mark-all-seen", methods=["POST"])
+def api_mark_all_alerts_seen():
+    body = request.get_json(silent=True) or {}
+    profile_id = body.get("profile_id")
+    if not profile_id:
+        return _err("profile_id required")
+    marked = mark_all_alerts_seen(profile_id)
+    return _ok({"marked": marked})
+
+
+# ── Watchlist (derived from feedback events) ─────────────────────────
+
+
+@grants_bp.route("/grants/watchlist", methods=["GET"])
+def api_get_watchlist():
+    profile_id = request.args.get("profile_id")
+    if not profile_id:
+        return _err("profile_id required")
+    ids = get_watchlist(profile_id)
+    return _ok({"opportunity_ids": ids})
+
+
+# ── Scheduler (Phase D.1) ────────────────────────────────────────────
+
+
+@grants_bp.route("/grants/scheduler/status", methods=["GET"])
+def api_scheduler_status():
+    sched = get_scheduler()
+    return _ok(sched.status())
+
+
+@grants_bp.route("/grants/scheduler/start", methods=["POST"])
+def api_scheduler_start():
+    sched = get_scheduler()
+    sched.start()
+    return _ok(sched.status())
+
+
+@grants_bp.route("/grants/scheduler/trigger/<source_id>", methods=["POST"])
+def api_scheduler_trigger(source_id: str):
+    sched = get_scheduler()
+    # Ensure the scheduler is running so the worker pool exists.
+    sched.start()
+    ok = sched.trigger(source_id)
+    if not ok:
+        return _err("already running or source unknown", 409)
+    return _ok({"source_id": source_id, "triggered": True})
+
+
+@grants_bp.route("/grants/scheduler/runs", methods=["GET"])
+def api_scheduler_runs():
+    source_id = request.args.get("source_id")
+    limit = int(request.args.get("limit", 50))
+    runs = list_crawl_runs(source_id=source_id, limit=limit)
+    return _ok({"count": len(runs), "runs": runs})
+
+
+# ── Timeline + regional bloc query (Phase D.2) ──────────────────────
+
+
+@grants_bp.route("/grants/timeline", methods=["GET"])
+def api_grant_timeline():
+    """
+    Opportunities for the SEA Timeline view.
+
+    Query params:
+        regions          comma-separated ISO codes + blocs; defaults to SEA bloc
+        deadline_state   optional filter
+        limit            default 500
+    """
+    regions_param = request.args.get("regions", "")
+    if regions_param:
+        region_codes = [c.strip().upper() for c in regions_param.split(",") if c.strip()]
+    else:
+        region_codes = [
+            "VN", "TH", "ID", "MY", "SG", "PH", "KH", "LA", "MM", "BN", "TL",
+            "ASEAN", "APAC", "GLOBAL",
+        ]
+    deadline_state = request.args.get("deadline_state")
+    limit = int(request.args.get("limit", 500))
+    opps = list_opportunities_by_region_bloc(
+        bloc_codes=region_codes,
+        limit=limit,
+        deadline_state=deadline_state,
+    )
+    return _ok(
+        {
+            "count": len(opps),
+            "regions": region_codes,
+            "opportunities": [o.to_dict() for o in opps],
+        }
+    )
+
+
+# ── CSV export (Phase F) ────────────────────────────────────────────
+
+
+@grants_bp.route("/grants/opportunities/export", methods=["GET"])
+def api_export_opportunities():
+    """Export filtered opportunities as CSV."""
+    import csv
+    import io
+
+    opps = list_opportunities(
+        source_id=request.args.get("source_id"),
+        limit=int(request.args.get("limit", 1000)),
+        theme_tag=request.args.get("theme_tag"),
+        region_code=request.args.get("region_code"),
+        deadline_state=request.args.get("deadline_state"),
+        applicant_scope=request.args.get("applicant_scope"),
+        search=request.args.get("search"),
+    )
+
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow([
+        "opportunity_id", "title", "funder", "deadline_date", "deadline_state",
+        "grant_size_min_usd", "grant_size_max_usd", "theme_tags",
+        "region_codes", "applicant_scopes", "call_url",
+    ])
+    for o in opps:
+        writer.writerow([
+            o.opportunity_id,
+            o.title,
+            o.funder,
+            o.deadline_date,
+            o.deadline_state,
+            o.grant_size_min_usd or "",
+            o.grant_size_max_usd or "",
+            ";".join(o.theme_tags or []),
+            ";".join(o.region_codes or []),
+            ";".join(o.applicant_scopes or []),
+            o.call_url or o.source_url,
+        ])
+
+    from flask import Response
+    return Response(
+        buf.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": "attachment; filename=grant-opportunities.csv"},
+    )

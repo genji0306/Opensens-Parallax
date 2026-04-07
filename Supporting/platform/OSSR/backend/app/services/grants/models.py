@@ -9,7 +9,7 @@ independently of any ORM.
 from __future__ import annotations
 
 from dataclasses import dataclass, field, asdict
-from datetime import datetime
+from datetime import datetime, date
 from typing import Any, Dict, List, Optional
 
 
@@ -90,6 +90,9 @@ class GrantOpportunity:
     A structured extracted grant call. For listing-hub sites like
     fundsforngos, the `source_url` is the listing page and `call_url`
     is the final funder page reached via link-following.
+
+    V2 fields add canonical typed enums for scopes, themes, regions,
+    normalised USD grant sizes, ISO deadline dates, and deduplication support.
     """
     opportunity_id: str
     source_id: str
@@ -101,13 +104,64 @@ class GrantOpportunity:
     eligibility: List[str] = field(default_factory=list)
     themes: List[str] = field(default_factory=list)
     regions: List[str] = field(default_factory=list)
-    applicant_types: List[str] = field(default_factory=list)  # "startup", "ngo", "researcher", "sme"...
+    applicant_types: List[str] = field(default_factory=list)  # legacy free-text list
     summary: str = ""
     source_url: str = ""                      # listing page where we found it
     call_url: str = ""                        # real funder call page
     raw_text: str = ""                        # trimmed extracted text of the call
     fetched_at: str = field(default_factory=lambda: datetime.now().isoformat())
     extra: Dict[str, Any] = field(default_factory=dict)
+
+    # ── V2 typed fields ──────────────────────────────────────────
+    open_date: str = ""                       # ISO date or ""
+    deadline_date: str = ""                   # ISO date YYYY-MM-DD or ""
+    deadline_state: str = "unknown"           # open|closing_soon|closed|rolling|unknown
+    grant_size_min_usd: Optional[float] = None
+    grant_size_max_usd: Optional[float] = None
+    original_amount_text: str = ""            # preserve raw amount string
+    applicant_scopes: List[str] = field(default_factory=list)   # canonical enum
+    theme_tags: List[str] = field(default_factory=list)         # canonical enum
+    region_codes: List[str] = field(default_factory=list)       # ISO + blocs
+    language: str = ""
+    source_url_canonical: str = ""
+    content_hash: str = ""
+    source_ids: List[str] = field(default_factory=list)         # merged after dedup
+
+    def compute_deadline_state(self) -> None:
+        """
+        Set deadline_state based on deadline_date relative to today.
+
+        Rules:
+            - "" or unparseable  → "unknown"
+            - "rolling" or "continuous" in deadline text  → "rolling"
+            - past date          → "closed"
+            - within 14 days     → "closing_soon"
+            - otherwise          → "open"
+        """
+        # Check for rolling indicator in raw deadline text first
+        raw = (self.deadline or "").lower()
+        if "rolling" in raw or "continuous" in raw or "ongoing" in raw:
+            self.deadline_state = "rolling"
+            return
+
+        if not self.deadline_date:
+            self.deadline_state = "unknown"
+            return
+
+        try:
+            deadline_d = date.fromisoformat(self.deadline_date)
+        except ValueError:
+            self.deadline_state = "unknown"
+            return
+
+        today = date.today()
+        days_left = (deadline_d - today).days
+        if days_left < 0:
+            self.deadline_state = "closed"
+        elif days_left <= 14:
+            self.deadline_state = "closing_soon"
+        else:
+            self.deadline_state = "open"
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -132,6 +186,20 @@ class GrantOpportunity:
             raw_text=data.get("raw_text", ""),
             fetched_at=data.get("fetched_at", datetime.now().isoformat()),
             extra=data.get("extra", {}) or {},
+            # V2 fields
+            open_date=data.get("open_date", ""),
+            deadline_date=data.get("deadline_date", ""),
+            deadline_state=data.get("deadline_state", "unknown"),
+            grant_size_min_usd=data.get("grant_size_min_usd"),
+            grant_size_max_usd=data.get("grant_size_max_usd"),
+            original_amount_text=data.get("original_amount_text", ""),
+            applicant_scopes=list(data.get("applicant_scopes", []) or []),
+            theme_tags=list(data.get("theme_tags", []) or []),
+            region_codes=list(data.get("region_codes", []) or []),
+            language=data.get("language", ""),
+            source_url_canonical=data.get("source_url_canonical", ""),
+            content_hash=data.get("content_hash", ""),
+            source_ids=list(data.get("source_ids", []) or []),
         )
 
 

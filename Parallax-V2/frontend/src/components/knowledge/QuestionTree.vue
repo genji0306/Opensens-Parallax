@@ -4,15 +4,74 @@
  * Shows evidence coverage per question.
  */
 
-import { ref } from 'vue'
-import { decomposeQuestions } from '@/api/ais'
-import type { QuestionTreeData } from '@/api/ais'
+import { ref, watch } from 'vue'
+import { decomposeQuestions, getKnowledgeArtifact } from '@/api/ais'
+import type { KnowledgeArtifact, QuestionTreeData } from '@/api/ais'
 
 const props = defineProps<{ runId: string }>()
 
 const data = ref<QuestionTreeData | null>(null)
 const loading = ref(false)
 const error = ref<string | null>(null)
+
+function buildQuestionTree(artifact: KnowledgeArtifact | null | undefined): QuestionTreeData | null {
+  if (!artifact) return null
+
+  const questions = Array.isArray(artifact.sub_questions) ? artifact.sub_questions : []
+  if (!questions.length) return null
+
+  const nodes = new Map<string, QuestionTreeData['tree'][number] & { parent_id: string | null }>()
+  const orderedIds: string[] = []
+
+  for (const question of questions) {
+    if (!question.question_id) continue
+    nodes.set(question.question_id, {
+      id: question.question_id,
+      text: question.text ?? '',
+      evidence_coverage: Number(question.evidence_coverage ?? 0),
+      parent_id: question.parent_id ?? null,
+      children: [],
+    })
+    orderedIds.push(question.question_id)
+  }
+
+  const tree: QuestionTreeData['tree'] = []
+  for (const questionId of orderedIds) {
+    const node = nodes.get(questionId)
+    if (!node) continue
+    const parentId = node.parent_id
+    if (parentId && nodes.has(parentId)) {
+      nodes.get(parentId)!.children.push(node)
+    } else {
+      tree.push(node)
+    }
+  }
+
+  const coverages = questions.map(question => Number(question.evidence_coverage ?? 0))
+  return {
+    questions,
+    tree,
+    stats: {
+      total_questions: questions.length,
+      avg_coverage: coverages.length ? Number((coverages.reduce((sum, coverage) => sum + coverage, 0) / coverages.length).toFixed(2)) : 0,
+      uncovered_count: coverages.filter(coverage => coverage < 0.3).length,
+    },
+  }
+}
+
+async function hydrateQuestionTree() {
+  if (!props.runId) {
+    data.value = null
+    return
+  }
+
+  try {
+    const res = await getKnowledgeArtifact(props.runId)
+    data.value = buildQuestionTree(res.data?.data ?? null)
+  } catch {
+    data.value = null
+  }
+}
 
 async function runDecompose() {
   if (!props.runId) return
@@ -27,6 +86,10 @@ async function runDecompose() {
     loading.value = false
   }
 }
+
+watch(() => props.runId, () => {
+  hydrateQuestionTree()
+}, { immediate: true })
 
 function coverageColor(coverage: number): string {
   if (coverage >= 0.7) return 'var(--success, #22c55e)'

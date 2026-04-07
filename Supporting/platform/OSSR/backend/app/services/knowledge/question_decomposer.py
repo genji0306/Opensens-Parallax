@@ -58,12 +58,10 @@ class QuestionDecomposer:
     """Decomposes research ideas into sub-question trees."""
 
     def __init__(self):
-        self.llm = None
+        pass
 
-    def _get_llm(self) -> LLMClient:
-        if self.llm is None:
-            self.llm = LLMClient()
-        return self.llm
+    def _get_llm(self, model: str = "") -> LLMClient:
+        return LLMClient(model=model) if model else LLMClient()
 
     def decompose(self, run_id: str, model: str = "") -> Dict[str, Any]:
         """
@@ -79,8 +77,10 @@ class QuestionDecomposer:
         artifact = KnowledgeArtifactDAO.load(run_id)
         from ...models.ais_models import PipelineRunDAO
         run = PipelineRunDAO.load(run_id)
+        if not run:
+            raise ValueError(f"Run not found: {run_id}")
 
-        idea = run.research_idea if run else ""
+        idea = run.research_idea
         claims_text = ""
         evidence_summary = ""
 
@@ -88,14 +88,13 @@ class QuestionDecomposer:
             claims_text = "\n".join(f"- {c.text}" for c in artifact.claims[:10])
             evidence_summary = f"{len(artifact.evidence)} pieces of evidence, {len(artifact.claims)} claims"
 
-        model = model or "claude-sonnet-4-20250514"
-        response = self._get_llm().chat(
-            DECOMPOSE_PROMPT.format(
-                idea=idea,
-                claims=claims_text or "No claims extracted yet.",
-                evidence_summary=evidence_summary or "No evidence yet.",
-            ),
-            model=model,
+        prompt = DECOMPOSE_PROMPT.format(
+            idea=idea,
+            claims=claims_text or "No claims extracted yet.",
+            evidence_summary=evidence_summary or "No evidence yet.",
+        )
+        response = self._get_llm(model).chat(
+            [{"role": "user", "content": prompt}],
         )
 
         questions, tree = self._parse_response(response)

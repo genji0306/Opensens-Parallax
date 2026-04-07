@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed, ref, onUnmounted } from 'vue'
+import { computed, ref, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import DOMPurify from 'dompurify'
 import ActionButton from '@/components/shared/ActionButton.vue'
-import { exportDraft, runExperimentDesign, getPipelineStatus, getDraftVersions, buildArgumentSkeleton } from '@/api/ais'
+import { exportDraft, runExperimentDesign, getPipelineStatus, getDraftVersions, buildArgumentSkeleton, getKnowledgeArtifact } from '@/api/ais'
 import type { ExperimentDesignResult, DraftVersion } from '@/api/ais'
 import service from '@/api/client'
 
@@ -24,21 +25,39 @@ interface Section {
   complete?: boolean
 }
 
-const sections = computed<Section[]>(() => {
-  // Try explicit sections array first
-  const raw = props.result.sections as Section[] | undefined
-  if (raw && Array.isArray(raw) && raw.length > 0) return raw
+interface SkeletonSection {
+  section_id: string
+  heading: string
+  purpose: string
+  key_points: string[]
+  assigned_citations: string[]
+}
 
-  // Fallback: parse section_titles from draft metadata
+const sectionHeadingSource = computed<'sections' | 'titles' | 'count' | 'none'>(() => {
+  const raw = props.result.sections as Section[] | undefined
+  if (raw && Array.isArray(raw) && raw.length > 0) return 'sections'
+
   const titles = props.result.section_titles as string[] | undefined
-  if (titles && Array.isArray(titles)) {
+  if (titles && Array.isArray(titles) && titles.length > 0) return 'titles'
+
+  const count = (props.result.section_count ?? props.result.total_sections) as number | undefined
+  if (count && count > 0) return 'count'
+
+  return 'none'
+})
+
+const sections = computed<Section[]>(() => {
+  if (sectionHeadingSource.value === 'sections') {
+    return props.result.sections as Section[]
+  }
+
+  if (sectionHeadingSource.value === 'titles') {
+    const titles = props.result.section_titles as string[]
     return titles.map(t => ({ heading: t, complete: true }))
   }
 
-  // Fallback: use section_count from backend to show at least the number
-  const count = (props.result.section_count ?? props.result.total_sections) as number | undefined
-  if (count && count > 0) {
-    // No individual titles available — show generic section entries
+  if (sectionHeadingSource.value === 'count') {
+    const count = (props.result.section_count ?? props.result.total_sections) as number
     return Array.from({ length: count }, (_, i) => ({
       heading: `Section ${i + 1}`,
       complete: true,
@@ -47,6 +66,8 @@ const sections = computed<Section[]>(() => {
 
   return []
 })
+
+const usingPlaceholderSectionHeadings = computed(() => sectionHeadingSource.value === 'count')
 
 const citationCount = computed(() => {
   const citations = props.result.citations as unknown[] | undefined
@@ -122,7 +143,7 @@ function renderMarkdown(md: string): string {
   html = html.replace(/<p>(<h[1-4]>)/g, '$1').replace(/(<\/h[1-4]>)<\/p>/g, '$1')
   html = html.replace(/<p>(<hr>)<\/p>/g, '$1')
 
-  return html
+  return DOMPurify.sanitize(html, { ALLOWED_TAGS: ['h1','h2','h3','h4','p','strong','em','code','hr'] })
 }
 
 function closeDraftModal() {
@@ -143,7 +164,10 @@ async function handleExportMarkdown() {
       const a = document.createElement('a')
       a.href = url
       a.download = `draft-${props.runId}.md`
+      a.style.display = 'none'
+      document.body.appendChild(a)
       a.click()
+      document.body.removeChild(a)
       URL.revokeObjectURL(url)
     }
   } catch (err) {
@@ -216,7 +240,10 @@ function downloadFile(content: string, filename: string, mimeType: string) {
   const a = document.createElement('a')
   a.href = url
   a.download = filename
+  a.style.display = 'none'
+  document.body.appendChild(a)
   a.click()
+  document.body.removeChild(a)
   URL.revokeObjectURL(url)
 }
 
@@ -251,6 +278,64 @@ function clearExperimentPoll() {
 
 onUnmounted(() => clearExperimentPoll())
 
+function normalizeExperimentResult(raw: unknown): ExperimentDesignResult | null {
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return null
+
+  const candidate = raw as Record<string, unknown>
+  const gaps = Array.isArray(candidate.gaps) ? candidate.gaps : []
+  const experiments = Array.isArray(candidate.experiments)
+    ? candidate.experiments
+    : Array.isArray(candidate.proposed_experiments)
+      ? candidate.proposed_experiments
+      : []
+
+  if (!gaps.length && !experiments.length && candidate.overall_readiness == null) {
+    return null
+  }
+
+  return {
+    gaps: gaps as ExperimentDesignResult['gaps'],
+    experiments: experiments as ExperimentDesignResult['experiments'],
+    overall_readiness: Number(candidate.overall_readiness ?? 0),
+    summary: String(candidate.summary ?? ''),
+    model_used: String(candidate.model_used ?? ''),
+    gap_count: Number(candidate.gap_count ?? gaps.length),
+    critical_gaps: Number(candidate.critical_gaps ?? gaps.filter(gap => gap?.severity === 'critical').length),
+    experiment_count: Number(candidate.experiment_count ?? experiments.length),
+  }
+}
+
+async function hydratePersistedDraftIntelligence() {
+  if (!props.runId) {
+    experimentResult.value = null
+    skeletonResult.value = null
+    return
+  }
+
+  const [statusResult, knowledgeResult] = await Promise.allSettled([
+    getPipelineStatus(props.runId),
+    getKnowledgeArtifact(props.runId),
+  ])
+
+  if (statusResult.status === 'fulfilled') {
+    const stageResults = statusResult.value.data?.data?.stage_results as Record<string, unknown> | undefined
+    const persistedExperiment = normalizeExperimentResult(
+      stageResults?.experiment_design ?? stageResults?.stage_6 ?? stageResults?.experiment ?? null
+    )
+    if (persistedExperiment) {
+      experimentResult.value = persistedExperiment
+      experimentError.value = null
+    }
+  }
+
+  if (knowledgeResult.status === 'fulfilled') {
+    const sections = knowledgeResult.value.data?.data?.argument_skeleton
+    skeletonResult.value = Array.isArray(sections) && sections.length
+      ? sections as SkeletonSection[]
+      : null
+  }
+}
+
 async function handleRunExperimentDesign() {
   if (!props.runId) return
   experimentLoading.value = true
@@ -273,8 +358,11 @@ async function handleRunExperimentDesign() {
       try {
         const res = await getPipelineStatus(props.runId!)
         const stageResults = res.data?.data?.stage_results
-        if (stageResults?.experiment_design) {
-          experimentResult.value = stageResults.experiment_design as ExperimentDesignResult
+        const persistedExperiment = normalizeExperimentResult(
+          stageResults?.experiment_design ?? stageResults?.stage_6 ?? stageResults?.experiment ?? null
+        )
+        if (persistedExperiment) {
+          experimentResult.value = persistedExperiment
           experimentLoading.value = false
           clearExperimentPoll()
         }
@@ -302,7 +390,7 @@ function severityColor(severity: string): string {
 
 // ── Argument Skeleton (P-2) ───────────────────────────────────────────
 const skeletonLoading = ref(false)
-const skeletonResult = ref<Array<{ section_id: string; heading: string; purpose: string; key_points: string[]; assigned_citations: string[] }> | null>(null)
+const skeletonResult = ref<SkeletonSection[] | null>(null)
 
 async function handleBuildSkeleton() {
   if (!props.runId || skeletonLoading.value) return
@@ -344,6 +432,10 @@ const hasData = computed(() =>
     || futureDiscussion.value.length > 0
     || exportPath.value !== null,
 )
+
+watch(() => props.runId, () => {
+  hydratePersistedDraftIntelligence()
+}, { immediate: true })
 </script>
 
 <template>
@@ -378,14 +470,21 @@ const hasData = computed(() =>
             >
               {{ reviewScore.toFixed(1) }}/10
             </span>
-            <span class="draft-metric__label">Review Score</span>
+            <span class="draft-metric__label" title="Composite score from automated checks across novelty, rigor, and clarity.">
+              Review Score
+            </span>
           </div>
         </div>
       </div>
 
       <!-- Section List -->
       <div v-if="sections.length > 0" class="sections-list">
-        <h5 class="detail-heading">Sections</h5>
+        <div class="sections-list__header">
+          <h5 class="detail-heading">Sections</h5>
+          <span v-if="usingPlaceholderSectionHeadings" class="sections-list__note">
+            Section titles unavailable from backend artifact.
+          </span>
+        </div>
         <div
           v-for="(section, i) in sections"
           :key="i"
@@ -793,6 +892,19 @@ const hasData = computed(() =>
 .sections-list {
   display: flex;
   flex-direction: column;
+}
+
+.sections-list__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sections-list__note {
+  font-size: 11px;
+  color: var(--text-tertiary);
 }
 
 .section-item {

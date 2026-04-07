@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary": "#ffffff",
+              "surface-variant": "#dae3f7",
+              "surface-container-low": "#f0f3ff",
+              "surface-bright": "#f9f9ff",
+              "primary-fixed-dim": "#61dbbe",
+              "primary-fixed": "#7ff7da",
+              "on-surface": "#131c2a",
+              "secondary": "#3c665b",
+              "surface-dim": "#d1daef",
+              "outline": "#6d7a75",
+              "on-primary-fixed": "#00201a",
+              "on-primary-container": "#00352b",
+              "on-background": "#131c2a",
+              "primary-container": "#1ea88e",
+              "on-secondary": "#ffffff",
+              "background": "#09090b",
+              "inverse-on-surface": "#ecf1ff",
+              "surface-container-lowest": "#ffffff",
+              "secondary-fixed-dim": "#a3d0c2",
+              "secondary-fixed": "#bfecde",
+              "on-secondary-fixed-variant": "#244e44",
+              "primary": "#1ea88e",
+              "tertiary-fixed": "#ffdad2",
+              "on-tertiary-container": "#5a1506",
+              "tertiary": "#9a4431",
+              "inverse-primary": "#61dbbe",
+              "surface": "#09090b",
+              "on-surface-variant": "#3d4945",
+              "tertiary-container": "#df7962",
+              "on-tertiary-fixed": "#3d0600",
+              "on-error-container": "#93000a",
+              "on-error": "#ffffff",
+              "tertiary-fixed-dim": "#ffb4a4",
+              "surface-container-high": "#dfe8fd",
+              "surface-container": "#e7eeff",
+              "error": "#ba1a1a",
+              "error-container": "#ffdad6",
+              "on-primary-fixed-variant": "#005143",
+              "on-tertiary-fixed-variant": "#7c2d1c",
+              "outline-variant": "#bccac4",
+              "surface-tint": "#1ea88e",
+              "on-secondary-fixed": "#00201a",
+              "on-tertiary": "#ffffff",
+              "secondary-container": "#bce9db",
+              "on-secondary-container": "#416a5f",
+              "inverse-surface": "#283140"
+            },
+            fontFamily: {
+              "headline": ["Inter"],
+              "body": ["Inter"],
+              "label": ["Inter"],
+              "mono": ["JetBrains Mono"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-pulse {
+            box-shadow: 0 0 0 0 rgba(30, 168, 142, 0.4);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(30, 168, 142, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(30, 168, 142, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(30, 168, 142, 0); }
+        }
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 font-body antialiased selection:bg-primary-container selection:text-white">
+<!-- Top Navigation Shell -->
+<nav class="flex justify-between items-center px-8 w-full sticky top-0 z-50 h-16 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-200 dark:border-zinc-800">
+<div class="flex items-center gap-8">
+<span class="text-sm font-black tracking-tighter text-zinc-900 dark:text-zinc-50 font-mono">OPENSENS PARALLAX</span>
+<div class="hidden md:flex items-center gap-6">
+<a class="font-['Inter'] uppercase tracking-widest text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors duration-200 cursor-pointer active:scale-[0.98]" href="#">Crawl</a>
+<a class="font-['Inter'] uppercase tracking-widest text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors duration-200 cursor-pointer active:scale-[0.98]" href="#">Map</a>
+<a class="font-['Inter'] uppercase tracking-widest text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors duration-200 cursor-pointer active:scale-[0.98]" href="#">Debate</a>
+<a class="font-['Inter'] uppercase tracking-widest text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors duration-200 cursor-pointer active:scale-[0.98]" href="#">Validate</a>
+<a class="font-['Inter'] uppercase tracking-widest text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors duration-200 cursor-pointer active:scale-[0.98]" href="#">Ideas</a>
+<a class="font-['Inter'] uppercase tracking-widest text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors duration-200 cursor-pointer active:scale-[0.98]" href="#">Draft</a>
+<a class="font-['Inter'] uppercase tracking-widest text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors duration-200 cursor-pointer active:scale-[0.98]" href="#">Experiment</a>
+<a class="font-['Inter'] uppercase tracking-widest text-[11px] font-semibold text-[#1EA88E] border-b-2 border-[#1EA88E] pb-1 cursor-pointer active:scale-[0.98]" href="#">Rehab</a>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="font-mono text-sm tracking-tight text-primary flex items-center gap-2">
+<span class="text-xs text-zinc-500 uppercase">Cost</span>
+<span class="font-bold">$0.41</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-zinc-400 hover:text-white cursor-pointer transition-colors" data-icon="payments">payments</span>
+<span class="material-symbols-outlined text-zinc-400 hover:text-white cursor-pointer transition-colors" data-icon="contrast">contrast</span>
+<span class="material-symbols-outlined text-zinc-400 hover:text-white cursor-pointer transition-colors" data-icon="settings">settings</span>
+</div>
+</div>
+</nav>
+<main class="max-w-7xl mx-auto px-8 pt-12 pb-24">
+<!-- Header & Project Title -->
+<header class="mb-12">
+<div class="flex items-center gap-2 text-zinc-500 text-[10px] font-mono uppercase tracking-[0.2em] mb-2">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                Active Command
+            </div>
+<h1 class="text-4xl md:text-5xl font-black tracking-tight text-white mb-4">
+                Quantum-Resonant <span class="text-primary">Multi-Analyte</span> Sensing Array
+            </h1>
+<p class="text-zinc-400 max-w-2xl font-light leading-relaxed">
+                Advanced molecular diagnostics framework leveraging stochastic resonance patterns for low-concentration analyte identification in heterogeneous substrates.
+            </p>
+</header>
+<!-- Recommendation Banner -->
+<section class="mb-12 bg-primary/5 border border-primary/20 p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
+<div class="flex items-start gap-4">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="lightbulb">lightbulb</span>
+<div>
+<h3 class="font-bold text-sm tracking-tight uppercase text-primary">Recommended Action</h3>
+<p class="text-zinc-300 text-sm mt-1">
+                        Rehabilitation complete. Draft score is <span class="text-white font-bold">7.1/10</span>. Proceed to <span class="underline underline-offset-4 decoration-primary/40">Experiment</span> stage to computationally validate your hypothesis using the nanoGPT template.
+                    </p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="px-6 py-2 bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold uppercase tracking-widest transition-all">View Results</button>
+<button class="px-6 py-2 bg-primary hover:bg-[#158d76] text-zinc-950 text-xs font-bold uppercase tracking-widest transition-all">Run Experiment</button>
+</div>
+</section>
+<!-- Main Content Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Pipeline Section -->
+<div class="lg:col-span-8 space-y-8">
+<!-- Pipeline Tracker Card -->
+<div class="bg-zinc-900/40 border border-zinc-800 p-8">
+<div class="flex justify-between items-end mb-8">
+<div>
+<h2 class="text-xs font-mono uppercase text-zinc-500 tracking-widest">Pipeline Lifecycle</h2>
+<p class="text-lg font-bold text-white mt-1">Stochastic Progress Tracker</p>
+</div>
+<div class="text-right">
+<span class="text-2xl font-black font-mono text-primary">87%</span>
+<p class="text-[10px] font-mono text-zinc-500 uppercase">Operational Density</p>
+</div>
+</div>
+<div class="flex items-center justify-between relative">
+<!-- Connector Line Background -->
+<div class="absolute h-[2px] w-full bg-zinc-800 top-1/2 -translate-y-1/2 z-0"></div>
+<!-- Stages -->
+<!-- Stage 1-6 Done -->
+<div class="z-10 flex flex-col items-center gap-3 group">
+<div class="w-10 h-10 rounded-full bg-primary text-zinc-950 flex items-center justify-center border-4 border-zinc-950">
+<span class="material-symbols-outlined text-lg" data-icon="check" style="font-variation-settings: 'wght' 700;">check</span>
+</div>
+<span class="text-[9px] font-mono text-zinc-500 uppercase group-hover:text-primary transition-colors">Crawl</span>
+</div>
+<div class="z-10 flex flex-col items-center gap-3 group">
+<div class="w-10 h-10 rounded-full bg-primary text-zinc-950 flex items-center justify-center border-4 border-zinc-950">
+<span class="material-symbols-outlined text-lg" data-icon="check" style="font-variation-settings: 'wght' 700;">check</span>
+</div>
+<span class="text-[9px] font-mono text-zinc-500 uppercase group-hover:text-primary transition-colors">Map</span>
+</div>
+<div class="z-10 flex flex-col items-center gap-3 group">
+<div class="w-10 h-10 rounded-full bg-primary text-zinc-950 flex items-center justify-center border-4 border-zinc-950">
+<span class="material-symbols-outlined text-lg" data-icon="check" style="font-variation-settings: 'wght' 700;">check</span>
+</div>
+<span class="text-[9px] font-mono text-zinc-500 uppercase group-hover:text-primary transition-colors">Debate</span>
+</div>
+<div class="z-10 flex flex-col items-center gap-3 group">
+<div class="w-10 h-10 rounded-full bg-primary text-zinc-950 flex items-center justify-center border-4 border-zinc-950">
+<span class="material-symbols-outlined text-lg" data-icon="check" style="font-variation-settings: 'wght' 700;">check</span>
+</div>
+<span class="text-[9px] font-mono text-zinc-500 uppercase group-hover:text-primary transition-colors">Validate</span>
+</div>
+<div class="z-10 flex flex-col items-center gap-3 group">
+<div class="w-10 h-10 rounded-full bg-primary text-zinc-950 flex items-center justify-center border-4 border-zinc-950">
+<span class="material-symbols-outlined text-lg" data-icon="check" style="font-variation-settings: 'wght' 700;">check</span>
+</div>
+<span class="text-[9px] font-mono text-zinc-500 uppercase group-hover:text-primary transition-colors">Ideas</span>
+</div>
+<div class="z-10 flex flex-col items-center gap-3 group">
+<div class="w-10 h-10 rounded-full bg-primary text-zinc-950 flex items-center justify-center border-4 border-zinc-950">
+<span class="material-symbols-outlined text-lg" data-icon="check" style="font-variation-settings: 'wght' 700;">check</span>
+</div>
+<span class="text-[9px] font-mono text-zinc-500 uppercase group-hover:text-primary transition-colors">Draft</span>
+</div>
+<!-- Stage 7: Active Pulse -->
+<div class="z-10 flex flex-col items-center gap-3 group">
+<div class="w-12 h-12 rounded-full bg-zinc-950 border-2 border-primary text-primary flex items-center justify-center active-pulse relative">
+<span class="material-symbols-outlined text-xl" data-icon="science" style="font-variation-settings: 'FILL' 1;">science</span>
+<div class="absolute -top-1 -right-1 bg-primary text-[8px] px-1 font-bold text-zinc-950 uppercase">Active</div>
+</div>
+<span class="text-[9px] font-mono text-primary font-bold uppercase">Experiment</span>
+</div>
+<!-- Stage 8: Done -->
+<div class="z-10 flex flex-col items-center gap-3 group">
+<div class="w-10 h-10 rounded-full bg-primary text-zinc-950 flex items-center justify-center border-4 border-zinc-950">
+<span class="material-symbols-outlined text-lg" data-icon="check" style="font-variation-settings: 'wght' 700;">check</span>
+</div>
+<span class="text-[9px] font-mono text-zinc-500 uppercase group-hover:text-primary transition-colors">Rehab</span>
+</div>
+</div>
+</div>
+<!-- Bento Info Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Rehab Detail Card -->
+<div class="bg-zinc-900 border border-zinc-800 p-6 flex flex-col">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 bg-primary/20 rounded flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-sm" data-icon="medical_services">medical_services</span>
+</div>
+<div>
+<h3 class="text-[10px] font-mono text-zinc-500 uppercase tracking-tighter">Stage 8</h3>
+<h4 class="font-bold text-white text-base">Rehab Stage Detail</h4>
+</div>
+</div>
+<span class="px-2 py-0.5 border border-primary text-primary text-[9px] font-bold font-mono uppercase">COMPLETED</span>
+</div>
+<div class="space-y-4 mb-8">
+<div class="flex justify-between items-center border-b border-zinc-800 pb-2">
+<span class="text-zinc-500 text-xs">Final Score</span>
+<span class="font-mono text-white text-lg font-bold">7.1/10</span>
+</div>
+<div class="flex justify-between items-center border-b border-zinc-800 pb-2">
+<span class="text-zinc-500 text-xs">Cycles Executed</span>
+<span class="font-mono text-white">3 Rounds</span>
+</div>
+<div class="flex justify-between items-center border-b border-zinc-800 pb-2">
+<span class="text-zinc-500 text-xs">Synthesis Delta</span>
+<span class="font-mono text-white">19 Gaps Filled</span>
+</div>
+</div>
+<button class="mt-auto w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-white text-[11px] font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="description">description</span>
+                            Export .docx
+                        </button>
+</div>
+<!-- Experiment Canvas (Preview) -->
+<div class="bg-zinc-950 border border-zinc-800 p-6 relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50"></div>
+<div class="relative z-10">
+<h3 class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mb-4">Live Analysis Canvas</h3>
+<div class="space-y-3">
+<div class="h-2 w-full bg-zinc-900 overflow-hidden">
+<div class="h-full bg-primary/40 w-1/3 animate-[pulse_3s_infinite]"></div>
+</div>
+<div class="font-mono text-[10px] text-zinc-500 leading-tight">
+                                    [SYSTEM] Booting nanoGPT template...<br/>
+                                    [DATA] Loading resonant frequency arrays...<br/>
+                                    [WAVE] Initializing stochastic harmonics...
+                                </div>
+<div class="pt-4">
+<div class="flex items-center gap-2 mb-2">
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+<span class="text-xs text-white">Model Training (Stage 7.A)</span>
+</div>
+<div class="h-1 w-full bg-zinc-800">
+<div class="h-full bg-primary w-[42%]"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="absolute bottom-4 right-4 group-hover:translate-x-1 transition-transform">
+<span class="material-symbols-outlined text-primary/30" data-icon="arrow_forward_ios">arrow_forward_ios</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Sidebar -->
+<aside class="lg:col-span-4 space-y-6">
+<!-- Recent Projects List -->
+<div class="bg-zinc-900/50 border border-zinc-800">
+<div class="p-4 border-b border-zinc-800 flex justify-between items-center">
+<h3 class="text-[11px] font-mono font-bold text-zinc-100 uppercase tracking-widest">Active Stack</h3>
+<span class="material-symbols-outlined text-zinc-500 text-sm" data-icon="filter_list">filter_list</span>
+</div>
+<div class="divide-y divide-zinc-800">
+<!-- Top Project (Active) -->
+<div class="p-4 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer">
+<div class="flex justify-between mb-1">
+<h4 class="text-sm font-bold text-white truncate w-48">Quantum-Resonant Multi-Analyte Sensing Array</h4>
+<span class="text-[9px] font-mono text-primary font-bold">ST-07</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-mono text-zinc-400">Stage 7 Active</span>
+<div class="flex-grow h-[1px] bg-zinc-800"></div>
+<span class="text-[10px] font-mono text-zinc-500">8d ago</span>
+</div>
+</div>
+<!-- Previous Projects -->
+<div class="p-4 hover:bg-zinc-800/40 transition-colors cursor-pointer group">
+<div class="flex justify-between mb-1">
+<h4 class="text-sm font-medium text-zinc-300 group-hover:text-white transition-colors truncate w-48">Hyper-Localized Weather Synthesis</h4>
+<span class="text-[9px] font-mono text-zinc-500">ST-08</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-mono text-zinc-500">Archived</span>
+<div class="flex-grow h-[1px] bg-zinc-800"></div>
+<span class="text-[10px] font-mono text-zinc-500">14d ago</span>
+</div>
+</div>
+<div class="p-4 hover:bg-zinc-800/40 transition-colors cursor-pointer group">
+<div class="flex justify-between mb-1">
+<h4 class="text-sm font-medium text-zinc-300 group-hover:text-white transition-colors truncate w-48">Bio-Mimetic Carbon Capture</h4>
+<span class="text-[9px] font-mono text-zinc-500">ST-05</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-mono text-zinc-500">Paused</span>
+<div class="flex-grow h-[1px] bg-zinc-800"></div>
+<span class="text-[10px] font-mono text-zinc-500">21d ago</span>
+</div>
+</div>
+</div>
+<button class="w-full p-4 text-[10px] font-mono text-zinc-500 uppercase hover:text-white transition-colors flex items-center justify-center gap-2">
+                        View All Operations
+                        <span class="material-symbols-outlined text-xs" data-icon="open_in_new">open_in_new</span>
+</button>
+</div>
+<!-- Abstract Visual -->
+<div class="aspect-square bg-zinc-900 border border-zinc-800 overflow-hidden relative">
+<img class="w-full h-full object-cover opacity-40 mix-blend-overlay" data-alt="Abstract cyan digital neural network lines" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAmrWkuc9DQVnefvw3FEfBjdV6Qd6Yu44rjLCTTeNp7gjTiKrGuoVXy83Tf92BYP11G8QZ66LWHm8UBgAzXSc54-9sccPVQ3vXDOCMSyu9c96aAbl23IOoqgdmToRpvBt8IGH9DAweJLA-WgfPG0z4KtAhCJhTMUjVN6Dp0k9TFneLkQpgks43DhDpj3fO6FM3xv5SJcDQ_u_YC0QT9mS7X5x1BMpxvVXD2YoR6-5gqPu5CI7MLkRHH_e1LFzeaWfutPz8aVqz9jY"/>
+<div class="absolute inset-0 bg-gradient-to-t from-zinc-950 to-transparent"></div>
+<div class="absolute bottom-4 left-4 right-4">
+<div class="text-[9px] font-mono text-primary mb-1">SYNCING COMPLETED</div>
+<div class="text-xs font-bold text-white uppercase tracking-tighter">Resonant Pattern Mapped</div>
+</div>
+</div>
+</aside>
+</div>
+</main>
+<!-- Bottom Status Bar -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-start items-center px-8 gap-12 bg-zinc-900 dark:bg-black h-8 shadow-[0_-4px_12px_rgba(0,0,0,0.1)] overflow-hidden">
+<div class="flex items-center gap-2 font-mono text-[9px] tracking-tight uppercase text-[#1EA88E]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#1EA88E]"></span>
+<span class="material-symbols-outlined text-[10px]" data-icon="sensors">sensors</span>
+            LLM Proxy: Active
+        </div>
+<div class="flex items-center gap-2 font-mono text-[9px] tracking-tight uppercase text-zinc-400">
+<span class="w-1.5 h-1.5 rounded-full bg-[#1EA88E]"></span>
+<span class="material-symbols-outlined text-[10px]" data-icon="memory">memory</span>
+            Anthropic API
+        </div>
+<div class="flex items-center gap-2 font-mono text-[9px] tracking-tight uppercase text-zinc-400">
+<span class="w-1.5 h-1.5 rounded-full bg-[#1EA88E]"></span>
+<span class="material-symbols-outlined text-[10px]" data-icon="science">science</span>
+            ScienceClaw: Online
+        </div>
+<div class="flex items-center gap-2 font-mono text-[9px] tracking-tight uppercase text-zinc-400">
+<span class="w-1.5 h-1.5 rounded-full bg-[#1EA88E]"></span>
+            AutoResearch: 3 queued
+        </div>
+<div class="ml-auto flex items-center gap-2 font-mono text-[9px] tracking-tight uppercase text-primary">
+<span class="text-zinc-500">Session:</span>
+<span class="font-bold">$0.41 (93% saved)</span>
+</div>
+</footer>
+</body></html>

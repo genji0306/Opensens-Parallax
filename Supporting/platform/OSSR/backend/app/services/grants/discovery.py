@@ -14,7 +14,14 @@ Two-stage flow per source:
               which itself links out to the real funder page; the extractor
               is tolerant of either)
         → extractor.extract_opportunity(page) → GrantOpportunity
+    deduplicate_opportunities(results)
     save_opportunities(...)
+
+Additional V2 capabilities:
+    - FundsforNGOs sources (kind="fundsforngos") use the FundsforNGOsAdapter
+      to enumerate tag pages with pagination, then follow outbound funder
+      links for two-stage resolution.
+    - Incremental crawl cache: content-unchanged pages are skipped.
 
 This module is synchronous-friendly: it exposes discover_source() which
 wraps the async crawler in asyncio.run() so API handlers stay simple.
@@ -27,7 +34,9 @@ import logging
 from datetime import datetime
 from typing import List
 
+from .adapters.fundsforngos import FundsforNGOsAdapter
 from .crawler import CrawledPage, GrantCrawler
+from .dedup import deduplicate_opportunities
 from .extractor import OpportunityExtractor
 from .models import GrantOpportunity, GrantSource
 from .sources import LinkCandidate, deduplicate, selector_for  # noqa: F401
@@ -57,65 +66,92 @@ async def discover_source_async(
     max_pages: int = 30,
     model: str = "",
 ) -> DiscoveryResult:
-    """Run a full crawl → extract for one source."""
+    """Run a full crawl → extract → dedup for one source."""
     result = DiscoveryResult()
     crawler = GrantCrawler(max_pages=max_pages)
     extractor = OpportunityExtractor(model=model)
 
-    # Stage 1: fetch listing
-    listing = await crawler.fetch(source.listing_url)
-    if not listing:
-        result.errors.append(f"listing fetch failed: {source.listing_url}")
-        return result
-    result.visited += 1
-
-    # Stage 1b: select candidates
-    selector = selector_for(source.kind)
-    candidates = deduplicate(selector(source.listing_url, listing.links))
-    result.candidates = len(candidates)
-    if not candidates:
-        logger.info("No candidates found on %s", source.listing_url)
-        return result
-
-    # Stage 2: fetch each candidate page (one hop; hub-exit candidates
-    # are already the funder page for external links, or the post page
-    # for same-host fundsforngos posts which we extract from directly).
     pages: List[CrawledPage] = []
-    for candidate in candidates[:max_pages]:
-        page = await crawler.fetch(candidate.url)
-        if page:
-            pages.append(page)
+
+    # ── FundsforNGOs: use tag-page adapter ───────────────────────
+    if source.kind == "fundsforngos":
+        adapter = FundsforNGOsAdapter(crawler)
+        meta = source.metadata or {}
+        tag_pages = None
+        # Single-source override: use the listing_url as the single tag page
+        if source.listing_url:
+            tag_pages = [source.listing_url]
+        post_urls = await adapter.enumerate_candidates(
+            tag_pages=tag_pages,
+            max_pages_per_tag=3,
+        )
+        result.candidates = len(post_urls)
+
+        # Fetch all post pages
+        post_pages = await crawler.fetch_many(post_urls)
+        result.visited += len(post_pages)
+
+        # Two-stage resolution: also fetch outbound funder URLs
+        if meta.get("follow_outbound", True):
+            funder_urls = await adapter.follow_outbound_links(post_urls)
+            extra = await crawler.fetch_many(funder_urls)
+            pages.extend(extra)
+            result.visited += len(extra)
+
+        pages.extend(post_pages)
+
+    else:
+        # ── Standard sources ──────────────────────────────────────
+
+        # Try sitemap discovery first
+        sitemap_urls = await crawler.discover_sitemap_urls(source.listing_url)
+
+        if sitemap_urls:
+            logger.info(
+                "Source %s: using sitemap (%d grant URLs)",
+                source.source_id,
+                len(sitemap_urls),
+            )
+            result.candidates = len(sitemap_urls)
+            pages = await crawler.fetch_many(sitemap_urls[:max_pages])
+            result.visited = len(pages)
+        else:
+            # Fall back to listing-page link discovery
+            listing = await crawler.fetch(source.listing_url)
+            if not listing:
+                result.errors.append(f"listing fetch failed: {source.listing_url}")
+                return result
             result.visited += 1
 
-    # Stage 2b: for fundsforngos same-host posts, there's an additional
-    # hop to the real funder page. We extract from whichever yields a
-    # richer signal; the extractor is prompt-driven and handles both.
-    follow_up_urls: List[str] = []
-    if source.kind == "fundsforngos":
-        for page in pages:
-            outbound = [
-                link for link in page.links
-                if link and "fundsforngos.org" not in link
-                and _looks_like_call(link)
-            ]
-            follow_up_urls.extend(outbound[:1])  # take top outbound per post
-    if follow_up_urls:
-        logger.info("Following %d fundsforngos outbound links", len(follow_up_urls))
-        extra = await crawler.fetch_many(follow_up_urls)
-        pages.extend(extra)
-        result.visited += len(extra)
+            selector = selector_for(source.kind)
+            candidates = deduplicate(selector(source.listing_url, listing.links))
+            result.candidates = len(candidates)
 
-    # Stage 3: extract structured opportunities
+            if not candidates:
+                logger.info("No candidates found on %s", source.listing_url)
+                return result
+
+            for candidate in candidates[:max_pages]:
+                page = await crawler.fetch(candidate.url)
+                if page:
+                    pages.append(page)
+                    result.visited += 1
+
+    # ── Extract structured opportunities ─────────────────────────
+    raw_opps: List[GrantOpportunity] = []
     for page in pages:
         try:
             opp = extractor.extract(page, source_id=source.source_id)
             if opp and opp.title:
-                result.opportunities.append(opp)
+                raw_opps.append(opp)
         except Exception as e:  # noqa: BLE001
             logger.warning("extract failed for %s: %s", page.url, e)
             result.errors.append(f"extract failed: {page.url}")
 
-    # Persist
+    # ── Deduplication ─────────────────────────────────────────────
+    result.opportunities = deduplicate_opportunities(raw_opps)
+
+    # ── Persist ──────────────────────────────────────────────────
     save_opportunities(result.opportunities)
 
     # Mark source crawled
@@ -130,7 +166,6 @@ def discover_source(source: GrantSource, max_pages: int = 30, model: str = "") -
     try:
         loop = asyncio.get_event_loop()
         if loop.is_running():  # pragma: no cover - unlikely in Flask sync handler
-            # If called from an already-running loop, schedule on a new one
             return asyncio.run_coroutine_threadsafe(
                 discover_source_async(source, max_pages, model), loop
             ).result()
@@ -139,7 +174,12 @@ def discover_source(source: GrantSource, max_pages: int = 30, model: str = "") -
     return asyncio.run(discover_source_async(source, max_pages, model))
 
 
-def discover_all(sources: List[GrantSource], max_pages_per_source: int = 30, model: str = "") -> List[DiscoveryResult]:
+def discover_all(
+    sources: List[GrantSource],
+    max_pages_per_source: int = 30,
+    model: str = "",
+) -> List[DiscoveryResult]:
+    """Run discovery for all enabled sources sequentially."""
     results: List[DiscoveryResult] = []
     for src in sources:
         if not src.enabled:

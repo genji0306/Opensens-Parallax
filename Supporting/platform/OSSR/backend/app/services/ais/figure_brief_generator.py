@@ -6,7 +6,7 @@ Generate briefs for missing figures: graphical abstract, workflow diagram, resul
 
 import json
 import logging
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from opensens_common.llm_client import LLMClient
 
@@ -44,17 +44,15 @@ class FigureBriefGenerator:
     """Generates briefs for missing figures in a paper."""
 
     def __init__(self):
-        self.llm = None
+        pass
 
-    def _get_llm(self) -> LLMClient:
-        if self.llm is None:
-            self.llm = LLMClient()
-        return self.llm
+    def _get_llm(self, model: str = "") -> LLMClient:
+        return LLMClient(model=model) if model else LLMClient()
 
     def generate(
         self,
         paper_sections: str,
-        existing_figures: List[str] = None,
+        existing_figures: Optional[List[str]] = None,
         model: str = "",
     ) -> Dict[str, Any]:
         """
@@ -68,13 +66,12 @@ class FigureBriefGenerator:
         """
         existing = "\n".join(f"- {f}" for f in (existing_figures or [])) or "None listed."
 
-        model = model or "claude-sonnet-4-20250514"
-        response = self._get_llm().chat(
-            BRIEF_PROMPT.format(
-                sections=paper_sections[:5000],
-                existing_figures=existing[:1000],
-            ),
-            model=model,
+        prompt = BRIEF_PROMPT.format(
+            sections=paper_sections[:5000],
+            existing_figures=existing[:1000],
+        )
+        response = self._get_llm(model).chat(
+            [{"role": "user", "content": prompt}],
         )
 
         briefs = self._parse(response)

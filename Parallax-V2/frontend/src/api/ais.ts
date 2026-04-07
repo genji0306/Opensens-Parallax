@@ -467,6 +467,20 @@ export function getRunArtifactUrl(runId: string): string {
   return `${baseURL}/api/research/history/runs/${runId}/artifact`
 }
 
+export type ProjectArtifactFormat = 'html' | 'pdf' | 'json'
+
+/**
+ * Get URL for full project artifact export (all stage results).
+ */
+export function getProjectArtifactDownloadUrl(
+  runId: string,
+  format: ProjectArtifactFormat = 'html',
+): string {
+  const baseURL = service.defaults.baseURL || ''
+  const params = new URLSearchParams({ format })
+  return `${baseURL}/api/research/ais/${runId}/artifact?${params.toString()}`
+}
+
 /**
  * Get recent activity across ALL types (debates, pipeline, papers, reports).
  */

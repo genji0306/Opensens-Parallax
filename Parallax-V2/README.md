@@ -25,7 +25,7 @@ npm install   # first time only
 npm run dev   # http://localhost:3002
 
 # 3. Debug diagnostics
-python3 debug_agent.py          # full local verification + API smoke
+python3 debug_agent.py          # full local verification + V3 gateway tests + API smoke
 python3 debug_agent.py --quick  # fast local pass, skips frontend build
 python3 debug_agent.py --live   # also probe running :5002 and :3002 services
 python cli_debug.py           # full check (75 tests)
@@ -204,7 +204,7 @@ python3 debug_agent.py
 
 - Backend is shared with V1 via symlink. V2 adds tables and endpoints; V1 functionality is unaffected.
 - Use the shared backend under `Supporting/platform/OSSR/backend`. The sibling `platform/OSSR/backend` tree in this workspace is only a data stub and can cause `no such table: ais_pipeline_runs` runtime errors if used by mistake.
-- `debug_agent.py` is the top-level debug runner. It wraps frontend checks, backend pytest, `cli_debug.py --quick`, and in-process Flask API smoke tests.
+- `debug_agent.py` is the top-level debug runner. It wraps frontend checks, backend pytest, the V3 gateway suite, `cli_debug.py --quick`, and in-process Flask API smoke tests.
 - The `node_modules` directory is symlinked from the canonical `Parallax V2/app/` location.
 - The `design/` folder contains 37 UI mockup screenshots from the Precision Editorial design system.
 - See `docs/parallax_v2_megaprompt.md` for the complete V2 specification and acceptance criteria.

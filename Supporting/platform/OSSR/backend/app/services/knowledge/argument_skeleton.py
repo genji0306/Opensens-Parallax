@@ -55,12 +55,10 @@ class ArgumentSkeleton:
     """Generates citation-backed argument skeletons from knowledge artifacts."""
 
     def __init__(self):
-        self.llm = None
+        pass
 
-    def _get_llm(self) -> LLMClient:
-        if self.llm is None:
-            self.llm = LLMClient()
-        return self.llm
+    def _get_llm(self, model: str = "") -> LLMClient:
+        return LLMClient(model=model) if model else LLMClient()
 
     def build(self, run_id: str, model: str = "") -> Dict[str, Any]:
         """
@@ -73,28 +71,27 @@ class ArgumentSkeleton:
             }
         """
         artifact = KnowledgeArtifactDAO.load(run_id)
+        if not artifact:
+            raise ValueError(f"No knowledge artifact found for run: {run_id}")
 
-        hypothesis = artifact.hypothesis if artifact else None
+        hypothesis = artifact.hypothesis
         problem = hypothesis.problem_statement if hypothesis else "Not defined"
         contribution = hypothesis.contribution if hypothesis else "Not defined"
         differentiators = ", ".join(hypothesis.differentiators) if hypothesis else "None"
 
-        claims_text = ""
-        if artifact:
-            claims_text = "\n".join(f"- {c.text}" for c in artifact.claims[:10])
+        claims_text = "\n".join(f"- {c.text}" for c in artifact.claims[:10])
 
         papers = self._get_paper_titles(run_id)
 
-        model = model or "claude-sonnet-4-20250514"
-        response = self._get_llm().chat(
-            SKELETON_PROMPT.format(
-                problem=problem,
-                contribution=contribution,
-                differentiators=differentiators,
-                claims=claims_text or "No claims.",
-                papers=papers or "No papers available.",
-            ),
-            model=model,
+        prompt = SKELETON_PROMPT.format(
+            problem=problem,
+            contribution=contribution,
+            differentiators=differentiators,
+            claims=claims_text or "No claims.",
+            papers=papers or "No papers available.",
+        )
+        response = self._get_llm(model).chat(
+            [{"role": "user", "content": prompt}],
         )
 
         sections = self._parse_response(response)

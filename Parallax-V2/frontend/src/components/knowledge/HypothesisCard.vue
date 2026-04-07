@@ -3,9 +3,9 @@
  * HypothesisCard — Structured contribution hypothesis display (Sprint 7.1).
  */
 
-import { ref } from 'vue'
-import { buildHypothesis } from '@/api/ais'
-import type { KnowledgeHypothesis } from '@/api/ais'
+import { ref, watch } from 'vue'
+import { buildHypothesis, getKnowledgeArtifact } from '@/api/ais'
+import type { KnowledgeArtifact, KnowledgeHypothesis } from '@/api/ais'
 
 const props = defineProps<{ runId: string }>()
 
@@ -13,6 +13,35 @@ const hypothesis = ref<KnowledgeHypothesis | null>(null)
 const context = ref<Record<string, number>>({})
 const loading = ref(false)
 const error = ref<string | null>(null)
+
+function buildSupportingContext(artifact: KnowledgeArtifact | null | undefined): Record<string, number> {
+  if (!artifact) return {}
+
+  const noveltyAssessments = Array.isArray(artifact.novelty_assessments) ? artifact.novelty_assessments : []
+  return {
+    claims: Array.isArray(artifact.claims) ? artifact.claims.length : 0,
+    gaps: Array.isArray(artifact.gaps) ? artifact.gaps.length : 0,
+    novel_claims: noveltyAssessments.filter(item => Number(item.novelty_score ?? 0) >= 0.7).length,
+  }
+}
+
+async function hydrateHypothesis() {
+  if (!props.runId) {
+    hypothesis.value = null
+    context.value = {}
+    return
+  }
+
+  try {
+    const res = await getKnowledgeArtifact(props.runId)
+    const artifact = res.data?.data ?? null
+    hypothesis.value = artifact?.hypothesis ?? null
+    context.value = buildSupportingContext(artifact)
+  } catch {
+    hypothesis.value = null
+    context.value = {}
+  }
+}
 
 async function generate() {
   if (!props.runId) return
@@ -29,6 +58,10 @@ async function generate() {
     loading.value = false
   }
 }
+
+watch(() => props.runId, () => {
+  hydrateHypothesis()
+}, { immediate: true })
 </script>
 
 <template>

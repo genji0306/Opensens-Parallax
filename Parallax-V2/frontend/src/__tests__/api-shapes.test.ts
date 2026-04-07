@@ -312,6 +312,107 @@ describe('Backend Response Shape Parsing', () => {
     })
   })
 
+  describe('Pipeline Store — endpoint gating by run kind', () => {
+    it('does not call AIS graph/cost endpoints for debate_sim runs', async () => {
+      const mockAxios = (await import('axios')).default
+      vi.mocked(mockAxios.get).mockImplementation(async (url: string) => {
+        if (url.includes('/history/runs/')) {
+          return {
+            data: {
+              success: true,
+              data: {
+                run_id: 'ossr_sim_f021de59aab3',
+                type: 'debate',
+                status: 'completed',
+                query: 'debate sample',
+                source: 'cli',
+                data: { debate: { agent_count: 6, rounds: 2 }, ideas: [] },
+              },
+            },
+          }
+        }
+        return { data: { success: true, data: {} } }
+      })
+
+      const { usePipelineStore } = await import('@/stores/pipeline')
+      const store = usePipelineStore()
+      await store.loadProject('ossr_sim_f021de59aab3')
+      await Promise.resolve()
+
+      const requestedUrls = vi.mocked(mockAxios.get).mock.calls.map((args) => String(args[0]))
+      expect(store.projectType).toBe('debate_sim')
+      expect(requestedUrls.some((url) => url.includes('/graph'))).toBe(false)
+      expect(requestedUrls.some((url) => url.includes('/cost'))).toBe(false)
+    })
+
+    it('calls AIS graph/cost endpoints for ais runs', async () => {
+      const mockAxios = (await import('axios')).default
+      vi.mocked(mockAxios.get).mockImplementation(async (url: string) => {
+        if (url.includes('/history/runs/')) {
+          return {
+            data: {
+              success: true,
+              data: {
+                run_id: 'ais_run_123',
+                type: 'ais',
+                status: 'drafting',
+                query: 'ais sample',
+                source: 'platform',
+                current_stage: 5,
+                summary: { current_stage: 5, stages_total: 8 },
+              },
+            },
+          }
+        }
+        if (url.includes('/graph')) {
+          return {
+            data: {
+              success: true,
+              data: {
+                run_id: 'ais_run_123',
+                nodes: [],
+                edges: [],
+                summary: {
+                  total_nodes: 0,
+                  completed: 0,
+                  running: 0,
+                  failed: 0,
+                  pending: 0,
+                  progress_pct: 0,
+                },
+              },
+            },
+          }
+        }
+        if (url.includes('/cost')) {
+          return {
+            data: {
+              success: true,
+              data: {
+                run_id: 'ais_run_123',
+                total_cost_usd: 0.42,
+                total_input_tokens: 1000,
+                total_output_tokens: 500,
+                by_node: {},
+              },
+            },
+          }
+        }
+        return { data: { success: true, data: {} } }
+      })
+
+      const { usePipelineStore } = await import('@/stores/pipeline')
+      const store = usePipelineStore()
+      await store.loadProject('ais_run_123')
+      await Promise.resolve()
+
+      const requestedUrls = vi.mocked(mockAxios.get).mock.calls.map((args) => String(args[0]))
+      expect(store.projectType).toBe('ais')
+      expect(requestedUrls.some((url) => url.includes('/graph'))).toBe(true)
+      expect(requestedUrls.some((url) => url.includes('/cost'))).toBe(true)
+    })
+  })
+
   describe('Pipeline Start — response shape', () => {
     it('returns run_id from POST /ais/start', async () => {
       const mockAxios = (await import('axios')).default
