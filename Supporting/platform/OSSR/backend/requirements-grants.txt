@@ -1,16 +1,37 @@
 # Optional dependencies for the Grant Hunt module.
 #
-# The grants module works with httpx + BeautifulSoup alone (already
-# shipped with OSSR), but for the full JavaScript-rendering browser
-# crawl path you need crawl4ai + its Playwright runtime.
+# The grants module is built around a tiered fetcher cascade. You only
+# need to install what your target sources actually require:
 #
-# Install with:
+#   ┌──────────────────────────┬─────────────────────────────────────────┐
+#   │ backend                  │ when you need it                        │
+#   ├──────────────────────────┼─────────────────────────────────────────┤
+#   │ scrapling[all] (v2.1+)   │ Primary — tiered HTTP/stealth/dynamic  │
+#   │                          │ with TLS-fingerprint impersonation,    │
+#   │                          │ Cloudflare Turnstile bypass, adaptive  │
+#   │                          │ selectors that survive page redesigns. │
+#   │                          │ This is the recommended install.       │
+#   ├──────────────────────────┼─────────────────────────────────────────┤
+#   │ crawl4ai                 │ Legacy fallback (v0.1 backend). Only    │
+#   │                          │ needed if you don't want Scrapling.     │
+#   ├──────────────────────────┼─────────────────────────────────────────┤
+#   │ httpx + beautifulsoup4   │ Last-resort fallback for static pages   │
+#   │                          │ (already shipped in OSSR core deps).    │
+#   └──────────────────────────┴─────────────────────────────────────────┘
+#
+# Install (recommended, full stack):
 #     pip install -r backend/requirements-grants.txt
-#     playwright install chromium
+#     scrapling install               # downloads stealth browser profiles
 #
-# Without these, the GrantCrawler automatically falls back to an
-# httpx-based fetcher that works on most static grant pages but can't
-# render SPA-heavy portals.
+# Minimal install (no browser automation, static pages only):
+#     pip install httpx beautifulsoup4
+#
+# Per-source stealth escalation: sources with Cloudflare/SPA walls
+# (grants.gov, CORDIS, Horizon Europe, EIC, SBIR) are tagged with
+# ``metadata.stealth_level = "stealth"`` or ``"dynamic"`` in sources.py
+# and will skip the cheap HTTP path, routing directly to the Scrapling
+# browser rung.
 
+scrapling[all]>=0.3.0
 crawl4ai>=0.4.0
 beautifulsoup4>=4.12.0

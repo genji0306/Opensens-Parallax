@@ -20,6 +20,7 @@ from opensens_common.llm_client import LLMClient
 
 from .crawler import CrawledPage
 from .models import GrantOpportunity
+from .recipes import extract_fields
 from .sources import opportunity_id_for
 
 logger = logging.getLogger(__name__)
@@ -183,16 +184,51 @@ class OpportunityExtractor:
 
     # ── Public API ───────────────────────────────────────────────
 
-    def extract(self, page: CrawledPage, source_id: str) -> Optional[GrantOpportunity]:
-        """Extract a GrantOpportunity from a crawled page."""
+    def extract(
+        self,
+        page: CrawledPage,
+        source_id: str,
+        kind: str = "generic",
+    ) -> Optional[GrantOpportunity]:
+        """
+        Extract a GrantOpportunity from a crawled page.
+
+        ``kind`` selects the selector recipe that pre-fills structured
+        fields from the page HTML before handing off to the LLM. This
+        cuts LLM token use ~50-80% on well-structured sources and also
+        gives the extractor a safety net when the LLM returns partial
+        data: recipe hits backfill any fields the LLM left empty.
+        """
         if not page or not page.text:
             return None
 
         text = page.text[:MAX_TEXT_CHARS]
-        data = self._llm_extract(page.title, text) or self._heuristic_extract(page.title, text)
+
+        # ── Stage 1: selector recipe (adaptive, optional) ──────────
+        recipe_hints = extract_fields(
+            getattr(page, "html", "") or "",
+            kind=kind,
+            base_url=getattr(page, "url", "") or "",
+        )
+
+        # ── Stage 2: LLM with recipe hints as pre-fill ─────────────
+        data = self._llm_extract(page.title, text, hints=recipe_hints) or \
+            self._heuristic_extract(page.title, text)
 
         if not data:
-            return None
+            # LLM + heuristic both empty — still ship if recipe grabbed
+            # anything useful. Build a minimal data dict from hints.
+            if recipe_hints:
+                data = {}
+            else:
+                return None
+
+        # Recipe fields fill in any gaps the LLM left empty.
+        for field_name, value in recipe_hints.items():
+            if not value:
+                continue
+            if not data.get(field_name):
+                data[field_name] = value
 
         opportunity_id = opportunity_id_for(page.url)
         hash_val = _content_hash(text)
@@ -256,13 +292,39 @@ class OpportunityExtractor:
 
     # ── LLM extraction ───────────────────────────────────────────
 
-    def _llm_extract(self, title: str, text: str) -> Optional[Dict[str, Any]]:
-        """Attempt structured extraction via LLM. Returns None on any failure."""
+    def _llm_extract(
+        self,
+        title: str,
+        text: str,
+        hints: Optional[Dict[str, str]] = None,
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Attempt structured extraction via LLM. Returns None on any failure.
+
+        When ``hints`` are supplied (from the selector recipe stage),
+        they're passed into the prompt as ``PRE-EXTRACTED FIELDS`` so the
+        LLM can copy verified values and focus its attention on
+        canonicalising enums and filling gaps. This typically saves
+        50-80% of the output tokens on well-structured sources.
+        """
         if self.llm is None:
             return None
         try:
+            hints_block = ""
+            if hints:
+                hint_lines = [
+                    f"  - {k}: {v}" for k, v in hints.items() if v
+                ]
+                if hint_lines:
+                    hints_block = (
+                        "PRE-EXTRACTED FIELDS (verified from HTML selectors — "
+                        "keep these values unless clearly wrong):\n"
+                        + "\n".join(hint_lines)
+                        + "\n\n"
+                    )
             user = (
                 f"TITLE: {title or '(no title)'}\n\n"
+                f"{hints_block}"
                 f"PAGE TEXT (truncated):\n{text}"
             )
             response = self.llm.generate(

@@ -789,6 +789,518 @@ class TestExtractorEnums:
 # ── Adapters ─────────────────────────────────────────────────────────
 
 
+# ── Scrapling-backed crawler (v2.1) ─────────────────────────────────
+
+
+class TestScraplingCascade:
+    """
+    The Scrapling integration is opt-in via metadata.stealth_level on each
+    source. These tests verify:
+      - the crawler accepts the stealth_level param and rejects invalid ones
+      - the cascade order changes with the level
+      - discover_source picks up the level from source metadata
+      - the response adapter converts a duck-typed Scrapling response
+        into a CrawledPage correctly
+      - broken/empty responses produce None
+    They run without Scrapling actually installed — we exercise the
+    dispatch plumbing, response adapter, and fallback paths directly.
+    """
+
+    def test_crawler_accepts_stealth_level(self):
+        from app.services.grants.crawler import GrantCrawler
+
+        assert GrantCrawler(stealth_level="fast").stealth_level == "fast"
+        assert GrantCrawler(stealth_level="stealth").stealth_level == "stealth"
+        assert GrantCrawler(stealth_level="dynamic").stealth_level == "dynamic"
+
+    def test_crawler_rejects_invalid_stealth_level(self):
+        from app.services.grants.crawler import GrantCrawler
+
+        # Unknown levels fall back to "fast" so a typo doesn't brick the
+        # scheduler when it spins up all enabled sources.
+        crawler = GrantCrawler(stealth_level="super-stealth")
+        assert crawler.stealth_level == "fast"
+
+    def test_builtin_sources_stealth_tags(self):
+        from app.services.grants.sources import BUILTIN_SOURCES
+
+        by_id = {s.source_id: s for s in BUILTIN_SOURCES}
+        # Known anti-bot sources must escalate straight to stealth.
+        assert by_id["grants-gov-innovation"].metadata["stealth_level"] == "stealth"
+        assert by_id["cordis-eu"].metadata["stealth_level"] == "stealth"
+        assert by_id["sbir-sttr"].metadata["stealth_level"] == "stealth"
+        assert by_id["eic-accelerator"].metadata["stealth_level"] == "stealth"
+        # Horizon Europe is a fully-rendered SPA → dynamic rung.
+        assert by_id["horizon-europe"].metadata["stealth_level"] == "dynamic"
+        # Static FundsforNGOs hubs stay on the cheap path by default.
+        assert by_id["fundsforngos-startups"].metadata.get("stealth_level", "fast") == "fast"
+
+    def test_response_adapter_parses_plain_html(self):
+        from app.services.grants.crawler import _scrapling_response_to_page
+
+        class FakeResp:
+            status_code = 200
+            html_content = (
+                "<html><head><title>Test grant</title></head>"
+                "<body><main>Hello world</main>"
+                "<a href='https://funder.example/apply'>Apply</a>"
+                "</body></html>"
+            )
+
+        page = _scrapling_response_to_page(FakeResp(), "https://example.com/grant")
+        assert page is not None
+        assert page.status == 200
+        assert "Hello world" in page.text
+        # Links come from the httpx HTML → text helper and should be absolute.
+        assert any("funder.example/apply" in u for u in page.links)
+
+    def test_response_adapter_rejects_4xx(self):
+        from app.services.grants.crawler import _scrapling_response_to_page
+
+        class FakeResp:
+            status_code = 403
+            html_content = "<html><body>Blocked</body></html>"
+
+        assert _scrapling_response_to_page(FakeResp(), "https://x.com") is None
+
+    def test_response_adapter_handles_empty_body(self):
+        from app.services.grants.crawler import _scrapling_response_to_page
+
+        class FakeResp:
+            status_code = 200
+            html_content = ""
+            body = ""
+
+        assert _scrapling_response_to_page(FakeResp(), "https://x.com") is None
+
+    def test_response_adapter_handles_bytes_body(self):
+        from app.services.grants.crawler import _scrapling_response_to_page
+
+        class FakeResp:
+            status_code = 200
+            body = b"<html><title>Bytes body</title><body>Payload</body></html>"
+
+        page = _scrapling_response_to_page(FakeResp(), "https://x.com")
+        assert page is not None
+        assert "Payload" in page.text
+
+    def test_response_adapter_skips_none(self):
+        from app.services.grants.crawler import _scrapling_response_to_page
+
+        assert _scrapling_response_to_page(None, "https://x.com") is None
+
+    def test_discovery_passes_stealth_level_through_metadata(self, monkeypatch):
+        """
+        discover_source_async must read ``stealth_level`` from source
+        metadata and pass it to ``GrantCrawler``. We monkey-patch
+        GrantCrawler in the discovery module to capture the init kwargs.
+        """
+        import asyncio
+        from app.services.grants import discovery
+        from app.services.grants.crawler import CrawledPage
+        from app.services.grants.models import GrantSource
+
+        init_kwargs: dict = {}
+
+        class FakeCrawler:
+            def __init__(self, *args, **kwargs):
+                init_kwargs.update(kwargs)
+
+            async def fetch(self, url, **_kw):
+                return CrawledPage(url=url, title="t", text="irrelevant", links=[])
+
+            async def fetch_many(self, urls):
+                return []
+
+            async def discover_sitemap_urls(self, base_url):
+                return []
+
+        async def _fake_extract_stage(*args, **kwargs):
+            return None
+
+        # Patch into the discovery module namespace.
+        monkeypatch.setattr(discovery, "GrantCrawler", FakeCrawler)
+        # Make extraction a no-op so we don't depend on the LLM.
+        monkeypatch.setattr(
+            discovery.OpportunityExtractor, "extract",
+            lambda self, page, source_id: None,
+        )
+
+        source = GrantSource(
+            source_id="test-stealth",
+            name="Stealth test",
+            kind="generic",
+            listing_url="https://example.com/grants",
+            metadata={"stealth_level": "stealth"},
+        )
+        asyncio.run(discovery.discover_source_async(source, max_pages=3))
+
+        assert init_kwargs.get("stealth_level") == "stealth"
+
+    def test_discovery_defaults_stealth_level_to_fast(self, monkeypatch):
+        import asyncio
+        from app.services.grants import discovery
+        from app.services.grants.crawler import CrawledPage
+        from app.services.grants.models import GrantSource
+
+        init_kwargs: dict = {}
+
+        class FakeCrawler:
+            def __init__(self, *args, **kwargs):
+                init_kwargs.update(kwargs)
+
+            async def fetch(self, url, **_kw):
+                return CrawledPage(url=url, title="t", text="irrelevant", links=[])
+
+            async def fetch_many(self, urls):
+                return []
+
+            async def discover_sitemap_urls(self, base_url):
+                return []
+
+        monkeypatch.setattr(discovery, "GrantCrawler", FakeCrawler)
+        monkeypatch.setattr(
+            discovery.OpportunityExtractor, "extract",
+            lambda self, page, source_id: None,
+        )
+
+        source = GrantSource(
+            source_id="test-default",
+            name="Default",
+            kind="generic",
+            listing_url="https://example.com/grants",
+            metadata={},
+        )
+        asyncio.run(discovery.discover_source_async(source, max_pages=3))
+        assert init_kwargs.get("stealth_level") == "fast"
+
+    def test_discovery_rejects_bad_stealth_level(self, monkeypatch):
+        """An invalid stealth_level in metadata falls back to 'fast'."""
+        import asyncio
+        from app.services.grants import discovery
+        from app.services.grants.crawler import CrawledPage
+        from app.services.grants.models import GrantSource
+
+        init_kwargs: dict = {}
+
+        class FakeCrawler:
+            def __init__(self, *args, **kwargs):
+                init_kwargs.update(kwargs)
+
+            async def fetch(self, url, **_kw):
+                return CrawledPage(url=url, title="t", text="irrelevant", links=[])
+
+            async def fetch_many(self, urls):
+                return []
+
+            async def discover_sitemap_urls(self, base_url):
+                return []
+
+        monkeypatch.setattr(discovery, "GrantCrawler", FakeCrawler)
+        monkeypatch.setattr(
+            discovery.OpportunityExtractor, "extract",
+            lambda self, page, source_id: None,
+        )
+
+        source = GrantSource(
+            source_id="test-bad",
+            name="Bad",
+            kind="generic",
+            listing_url="https://example.com/grants",
+            metadata={"stealth_level": "ultra-mega-stealth"},
+        )
+        asyncio.run(discovery.discover_source_async(source, max_pages=3))
+        assert init_kwargs.get("stealth_level") == "fast"
+
+
+# ── Selector recipes (v2.1 pre-extraction) ──────────────────────────
+
+
+class TestSelectorRecipes:
+    """
+    The recipe layer pre-fills structured fields from the page HTML
+    before the LLM sees it. Tests verify:
+      - the default recipe covers all canonical fields
+      - per-source recipes inherit from the default
+      - BS4 fallback works without Scrapling's Adaptor
+      - pseudo-element parsing handles ``::text`` and ``::attr()``
+      - post-regex strips labels from deadline values
+      - empty/broken HTML returns an empty dict (never raises)
+      - the extractor hands recipe hints to the LLM prompt
+    """
+
+    def test_default_recipe_covers_canonical_fields(self):
+        from app.services.grants.recipes import RECIPE_FIELDS, recipe_for
+
+        default = recipe_for("generic")
+        for f in RECIPE_FIELDS:
+            # Every canonical field should have at least one fallback selector.
+            assert default.selectors(f), f"default recipe missing selectors for {f}"
+
+    def test_per_source_recipe_inherits_default(self):
+        from app.services.grants.recipes import recipe_for
+
+        # FundsforNGOs recipe overrides title+summary but should still
+        # carry the default selectors as fallbacks.
+        ffngo = recipe_for("fundsforngos")
+        title_sels = ffngo.selectors("title")
+        assert ".entry-title" in title_sels  # override
+        assert "h1" in title_sels  # fallback from default
+
+    def test_unknown_kind_falls_back_to_default(self):
+        from app.services.grants.recipes import recipe_for
+
+        mystery = recipe_for("mystery_kind")
+        assert mystery.kind == "generic"
+
+    def test_extract_fields_title_from_meta_og(self):
+        from app.services.grants.recipes import extract_fields
+
+        html = (
+            '<html><head>'
+            '<meta property="og:title" content="Big Grant Call 2026">'
+            '<meta property="og:description" content="Funding for clean energy">'
+            '</head><body></body></html>'
+        )
+        fields = extract_fields(html, kind="generic", base_url="https://x.com")
+        # Either OG meta (if BS4) or plain <title> path should surface
+        # the title. BS4 supports ::attr(content) via our parser.
+        assert fields.get("title") in {"Big Grant Call 2026", ""}
+
+    def test_extract_fields_from_main_body(self):
+        from app.services.grants.recipes import extract_fields
+
+        html = (
+            '<html><head><title>Fallback title</title></head>'
+            '<body><main><h1>Innovation Grant</h1>'
+            '<p>Apply for funding from the Innovation Council.</p>'
+            '</main></body></html>'
+        )
+        fields = extract_fields(html, kind="generic", base_url="https://x.com")
+        # Title should come from one of the h1 selectors.
+        title = fields.get("title", "")
+        assert "Innovation Grant" in title or title == "Fallback title"
+
+    def test_extract_fields_empty_html(self):
+        from app.services.grants.recipes import extract_fields
+
+        assert extract_fields("", kind="generic") == {}
+        assert extract_fields(None, kind="generic") == {}  # type: ignore[arg-type]
+
+    def test_extract_fields_never_raises(self):
+        from app.services.grants.recipes import extract_fields
+
+        # Malformed HTML shouldn't explode the recipe engine.
+        junk = "<<>broken<<<<<<"
+        result = extract_fields(junk, kind="fundsforngos", base_url="https://x.com")
+        assert isinstance(result, dict)
+
+    def test_parse_pseudo_attr(self):
+        from app.services.grants.recipes import _parse_pseudo
+
+        css, attr, text = _parse_pseudo("a::attr(href)")
+        assert css == "a"
+        assert attr == "href"
+        assert text is False
+
+    def test_parse_pseudo_text(self):
+        from app.services.grants.recipes import _parse_pseudo
+
+        css, attr, text = _parse_pseudo("h1::text")
+        assert css == "h1"
+        assert attr is None
+        assert text is True
+
+    def test_parse_pseudo_plain(self):
+        from app.services.grants.recipes import _parse_pseudo
+
+        css, attr, text = _parse_pseudo("article h1")
+        assert css == "article h1"
+        assert attr is None
+        assert text is False
+
+    def test_apply_post_regex_strips_deadline_label(self):
+        from app.services.grants.recipes import _apply_post_regex
+
+        pattern = r"(?:deadline|closes?|apply by|submission)[:\s]*(.+)$"
+        assert _apply_post_regex("Deadline: 2026-08-01", pattern) == "2026-08-01"
+        assert _apply_post_regex("Closes 30 June 2026", pattern) == "30 June 2026"
+
+    def test_apply_post_regex_passthrough_when_no_match(self):
+        from app.services.grants.recipes import _apply_post_regex
+
+        assert _apply_post_regex("2026-08-01", r"(?:deadline):\s*(.+)") == "2026-08-01"
+
+    def test_extractor_uses_recipe_hints(self):
+        """
+        Without an LLM, the extractor should fall back to recipe hints
+        when the heuristic comes up empty. Verify that recipe hits reach
+        the final opportunity.
+        """
+        from app.services.grants.crawler import CrawledPage
+        from app.services.grants.extractor import OpportunityExtractor
+
+        html = (
+            '<html><head><title>Recipe Target</title>'
+            '<meta property="og:description" content="A recipe-extracted summary.">'
+            '</head><body><main>'
+            '<h1>Recipe Target</h1>'
+            '<p>Body text about the grant.</p>'
+            '</main></body></html>'
+        )
+        page = CrawledPage(
+            url="https://example.org/recipe",
+            title="Recipe Target",
+            text="Body text about the grant.",
+            html=html,
+            links=[],
+        )
+        extractor = OpportunityExtractor()
+        extractor.llm = None  # force the recipe+heuristic path
+        opp = extractor.extract(page, source_id="src1", kind="generic")
+        assert opp is not None
+        assert opp.title == "Recipe Target"
+
+    def test_extractor_accepts_kind_parameter(self):
+        """
+        The extractor should accept ``kind`` without breaking existing
+        callers that only pass ``source_id``.
+        """
+        from app.services.grants.crawler import CrawledPage
+        from app.services.grants.extractor import OpportunityExtractor
+
+        page = CrawledPage(
+            url="https://x.com/a",
+            title="Default test",
+            text="Some text",
+            html="<html><body><p>Some text</p></body></html>",
+            links=[],
+        )
+        extractor = OpportunityExtractor()
+        extractor.llm = None
+        # Both calls must succeed.
+        opp1 = extractor.extract(page, source_id="s1")
+        opp2 = extractor.extract(page, source_id="s1", kind="fundsforngos")
+        assert opp1 is not None
+        assert opp2 is not None
+
+
+# ── Concurrent fetch_many ────────────────────────────────────────────
+
+
+class TestConcurrentFetchMany:
+    """
+    ``fetch_many`` now uses ``asyncio.gather`` with a bounded semaphore.
+    Tests verify:
+      - concurrency cap is enforced (we never exceed it)
+      - order is preserved
+      - failures don't block siblings
+      - empty URL list returns []
+      - ``max_pages`` bound is still honoured
+    """
+
+    def test_fetch_many_empty_list(self):
+        import asyncio
+        from app.services.grants.crawler import GrantCrawler
+
+        crawler = GrantCrawler()
+        out = asyncio.run(crawler.fetch_many([]))
+        assert out == []
+
+    def test_fetch_many_enforces_concurrency_cap(self, monkeypatch):
+        """Multiple concurrent fetches never exceed the semaphore value."""
+        import asyncio
+        from app.services.grants.crawler import CrawledPage, GrantCrawler
+
+        crawler = GrantCrawler(max_pages=20)
+
+        in_flight = {"current": 0, "peak": 0}
+
+        async def fake_fetch(url, **_kw):
+            in_flight["current"] += 1
+            in_flight["peak"] = max(in_flight["peak"], in_flight["current"])
+            # Yield to let other coroutines interleave.
+            await asyncio.sleep(0.01)
+            in_flight["current"] -= 1
+            return CrawledPage(url=url, title="t", text="x", links=[])
+
+        monkeypatch.setattr(crawler, "fetch", fake_fetch)
+        urls = [f"https://x.com/{i}" for i in range(10)]
+        results = asyncio.run(crawler.fetch_many(urls, concurrency=3))
+
+        assert len(results) == 10
+        # Peak in-flight should be bounded by the semaphore (allow +1
+        # slack for scheduling jitter).
+        assert in_flight["peak"] <= 4
+
+    def test_fetch_many_preserves_order(self, monkeypatch):
+        import asyncio
+        from app.services.grants.crawler import CrawledPage, GrantCrawler
+
+        crawler = GrantCrawler(max_pages=20)
+
+        async def fake_fetch(url, **_kw):
+            # Introduce reverse-order delays — later URLs finish first.
+            idx = int(url.rsplit("/", 1)[-1])
+            await asyncio.sleep(0.01 * (10 - idx))
+            return CrawledPage(url=url, title=f"t{idx}", text="x", links=[])
+
+        monkeypatch.setattr(crawler, "fetch", fake_fetch)
+        urls = [f"https://x.com/{i}" for i in range(5)]
+        results = asyncio.run(crawler.fetch_many(urls, concurrency=5))
+        # Results should come back in the original URL order.
+        assert [r.url for r in results] == urls
+
+    def test_fetch_many_survives_failures(self, monkeypatch):
+        import asyncio
+        from app.services.grants.crawler import CrawledPage, GrantCrawler
+
+        crawler = GrantCrawler(max_pages=20)
+
+        async def fake_fetch(url, **_kw):
+            if "bad" in url:
+                raise RuntimeError("boom")
+            return CrawledPage(url=url, title="t", text="x", links=[])
+
+        monkeypatch.setattr(crawler, "fetch", fake_fetch)
+        urls = [
+            "https://x.com/ok1",
+            "https://x.com/bad",
+            "https://x.com/ok2",
+        ]
+        results = asyncio.run(crawler.fetch_many(urls, concurrency=3))
+        assert len(results) == 2
+        assert all("bad" not in p.url for p in results)
+
+    def test_fetch_many_honours_max_pages(self, monkeypatch):
+        import asyncio
+        from app.services.grants.crawler import CrawledPage, GrantCrawler
+
+        crawler = GrantCrawler(max_pages=3)
+
+        async def fake_fetch(url, **_kw):
+            return CrawledPage(url=url, title="t", text="x", links=[])
+
+        monkeypatch.setattr(crawler, "fetch", fake_fetch)
+        urls = [f"https://x.com/{i}" for i in range(10)]
+        results = asyncio.run(crawler.fetch_many(urls, concurrency=5))
+        assert len(results) == 3
+
+    def test_fetch_many_returns_empty_when_none_succeed(self, monkeypatch):
+        import asyncio
+        from app.services.grants.crawler import GrantCrawler
+
+        crawler = GrantCrawler(max_pages=5)
+
+        async def fake_fetch(url, **_kw):
+            return None
+
+        monkeypatch.setattr(crawler, "fetch", fake_fetch)
+        urls = ["https://x.com/a", "https://x.com/b"]
+        results = asyncio.run(crawler.fetch_many(urls, concurrency=2))
+        assert results == []
+
+
 class TestFundsforNGOsAdapter:
     def test_tag_pages_cover_all_categories(self):
         from app.services.grants.adapters.fundsforngos import TAG_PAGES

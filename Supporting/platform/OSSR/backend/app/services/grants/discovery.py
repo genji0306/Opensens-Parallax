@@ -68,7 +68,16 @@ async def discover_source_async(
 ) -> DiscoveryResult:
     """Run a full crawl → extract → dedup for one source."""
     result = DiscoveryResult()
-    crawler = GrantCrawler(max_pages=max_pages)
+
+    # Pick up the per-source stealth level from metadata. Sources with known
+    # anti-bot walls (grants.gov, CORDIS, Horizon Europe) tag themselves with
+    # ``stealth_level: "stealth"`` or ``"dynamic"`` and route through the
+    # Scrapling browser rung. Defaults to the cheap HTTP path.
+    stealth_level = str((source.metadata or {}).get("stealth_level") or "fast").lower()
+    if stealth_level not in ("fast", "stealth", "dynamic"):
+        stealth_level = "fast"
+
+    crawler = GrantCrawler(max_pages=max_pages, stealth_level=stealth_level)
     extractor = OpportunityExtractor(model=model)
 
     pages: List[CrawledPage] = []
@@ -141,7 +150,11 @@ async def discover_source_async(
     raw_opps: List[GrantOpportunity] = []
     for page in pages:
         try:
-            opp = extractor.extract(page, source_id=source.source_id)
+            opp = extractor.extract(
+                page,
+                source_id=source.source_id,
+                kind=source.kind or "generic",
+            )
             if opp and opp.title:
                 raw_opps.append(opp)
         except Exception as e:  # noqa: BLE001

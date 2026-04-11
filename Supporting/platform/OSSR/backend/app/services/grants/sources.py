@@ -116,21 +116,27 @@ BUILTIN_SOURCES: list[GrantSource] = [
         name="Grants.gov — Innovation (SBIR/STTR & R&D)",
         kind="grants_gov",
         listing_url="https://www.grants.gov/search-grants?fundingCategories=ST",
-        metadata={"hub": False, "schedule": _DEFAULT_SCHEDULE},
+        # grants.gov ships a JS-rendered SPA; escalate directly to stealth.
+        metadata={"hub": False, "schedule": _DEFAULT_SCHEDULE, "stealth_level": "stealth"},
     ),
     GrantSource(
         source_id="cordis-eu",
         name="CORDIS — EU Research Calls",
         kind="cordis",
         listing_url="https://cordis.europa.eu/search?q=contenttype%3D%27project%27",
-        metadata={"hub": False, "schedule": _WEEKLY_SCHEDULE},
+        # CORDIS behind Akamai bot mitigation — stealth required.
+        metadata={"hub": False, "schedule": _WEEKLY_SCHEDULE, "stealth_level": "stealth"},
     ),
     GrantSource(
         source_id="horizon-europe",
         name="Horizon Europe — EU Funding & Tenders",
         kind="horizon_europe",
         listing_url="https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-search",
-        metadata={"hub": False, "schedule": _WEEKLY_SCHEDULE, "stub": True},
+        # SEDIA portal is a fully client-rendered Angular app — needs dynamic.
+        metadata={
+            "hub": False, "schedule": _WEEKLY_SCHEDULE, "stub": True,
+            "stealth_level": "dynamic",
+        },
         enabled=False,
     ),
 
@@ -140,8 +146,10 @@ BUILTIN_SOURCES: list[GrantSource] = [
         name="SBIR/STTR (US)",
         kind="sbir",
         listing_url="https://www.sbir.gov/sbirsearch/solicitationsearch",
+        # sbir.gov has strong anti-bot on the search endpoint — use stealth.
         metadata={"hub": False, "schedule": _DEFAULT_SCHEDULE,
-                  "paginate": {"param": "page", "max_pages": 5}},
+                  "paginate": {"param": "page", "max_pages": 5},
+                  "stealth_level": "stealth"},
     ),
     GrantSource(
         source_id="enterprise-sg",
@@ -169,7 +177,8 @@ BUILTIN_SOURCES: list[GrantSource] = [
         name="EIC Accelerator",
         kind="generic",
         listing_url="https://eic.ec.europa.eu/eic-funding-opportunities/eic-accelerator_en",
-        metadata={"hub": False, "schedule": _WEEKLY_SCHEDULE},
+        # europa.eu sits behind Akamai → stealth.
+        metadata={"hub": False, "schedule": _WEEKLY_SCHEDULE, "stealth_level": "stealth"},
     ),
 
     # ── C.2 Energy Efficiency & Climate Tech ─────────────────────
