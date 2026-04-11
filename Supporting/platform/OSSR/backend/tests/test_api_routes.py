@@ -499,3 +499,33 @@ class TestPapersSortFilter:
         assert resp.status_code == 200
         body = resp.get_json()
         assert body["data"]["source_filter"] == "arxiv"
+
+    def test_papers_search_matches_parsed_document_text(self, client, seeded_run, isolated_db):
+        run_id, _, _ = seeded_run
+        from app.models.research import ResearchDataStore, Paper, AcademicSource, IngestionStatus
+
+        store = ResearchDataStore()
+        paper = Paper(
+            paper_id="",
+            doi="10.1000/document-search",
+            title="Battery degradation study",
+            abstract="General abstract without target phrase.",
+            authors=[{"name": "Author One"}],
+            publication_date="2026-04-10",
+            source=AcademicSource.ARXIV,
+            status=IngestionStatus.STORED,
+            metadata={
+                "document_search_text": "Rare phrase zirconia interface stabilization appears only in parsed full text.",
+                "document_outline": ["abstract", "results"],
+            },
+        )
+        store.add_paper(paper)
+        store.record_run_papers(run_id, [paper.paper_id])
+
+        resp = client.get(f"/api/research/ais/{run_id}/papers?search=zirconia interface stabilization")
+        assert resp.status_code == 200
+        body = resp.get_json()
+        assert body["data"]["total"] >= 1
+        assert any(item["doi"] == "10.1000/document-search" for item in body["data"]["papers"])
+        matched = next(item for item in body["data"]["papers"] if item["doi"] == "10.1000/document-search")
+        assert matched["has_document_parse"] is True

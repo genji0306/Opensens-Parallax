@@ -485,6 +485,22 @@ def init_db():
             created_at TEXT NOT NULL DEFAULT ''
         );
 
+        -- Paper Lab visualization artifacts
+        CREATE TABLE IF NOT EXISTS paper_visualization_artifacts (
+            artifact_id TEXT PRIMARY KEY,
+            upload_id TEXT NOT NULL,
+            artifact_type TEXT NOT NULL DEFAULT 'chart',
+            intent TEXT NOT NULL DEFAULT 'summarize',
+            title TEXT NOT NULL DEFAULT '',
+            status TEXT NOT NULL DEFAULT 'draft',
+            version INTEGER NOT NULL DEFAULT 1,
+            payload_json TEXT NOT NULL DEFAULT '{}',
+            audit_json TEXT NOT NULL DEFAULT '{}',
+            provenance_json TEXT NOT NULL DEFAULT '{}',
+            created_at TEXT NOT NULL DEFAULT '',
+            updated_at TEXT NOT NULL DEFAULT ''
+        );
+
         -- Grant Hunt module tables
         CREATE TABLE IF NOT EXISTS grant_profiles (
             profile_id TEXT PRIMARY KEY,
@@ -541,6 +557,8 @@ def init_db():
 
         CREATE INDEX IF NOT EXISTS idx_knowledge_artifacts_run ON knowledge_artifacts(run_id);
         CREATE INDEX IF NOT EXISTS idx_revision_history_run ON revision_history(run_id);
+        CREATE INDEX IF NOT EXISTS idx_paper_viz_artifacts_upload ON paper_visualization_artifacts(upload_id, updated_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_paper_viz_artifacts_type ON paper_visualization_artifacts(upload_id, artifact_type);
         CREATE INDEX IF NOT EXISTS idx_papers_doi ON papers(doi);
         CREATE INDEX IF NOT EXISTS idx_papers_source ON papers(source);
         CREATE INDEX IF NOT EXISTS idx_papers_status ON papers(status);
@@ -766,6 +784,26 @@ def _get_migrations():
             );
             CREATE INDEX IF NOT EXISTS idx_grant_alerts_profile
                 ON grant_alerts(profile_id, fired_at DESC);
+        """),
+        (8, "Paper Lab visualization artifacts", """
+            CREATE TABLE IF NOT EXISTS paper_visualization_artifacts (
+                artifact_id TEXT PRIMARY KEY,
+                upload_id TEXT NOT NULL,
+                artifact_type TEXT NOT NULL DEFAULT 'chart',
+                intent TEXT NOT NULL DEFAULT 'summarize',
+                title TEXT NOT NULL DEFAULT '',
+                status TEXT NOT NULL DEFAULT 'draft',
+                version INTEGER NOT NULL DEFAULT 1,
+                payload_json TEXT NOT NULL DEFAULT '{}',
+                audit_json TEXT NOT NULL DEFAULT '{}',
+                provenance_json TEXT NOT NULL DEFAULT '{}',
+                created_at TEXT NOT NULL DEFAULT '',
+                updated_at TEXT NOT NULL DEFAULT ''
+            );
+            CREATE INDEX IF NOT EXISTS idx_paper_viz_artifacts_upload
+                ON paper_visualization_artifacts(upload_id, updated_at DESC);
+            CREATE INDEX IF NOT EXISTS idx_paper_viz_artifacts_type
+                ON paper_visualization_artifacts(upload_id, artifact_type);
         """),
     ]
 

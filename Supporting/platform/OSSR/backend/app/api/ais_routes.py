@@ -1753,8 +1753,16 @@ def get_run_papers(run_id: str):
     params: list = [run_id]
 
     if search:
-        where_parts.append("(p.title LIKE ? OR p.abstract LIKE ? OR p.authors LIKE ?)")
-        params.extend([f"%{search}%", f"%{search}%", f"%{search}%"])
+        where_parts.append(
+            "("
+            "p.title LIKE ? OR "
+            "p.abstract LIKE ? OR "
+            "p.authors LIKE ? OR "
+            "json_extract(p.metadata, '$.document_search_text') LIKE ? OR "
+            "json_extract(p.metadata, '$.document_outline') LIKE ?"
+            ")"
+        )
+        params.extend([f"%{search}%", f"%{search}%", f"%{search}%", f"%{search}%", f"%{search}%"])
 
     if source_filter:
         where_parts.append("p.source = ?")
@@ -1804,6 +1812,7 @@ def get_run_papers(run_id: str):
             "keywords": keywords,
             "full_text_url": row["full_text_url"],
             "status": row["status"],
+            "has_document_parse": "document_search_text" in (json.loads(row["metadata"]) if row["metadata"] else {}),
         })
 
     return jsonify({

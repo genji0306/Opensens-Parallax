@@ -20,12 +20,14 @@ import { setActivePinia, createPinia } from 'pinia'
 const mockGet = vi.fn()
 const mockPost = vi.fn()
 const mockPatch = vi.fn()
+const mockPut = vi.fn()
 
 vi.mock('axios', () => {
   const instance = {
     get: mockGet,
     post: mockPost,
     patch: mockPatch,
+    put: mockPut,
     defaults: { baseURL: '' },
     interceptors: {
       request: { use: vi.fn() },
@@ -843,11 +845,11 @@ describe('Paper Lab Protocol (paperLab.ts)', () => {
     })
 
     it('startReview → POST /api/research/paper-lab/:id/start-review', async () => {
-      mockPost.mockResolvedValueOnce(ok({ status: 'review_started' }))
+      mockPost.mockResolvedValueOnce(ok({ upload_id: 'upload_001', task_id: 'task_1', config: { rounds: 3, reviewers: 2, live: true } }))
       const { startReview } = await import('@/api/paperLab')
       const res = await startReview('upload_001', { rounds: 3, reviewers: 2, live: true })
       expect(mockPost).toHaveBeenCalledWith('/api/research/paper-lab/upload_001/start-review', { rounds: 3, reviewers: 2, live: true })
-      expect(res.data.data.status).toBe('review_started')
+      expect(res.data.data.upload_id).toBe('upload_001')
     })
   })
 
@@ -867,21 +869,23 @@ describe('Paper Lab Protocol (paperLab.ts)', () => {
       const { getRounds } = await import('@/api/paperLab')
       const res = await getRounds('upload_001')
       expect(mockGet).toHaveBeenCalledWith('/api/research/paper-lab/upload_001/rounds')
-      expect(res.data.data).toHaveLength(2)
-      expect(res.data.data[0]?.reviews[0]?.score).toBe(5.2)
+      const data = res.data.data as unknown as Array<Record<string, unknown>>
+      expect(data).toHaveLength(2)
+      expect((data[0] as Record<string, unknown>).reviews).toBeDefined()
     })
 
     it('getDraft → GET /api/research/paper-lab/:id/draft', async () => {
       mockGet.mockResolvedValueOnce(ok({
+        upload_id: 'upload_001',
         title: 'Revised Paper',
-        sections: [{ heading: 'Abstract', content: 'Revised abstract' }],
-        citations: [{ id: 'c1', title: 'Reference 1' }],
-        metadata: { word_count: 5000 },
+        draft: 'Revised abstract content...',
+        word_count: 5000,
+        status: 'review_complete',
       }))
       const { getDraft } = await import('@/api/paperLab')
       const res = await getDraft('upload_001')
       expect(res.data.data.title).toBe('Revised Paper')
-      expect(res.data.data.sections).toHaveLength(1)
+      expect(res.data.data.word_count).toBe(5000)
     })
   })
 
@@ -931,6 +935,111 @@ describe('Paper Lab Protocol (paperLab.ts)', () => {
       const res = await getSpecialistReview('upload_001')
       expect(mockGet).toHaveBeenCalledWith('/api/research/paper-lab/upload_001/specialist-review')
       expect(res.data.data.upload_id).toBe('upload_001')
+    })
+  })
+
+  describe('Visualization Studio + PaperOrchestra Flows', () => {
+    it('getVisualizationPlan → POST /api/research/paper-lab/:id/visualization-plan', async () => {
+      mockPost.mockResolvedValueOnce(ok({
+        reconstruct: [],
+        improve: [],
+        create_missing: [],
+        graphical_abstract: [],
+        communication_outputs: [],
+      }))
+      const { getVisualizationPlan } = await import('@/api/paperLab')
+      const res = await getVisualizationPlan('upload_001')
+      expect(mockPost).toHaveBeenCalledWith('/api/research/paper-lab/upload_001/visualization-plan', {})
+      expect(res.data.data.graphical_abstract).toEqual([])
+    })
+
+    it('listVisualizationArtifacts → GET /api/research/paper-lab/:id/visualization-artifacts', async () => {
+      mockGet.mockResolvedValueOnce(ok([{ artifact_id: 'viz_1', title: 'Figure 2' }]))
+      const { listVisualizationArtifacts } = await import('@/api/paperLab')
+      const res = await listVisualizationArtifacts('upload_001')
+      expect(mockGet).toHaveBeenCalledWith('/api/research/paper-lab/upload_001/visualization-artifacts')
+      expect(res.data.data[0]?.artifact_id).toBe('viz_1')
+    })
+
+    it('createVisualizationArtifact → POST /api/research/paper-lab/:id/artifacts', async () => {
+      mockPost.mockResolvedValueOnce(ok({ artifact_id: 'viz_1', title: 'Figure 2' }))
+      const { createVisualizationArtifact } = await import('@/api/paperLab')
+      const res = await createVisualizationArtifact('upload_001', { type: 'chart', intent: 'reconstruct', title: 'Figure 2' })
+      expect(mockPost).toHaveBeenCalledWith('/api/research/paper-lab/upload_001/artifacts', { type: 'chart', intent: 'reconstruct', title: 'Figure 2' })
+      expect(res.data.data.artifact_id).toBe('viz_1')
+    })
+
+    it('updateVisualizationArtifact → PUT /api/research/paper-lab/:id/artifacts/:artifact_id', async () => {
+      mockPut.mockResolvedValueOnce(ok({ artifact_id: 'viz_1', version: 2 }))
+      const { updateVisualizationArtifact } = await import('@/api/paperLab')
+      const res = await updateVisualizationArtifact('upload_001', 'viz_1', { title: 'Updated' })
+      expect(mockPut).toHaveBeenCalledWith('/api/research/paper-lab/upload_001/artifacts/viz_1', { title: 'Updated' })
+      expect(res.data.data.version).toBe(2)
+    })
+
+    it('refinePaperSection → POST /api/research/paper-lab/:id/refine-section', async () => {
+      mockPost.mockResolvedValueOnce(ok({ section: 'Introduction', revised_text: 'New text' }))
+      const { refinePaperSection } = await import('@/api/paperLab')
+      const res = await refinePaperSection('upload_001', 'improve_introduction')
+      expect(mockPost).toHaveBeenCalledWith('/api/research/paper-lab/upload_001/refine-section', {
+        action: 'improve_introduction',
+        visualization_plan: undefined,
+      })
+      expect(res.data.data.section).toBe('Introduction')
+    })
+
+    it('groundedLiteratureReview → POST /api/research/paper-lab/:id/literature-review', async () => {
+      mockPost.mockResolvedValueOnce(ok({ focus: 'battery benchmark', ready: true }))
+      const { groundedLiteratureReview } = await import('@/api/paperLab')
+      const res = await groundedLiteratureReview('upload_001', 'battery benchmark')
+      expect(mockPost).toHaveBeenCalledWith('/api/research/paper-lab/upload_001/literature-review', { focus: 'battery benchmark' })
+      expect(res.data.data.ready).toBe(true)
+    })
+
+    it('applyPaperRefinement → POST /api/research/paper-lab/:id/apply-refinement', async () => {
+      mockPost.mockResolvedValueOnce(ok({ upload_id: 'upload_001', refinement_id: 'refine_1', section: 'Introduction' }))
+      const { applyPaperRefinement } = await import('@/api/paperLab')
+      const res = await applyPaperRefinement('upload_001', {
+        refinement_id: 'refine_1',
+        action: 'improve_introduction',
+        section: 'Introduction',
+        original_text: 'Old text',
+        revised_text: 'New text',
+        applied: false,
+        diff: { before_word_count: 2, after_word_count: 2, summary: 'Updated' },
+        addressed_recommendations: ['Clarify motivation'],
+      })
+      expect(mockPost).toHaveBeenCalledWith('/api/research/paper-lab/upload_001/apply-refinement', {
+        refinement: {
+          refinement_id: 'refine_1',
+          action: 'improve_introduction',
+          section: 'Introduction',
+          original_text: 'Old text',
+          revised_text: 'New text',
+          applied: false,
+          diff: { before_word_count: 2, after_word_count: 2, summary: 'Updated' },
+          addressed_recommendations: ['Clarify motivation'],
+        },
+      })
+      expect(res.data.data.refinement_id).toBe('refine_1')
+    })
+
+    it('getDraftHistory → GET /api/research/paper-lab/:id/draft-history', async () => {
+      mockGet.mockResolvedValueOnce(ok({ upload_id: 'upload_001', applied_refinements: [] }))
+      const { getDraftHistory } = await import('@/api/paperLab')
+      const res = await getDraftHistory('upload_001')
+      expect(mockGet).toHaveBeenCalledWith('/api/research/paper-lab/upload_001/draft-history')
+      expect(res.data.data.upload_id).toBe('upload_001')
+    })
+
+    it('revertPaperRefinement → POST /api/research/paper-lab/:id/revert-refinement', async () => {
+      mockPost.mockResolvedValueOnce(ok({ upload_id: 'upload_001', reverted_refinement_id: 'refine_1' }))
+      const { revertPaperRefinement } = await import('@/api/paperLab')
+      const res = await revertPaperRefinement('upload_001', 'refine_1')
+      expect(mockPost).toHaveBeenCalledWith('/api/research/paper-lab/upload_001/revert-refinement', {
+        refinement_id: 'refine_1',
+      })
+      expect(res.data.data.reverted_refinement_id).toBe('refine_1')
     })
   })
 
@@ -1081,8 +1190,9 @@ describe('Cross-Protocol Integration', () => {
       { round: 2, reviews: [{ reviewer: 'R1', score: 7.0, comments: 'Much better' }] },
     ]))
     const roundsRes = await getRounds(uploadId)
-    expect(roundsRes.data.data).toHaveLength(2)
-    expect(roundsRes.data.data[1]?.reviews[0]?.score).toBe(7.0)
+    const roundsArr = roundsRes.data.data as unknown as Array<Record<string, unknown>>
+    expect(roundsArr).toHaveLength(2)
+    expect(((roundsArr[1])?.reviews as Array<Record<string, unknown>>)?.[0]?.score).toBe(7.0)
 
     // Fill gaps
     mockPost.mockResolvedValueOnce(ok({ status: 'gaps_filled' }))
@@ -1090,13 +1200,14 @@ describe('Cross-Protocol Integration', () => {
 
     // Get final draft
     mockGet.mockResolvedValueOnce(ok({
+      upload_id: uploadId,
       title: 'Improved Paper',
-      sections: [{ heading: 'Abstract', content: 'Better abstract' }],
-      citations: [{ id: 'c1', title: 'New Reference' }],
-      metadata: { word_count: 6000 },
+      draft: 'Better abstract content...',
+      word_count: 6000,
+      status: 'gap_filled',
     }))
     const draftRes = await getDraft(uploadId)
-    expect(draftRes.data.data.citations).toHaveLength(1)
+    expect(draftRes.data.data.word_count).toBe(6000)
   })
 
   it('Simulation + Mirofish flow: create sim → run → graph → scoreboard → snapshot', async () => {

@@ -1,17 +1,17 @@
 import service from './client'
 import type { AxiosResponse } from 'axios'
-import type { ApiResponse, PaperUpload, PaperDraft } from '@/types/api'
+import type { ApiResponse, PaperUpload } from '@/types/api'
 
 // ── Local Types ────────────────────────────────────────────────────────
 
-interface ReviewConfig {
+export interface ReviewConfig {
   rounds?: number
   reviewers?: number
   authors?: number
   live?: boolean
 }
 
-interface ReviewRound {
+export interface ReviewRound {
   round: number
   reviews: Array<{
     reviewer: string
@@ -37,19 +37,50 @@ interface SpecialistReviewConfig {
   model?: string
 }
 
-interface ProgressEvent {
+export interface ProgressEvent {
   type: string
   data: unknown
+}
+
+/** Backend draft response shape */
+export interface DraftPayload {
+  upload_id: string
+  title: string
+  draft: string
+  word_count: number
+  status: string
+}
+
+/** Backend rounds response shape (wraps ReviewRound[]) */
+export interface RoundsPayload {
+  rounds: ReviewRound[]
+  score_progression: number[]
+  reviewers: Array<Record<string, unknown>>
+  source_audit: Record<string, unknown>
+}
+
+export interface PaperUploadResponse {
+  upload_id: string
+  title?: string
+  language?: string
+  detected_field?: string
+  section_count?: number
+  sections?: string[]
+  word_count?: number
+  reference_count?: number
+  parser_engine?: string
+  parser_mode?: string
+  parse_quality?: Record<string, unknown>
 }
 
 // ── Paper Lab (Rehabilitation Pipeline) ────────────────────────────────
 
 /**
- * Upload a paper draft file (.docx, .txt, or .md).
+ * Upload a paper draft file (.pdf, .doc, .docx, .txt, or .md).
  */
 export function uploadPaper(
   file: File,
-): Promise<AxiosResponse<ApiResponse<{ upload_id: string }>>> {
+): Promise<AxiosResponse<ApiResponse<PaperUploadResponse>>> {
   const formData = new FormData()
   formData.append('file', file)
   return service.post('/api/research/paper-lab/upload', formData, {
@@ -69,29 +100,32 @@ export function getUploadStatus(
 
 /**
  * Start the adversarial review game.
+ * Backend returns: { upload_id, task_id, config }
  */
 export function startReview(
   uploadId: string,
   config: ReviewConfig = {},
-): Promise<AxiosResponse<ApiResponse<{ status: string }>>> {
+): Promise<AxiosResponse<ApiResponse<{ upload_id: string; task_id: string; session_id: string; config: ReviewConfig }>>> {
   return service.post(`/api/research/paper-lab/${uploadId}/start-review`, config)
 }
 
 /**
  * Get all review/revision round data.
+ * Backend may return either RoundsPayload (wrapped) or ReviewRound[] (legacy).
  */
 export function getRounds(
   uploadId: string,
-): Promise<AxiosResponse<ApiResponse<ReviewRound[]>>> {
+): Promise<AxiosResponse<ApiResponse<RoundsPayload | ReviewRound[]>>> {
   return service.get(`/api/research/paper-lab/${uploadId}/rounds`)
 }
 
 /**
  * Get the current (latest revised) draft.
+ * Backend returns: { upload_id, title, draft, word_count, status }
  */
 export function getDraft(
   uploadId: string,
-): Promise<AxiosResponse<ApiResponse<PaperDraft>>> {
+): Promise<AxiosResponse<ApiResponse<DraftPayload>>> {
   return service.get(`/api/research/paper-lab/${uploadId}/draft`)
 }
 
@@ -108,10 +142,12 @@ export function listUploads(): Promise<AxiosResponse<ApiResponse<PaperUpload[]>>
  */
 export function subscribeToProgress(
   uploadId: string,
+  sessionId: string | undefined,
   onEvent: (event: ProgressEvent) => void,
 ): () => void {
   const baseUrl = import.meta.env.VITE_API_BASE_URL || ''
-  const url = `${baseUrl}/api/research/paper-lab/${uploadId}/stream`
+  const params = sessionId ? `?session_id=${encodeURIComponent(sessionId)}` : ''
+  const url = `${baseUrl}/api/research/paper-lab/${uploadId}/stream${params}`
   const source = new EventSource(url)
 
   const eventTypes = [
@@ -148,6 +184,8 @@ export function subscribeToProgress(
 
   source.onerror = () => {
     source.close()
+    // Notify caller so UI can exit reviewing state and show actionable feedback
+    onEvent({ type: 'stream_error', data: { message: 'SSE connection lost' } })
   }
 
   return () => source.close()
@@ -445,6 +483,254 @@ export function runComparativeAnalysis(
   return service.post(`/api/research/paper-lab/compare`, { upload_ids: uploadIds })
 }
 
+// ── Visualization Artifacts + Planning ────────────────────────────────────
+
+export type VisualizationArtifactType =
+  | 'chart'
+  | 'diagram'
+  | 'table'
+  | 'graphical_abstract'
+  | 'poster_panel'
+  | 'slide'
+
+export type VisualizationArtifactIntent =
+  | 'reconstruct'
+  | 'improve'
+  | 'create_missing'
+  | 'summarize'
+
+export type VisualizationArtifactStatus = 'draft' | 'ready' | 'needs_input' | 'failed'
+
+export interface VisualizationArtifact {
+  artifact_id: string
+  upload_id: string
+  type: VisualizationArtifactType
+  intent: VisualizationArtifactIntent
+  title: string
+  status: VisualizationArtifactStatus
+  version: number
+  payload: Record<string, unknown>
+  audit: {
+    confidence?: number
+    issues?: string[]
+    consistency_status?: 'pass' | 'warn' | 'fail'
+    ready?: boolean
+  }
+  provenance: Record<string, unknown>
+  created_at: string
+  updated_at: string
+}
+
+export interface VisualizationPlanItem {
+  plan_id: string
+  type: VisualizationArtifactType
+  intent: VisualizationArtifactIntent
+  title: string
+  rationale: string
+  source_refs: string[]
+  source_sections: string[]
+  linked_review_findings: string[]
+  required_data: string[]
+  recommended_engine: string
+  data_mode: string
+  confidence: number
+  content_description?: string
+  priority?: string
+  layout_modes?: string[]
+}
+
+export interface VisualizationPlan {
+  reconstruct: VisualizationPlanItem[]
+  improve: VisualizationPlanItem[]
+  create_missing: VisualizationPlanItem[]
+  graphical_abstract: VisualizationPlanItem[]
+  communication_outputs: VisualizationPlanItem[]
+}
+
+export interface SectionRefinementResult {
+  refinement_id?: string
+  action: string
+  section: string
+  original_text: string
+  revised_text: string
+  applied?: boolean
+  diff: {
+    before_word_count: number
+    after_word_count: number
+    summary: string
+  }
+  addressed_recommendations: string[]
+}
+
+export interface ApplyRefinementResult {
+  upload_id: string
+  refinement_id: string
+  section: string
+  current_draft: string
+  sections: Array<Record<string, unknown>>
+}
+
+export interface DraftHistoryPayload {
+  upload_id: string
+  applied_refinements: Array<{
+    refinement_id: string
+    action: string
+    section: string
+    applied_at: string
+    draft_before_excerpt?: string
+    draft_after_excerpt?: string
+  }>
+  section_refinement_history: Array<{
+    refinement_id: string
+    action: string
+    section: string
+    summary: string
+    created_at: string
+    applied?: boolean
+    applied_at?: string
+  }>
+  grounded_literature_history: Array<{
+    focus: string
+    ready: boolean
+    suggestion_count: number
+    verified_count?: number
+    created_at: string
+  }>
+  last_applied_refinement_id?: string
+}
+
+export interface RevertRefinementResult {
+  upload_id: string
+  reverted_refinement_id: string
+  current_draft: string
+  sections: Array<Record<string, unknown>>
+}
+
+export interface GroundedLiteratureReviewResult {
+  focus: string
+  queries: string[]
+  suggestions: Array<{
+    citation_id: string
+    title: string
+    doi: string
+    year: string
+    source: string
+    verified: boolean
+    confidence: number
+    query: string
+    insertion_point: string
+    provenance: Record<string, unknown>
+  }>
+  ready: boolean
+  unverified_count: number
+  note: string
+}
+
+export function getVisualizationPlan(
+  uploadId: string,
+): Promise<AxiosResponse<ApiResponse<VisualizationPlan>>> {
+  return service.post(`/api/research/paper-lab/${uploadId}/visualization-plan`, {})
+}
+
+export function listVisualizationArtifacts(
+  uploadId: string,
+): Promise<AxiosResponse<ApiResponse<VisualizationArtifact[]>>> {
+  return service.get(`/api/research/paper-lab/${uploadId}/visualization-artifacts`)
+}
+
+export function createVisualizationArtifact(
+  uploadId: string,
+  body: Partial<VisualizationArtifact> & { type: VisualizationArtifactType; intent: VisualizationArtifactIntent; title: string },
+): Promise<AxiosResponse<ApiResponse<VisualizationArtifact>>> {
+  return service.post(`/api/research/paper-lab/${uploadId}/artifacts`, body)
+}
+
+export function updateVisualizationArtifact(
+  uploadId: string,
+  artifactId: string,
+  body: Record<string, unknown>,
+): Promise<AxiosResponse<ApiResponse<VisualizationArtifact>>> {
+  return service.put(`/api/research/paper-lab/${uploadId}/artifacts/${artifactId}`, body)
+}
+
+export function renderVisualizationArtifact(
+  uploadId: string,
+  artifactId: string,
+): Promise<AxiosResponse<ApiResponse<VisualizationArtifact>>> {
+  return service.post(`/api/research/paper-lab/${uploadId}/artifacts/${artifactId}/render`, {})
+}
+
+export function auditVisualizationArtifact(
+  uploadId: string,
+  artifactId: string,
+): Promise<AxiosResponse<ApiResponse<VisualizationArtifact>>> {
+  return service.post(`/api/research/paper-lab/${uploadId}/artifacts/${artifactId}/audit`, {})
+}
+
+export function exportVisualizationArtifact(
+  uploadId: string,
+  artifactId: string,
+): Promise<AxiosResponse<ApiResponse<Record<string, unknown>>>> {
+  return service.post(`/api/research/paper-lab/${uploadId}/artifacts/${artifactId}/export`, {})
+}
+
+export function refinePaperSection(
+  uploadId: string,
+  action: string,
+  visualizationPlan?: VisualizationPlan | null,
+): Promise<AxiosResponse<ApiResponse<SectionRefinementResult>>> {
+  return service.post(`/api/research/paper-lab/${uploadId}/refine-section`, {
+    action,
+    visualization_plan: visualizationPlan,
+  })
+}
+
+export function groundedLiteratureReview(
+  uploadId: string,
+  focus: string,
+): Promise<AxiosResponse<ApiResponse<GroundedLiteratureReviewResult>>> {
+  return service.post(`/api/research/paper-lab/${uploadId}/literature-review`, { focus })
+}
+
+export function applyPaperRefinement(
+  uploadId: string,
+  refinement: SectionRefinementResult,
+): Promise<AxiosResponse<ApiResponse<ApplyRefinementResult>>> {
+  return service.post(`/api/research/paper-lab/${uploadId}/apply-refinement`, { refinement })
+}
+
+export function getDraftHistory(
+  uploadId: string,
+): Promise<AxiosResponse<ApiResponse<DraftHistoryPayload>>> {
+  return service.get(`/api/research/paper-lab/${uploadId}/draft-history`)
+}
+
+export function revertPaperRefinement(
+  uploadId: string,
+  refinementId: string,
+): Promise<AxiosResponse<ApiResponse<RevertRefinementResult>>> {
+  return service.post(`/api/research/paper-lab/${uploadId}/revert-refinement`, { refinement_id: refinementId })
+}
+
+export function generateGraphicalAbstract(
+  uploadId: string,
+  layoutMode = 'process_summary',
+): Promise<AxiosResponse<ApiResponse<VisualizationArtifact>>> {
+  return service.post(`/api/research/paper-lab/${uploadId}/graphical-abstract`, { layout_mode: layoutMode })
+}
+
+export function generateSlideStarter(
+  uploadId: string,
+): Promise<AxiosResponse<ApiResponse<VisualizationArtifact>>> {
+  return service.post(`/api/research/paper-lab/${uploadId}/slide-starter`, {})
+}
+
+export function generatePosterStarter(
+  uploadId: string,
+): Promise<AxiosResponse<ApiResponse<VisualizationArtifact>>> {
+  return service.post(`/api/research/paper-lab/${uploadId}/poster-starter`, {})
+}
+
 // ── PaperBanana Agentic Illustrations ──────────────────────────────────────
 
 export interface PaperBananaResult {
@@ -466,4 +752,3 @@ export function generatePaperBananaIllustration(
     task_type: taskType
   })
 }
-

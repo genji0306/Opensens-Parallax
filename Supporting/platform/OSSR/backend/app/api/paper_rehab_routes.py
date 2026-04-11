@@ -110,13 +110,257 @@ def _load_upload(upload_id: str) -> dict | None:
     }
 
 
-def _emit_sse(upload_id: str, event_type: str, data: dict):
+def _current_review_session_id(upload: dict) -> str:
+    meta = upload.get("metadata") or {}
+    return meta.get("current_review_session_id", "")
+
+
+def _update_upload_metadata(upload_id: str, mutate_fn):
+    upload = _load_upload(upload_id)
+    if not upload:
+        return None
+    meta = dict(upload.get("metadata") or {})
+    mutate_fn(meta)
+    conn = get_connection()
+    conn.execute(
+        "UPDATE paper_uploads SET metadata = ?, updated_at = ? WHERE upload_id = ?",
+        (json.dumps(meta), datetime.now().isoformat(), upload_id),
+    )
+    conn.commit()
+    upload["metadata"] = meta
+    return upload
+
+
+def _build_draft_from_sections(sections: list[dict]) -> str:
+    blocks = []
+    for section in sections:
+        name = (section.get("name") or "").strip()
+        content = (section.get("content") or section.get("text") or "").strip()
+        if name:
+            blocks.append(name)
+        if content:
+            blocks.append(content)
+    return "\n\n".join(block for block in blocks if block).strip()
+
+
+def _apply_section_revision_to_upload(upload: dict, section_name: str, revised_text: str, action: str, refinement_id: str) -> dict:
+    sections = list(upload.get("sections") or [])
+    previous_draft = upload.get("current_draft", "")
+    updated = False
+    previous_section_text = ""
+    for section in sections:
+        if (section.get("name") or "").lower() == section_name.lower():
+            previous_section_text = section.get("content") or section.get("text") or ""
+            if "content" in section:
+                section["content"] = revised_text
+            else:
+                section["text"] = revised_text
+            updated = True
+            break
+
+    if not updated:
+        sections.append({"name": section_name, "content": revised_text})
+
+    next_draft = _build_draft_from_sections(sections) or revised_text
+    metadata = dict(upload.get("metadata") or {})
+    history = list(metadata.get("applied_section_refinements") or [])
+    history.append({
+        "refinement_id": refinement_id,
+        "action": action,
+        "section": section_name,
+        "applied_at": datetime.now().isoformat(),
+        "section_before_text": previous_section_text,
+        "section_after_text": revised_text,
+        "draft_before_excerpt": previous_draft[:280],
+        "draft_after_excerpt": next_draft[:280],
+    })
+    metadata["applied_section_refinements"] = history[-20:]
+
+    conn = get_connection()
+    conn.execute(
+        """
+        UPDATE paper_uploads
+        SET sections = ?, current_draft = ?, metadata = ?, updated_at = ?
+        WHERE upload_id = ?
+        """,
+        (
+            json.dumps(sections),
+            next_draft,
+            json.dumps(metadata),
+            datetime.now().isoformat(),
+            upload["upload_id"],
+        ),
+    )
+    conn.commit()
+
+    upload["sections"] = sections
+    upload["current_draft"] = next_draft
+    upload["metadata"] = metadata
+    return upload
+
+
+def _revert_section_refinement(upload: dict, refinement_id: str) -> dict | None:
+    metadata = dict(upload.get("metadata") or {})
+    history = list(metadata.get("applied_section_refinements") or [])
+    target = next((item for item in reversed(history) if item.get("refinement_id") == refinement_id), None)
+    if not target:
+        return None
+
+    section_name = target.get("section") or ""
+    previous_text = target.get("section_before_text", "")
+    sections = list(upload.get("sections") or [])
+    for section in sections:
+        if (section.get("name") or "").lower() == section_name.lower():
+            if "content" in section:
+                section["content"] = previous_text
+            else:
+                section["text"] = previous_text
+            break
+
+    next_draft = _build_draft_from_sections(sections)
+    history.append({
+        "refinement_id": f"revert_{uuid.uuid4().hex[:10]}",
+        "action": f"revert:{target.get('action', 'unknown')}",
+        "section": section_name,
+        "applied_at": datetime.now().isoformat(),
+        "section_before_text": target.get("section_after_text", ""),
+        "section_after_text": previous_text,
+        "draft_before_excerpt": (upload.get("current_draft") or "")[:280],
+        "draft_after_excerpt": next_draft[:280],
+        "reverted_refinement_id": refinement_id,
+    })
+    metadata["applied_section_refinements"] = history[-20:]
+    metadata["last_reverted_refinement_id"] = refinement_id
+
+    section_history = []
+    for item in (metadata.get("section_refinement_history") or []):
+        if item.get("refinement_id") == refinement_id:
+            section_history.append({
+                **item,
+                "applied": False,
+                "reverted_at": datetime.now().isoformat(),
+            })
+        else:
+            section_history.append(item)
+    metadata["section_refinement_history"] = section_history
+
+    conn = get_connection()
+    conn.execute(
+        """
+        UPDATE paper_uploads
+        SET sections = ?, current_draft = ?, metadata = ?, updated_at = ?
+        WHERE upload_id = ?
+        """,
+        (
+            json.dumps(sections),
+            next_draft,
+            json.dumps(metadata),
+            datetime.now().isoformat(),
+            upload["upload_id"],
+        ),
+    )
+    conn.commit()
+
+    upload["sections"] = sections
+    upload["current_draft"] = next_draft
+    upload["metadata"] = metadata
+    return upload
+
+
+def _artifact_export_bundle(artifact: dict) -> dict:
+    payload = artifact.get("payload") or {}
+    rendering = payload.get("rendering") or {}
+    export_formats = list(dict.fromkeys(payload.get("export_formats") or ["json"]))
+    base_name = (artifact.get("title", "artifact").strip() or "artifact").replace(" ", "_").lower()
+    artifact_type = artifact.get("type")
+    spec = rendering.get("spec")
+    files = [
+        {
+            "filename": f"{base_name}.json",
+            "format": "json",
+            "content": artifact,
+        }
+    ]
+
+    if rendering.get("spec") is not None:
+        files.append({
+            "filename": f"{base_name}.spec.json",
+            "format": "json",
+            "content": {
+                "engine": rendering.get("engine"),
+                "spec": rendering.get("spec"),
+            },
+        })
+
+    if artifact_type == "graphical_abstract" and isinstance(spec, str):
+        files.append({
+            "filename": f"{base_name}.html",
+            "format": "html",
+            "content": spec,
+        })
+
+    if artifact_type in {"chart", "diagram"} and spec is not None:
+        files.append({
+            "filename": f"{base_name}.svg",
+            "format": "svg",
+            "content": (
+                f"<svg xmlns='http://www.w3.org/2000/svg' width='960' height='540'>"
+                f"<rect width='100%' height='100%' fill='white'/>"
+                f"<text x='40' y='80' font-size='28' fill='#111827'>{artifact.get('title', 'Artifact')}</text>"
+                f"<text x='40' y='130' font-size='16' fill='#4b5563'>Engine: {rendering.get('engine', 'unknown')}</text>"
+                f"<text x='40' y='170' font-size='14' fill='#6b7280'>Exported placeholder bundle for {artifact_type}</text>"
+                f"</svg>"
+            ),
+        })
+
+    if artifact_type == "slide" and isinstance(payload.get("slides"), list):
+        files.append({
+            "filename": f"{base_name}.slides.json",
+            "format": "json",
+            "content": payload.get("slides"),
+        })
+        html_slides = "".join(
+            f"<section><h2>{slide.get('title', 'Slide')}</h2><p>{slide.get('summary', '')}</p></section>"
+            for slide in payload.get("slides", [])
+        )
+        files.append({
+            "filename": f"{base_name}.html",
+            "format": "html",
+            "content": f"<article class='slides'>{html_slides}</article>",
+        })
+
+    if artifact_type == "poster_panel" and isinstance(payload.get("panels"), list):
+        files.append({
+            "filename": f"{base_name}.poster.json",
+            "format": "json",
+            "content": payload.get("panels"),
+        })
+        html_panels = "".join(
+            f"<section><h2>{panel.get('name', 'Panel')}</h2><p>{' | '.join(panel.get('content', [])) if isinstance(panel.get('content'), list) else panel.get('content', '')}</p></section>"
+            for panel in payload.get("panels", [])
+        )
+        files.append({
+            "filename": f"{base_name}.html",
+            "format": "html",
+            "content": f"<article class='poster'>{html_panels}</article>",
+        })
+
+    return {
+        "bundle_name": base_name,
+        "formats": export_formats,
+        "files": files,
+        "provenance": artifact.get("provenance") or {},
+    }
+
+
+def _emit_sse(upload_id: str, event_type: str, data: dict, session_id: str = ""):
     """Push an SSE event for a given upload_id."""
     if upload_id not in _sse_events:
         _sse_events[upload_id] = []
     _sse_events[upload_id].append({
         "type": event_type,
         "data": data,
+        "session_id": session_id,
         "timestamp": datetime.now().isoformat(),
     })
 
@@ -126,6 +370,15 @@ def _summarize_upload(upload: dict) -> dict:
     scores = list(upload.get("score_progression", []) or [])
     rounds = len(upload.get("review_rounds", []) or []) or len(scores)
     field = upload.get("detected_field", "") or upload.get("field", "") or "general"
+    metadata = upload.get("metadata") or {}
+    parse_quality = metadata.get("parse_quality", {}) or {}
+    document_counts = {
+        "sections": len(upload.get("sections") or []),
+        "tables": len(metadata.get("tables") or []),
+        "figures": len(metadata.get("figures") or []),
+        "formulas": len(metadata.get("formulas") or []),
+        "references": len(upload.get("raw_references") or []),
+    }
 
     return {
         "upload_id": upload["upload_id"],
@@ -143,6 +396,11 @@ def _summarize_upload(upload: dict) -> dict:
         "rounds_completed": rounds,
         "created_at": upload.get("created_at", ""),
         "updated_at": upload.get("updated_at", ""),
+        "parser_engine": metadata.get("parser_engine", metadata.get("parser", "unknown")),
+        "parser_mode": metadata.get("parser_mode", "unknown"),
+        "parse_quality": parse_quality,
+        "ocr_used": bool(metadata.get("ocr_used", False)),
+        "document_counts": document_counts,
     }
 
 
@@ -152,7 +410,7 @@ def _summarize_upload(upload: dict) -> dict:
 @paper_rehab_bp.route("/paper-lab/upload", methods=["POST"])
 def upload_paper():
     """
-    Upload a paper draft file (.docx, .txt, .md).
+    Upload a paper draft file (.pdf, .doc, .docx, .txt, .md).
     Accepts multipart/form-data with a 'file' field.
     Returns parsed paper metadata + upload_id for subsequent operations.
     """
@@ -164,8 +422,8 @@ def upload_paper():
         return jsonify({"success": False, "error": "Empty filename"}), 400
 
     ext = Path(file.filename).suffix.lower()
-    if ext not in (".docx", ".txt", ".md", ".markdown"):
-        return jsonify({"success": False, "error": f"Unsupported file type: {ext}. Use .docx, .txt, or .md"}), 400
+    if ext not in (".pdf", ".doc", ".docx", ".txt", ".md", ".markdown"):
+        return jsonify({"success": False, "error": f"Unsupported file type: {ext}. Use .pdf, .doc, .docx, .txt, or .md"}), 400
 
     # Save uploaded file
     upload_id = f"paper_{uuid.uuid4().hex[:10]}"
@@ -205,6 +463,9 @@ def upload_paper():
                 "sections": [s.name for s in parsed.sections],
                 "word_count": parsed.metadata.get("word_count", 0),
                 "reference_count": len(parsed.raw_references),
+                "parser_engine": parsed.metadata.get("parser_engine", parsed.metadata.get("parser", "unknown")),
+                "parser_mode": parsed.metadata.get("parser_mode", "unknown"),
+                "parse_quality": parsed.metadata.get("parse_quality", {}),
             },
         })
     except Exception as e:
@@ -242,11 +503,16 @@ def start_review(upload_id):
         "live": use_live,
     }
 
+    session_id = f"review_{uuid.uuid4().hex[:12]}"
+    latest_meta = upload.get("metadata") or {}
+    latest_meta["current_review_session_id"] = session_id
+    _sse_events[upload_id] = []
+
     # Update status
     conn = get_connection()
     conn.execute(
-        "UPDATE paper_uploads SET status = ?, review_config = ?, updated_at = ? WHERE upload_id = ?",
-        ("reviewing", json.dumps(config), datetime.now().isoformat(), upload_id),
+        "UPDATE paper_uploads SET status = ?, review_config = ?, metadata = ?, updated_at = ? WHERE upload_id = ?",
+        ("reviewing", json.dumps(config), json.dumps(latest_meta), datetime.now().isoformat(), upload_id),
     )
     conn.commit()
 
@@ -257,7 +523,7 @@ def start_review(upload_id):
     # Launch background thread
     thread = threading.Thread(
         target=_run_review_pipeline,
-        args=(upload_id, task_id, config),
+        args=(upload_id, task_id, config, session_id),
         daemon=True,
     )
     thread.start()
@@ -267,12 +533,13 @@ def start_review(upload_id):
         "data": {
             "upload_id": upload_id,
             "task_id": task_id,
+            "session_id": session_id,
             "config": config,
         },
     }), 202
 
 
-def _run_review_pipeline(upload_id: str, task_id: str, config: dict):
+def _run_review_pipeline(upload_id: str, task_id: str, config: dict, session_id: str):
     """Background thread: runs the full review/revision pipeline."""
     import sys
     sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -320,18 +587,18 @@ def _run_review_pipeline(upload_id: str, task_id: str, config: dict):
         section_names = [s.name for s in sections]
         current_draft = upload["current_draft"] or upload["full_text"]
 
-        _emit_sse(upload_id, "status", {"message": "Generating reviewer and author agents"})
+        _emit_sse(upload_id, "status", {"message": "Generating reviewer and author agents"}, session_id)
         tm.update_task(task_id, progress=5, message="Agents generated")
 
         # Source audit
-        _emit_sse(upload_id, "status", {"message": "Running source quality audit"})
+        _emit_sse(upload_id, "status", {"message": "Running source quality audit"}, session_id)
         audit_result = test_source_audit(parsed_paper, use_live)
         source_audit = audit_result.get("_source_audit", {})
         tm.update_task(task_id, progress=15, message="Source audit complete")
         _emit_sse(upload_id, "source_audit", {
             "verified": len(source_audit.get("verified", [])),
             "unverified": len(source_audit.get("unverified", [])),
-        })
+        }, session_id)
 
         # Save audit + agents
         conn = get_connection()
@@ -351,7 +618,7 @@ def _run_review_pipeline(upload_id: str, task_id: str, config: dict):
             progress_base = 15 + (round_num - 1) * (70 // rounds)
 
             # Review round
-            _emit_sse(upload_id, "review_start", {"round": round_num})
+            _emit_sse(upload_id, "review_start", {"round": round_num}, session_id)
             tm.update_task(task_id, progress=progress_base, message=f"Review round {round_num}")
 
             review_result = test_review_round(
@@ -375,10 +642,10 @@ def _run_review_pipeline(upload_id: str, task_id: str, config: dict):
                 "round": round_num,
                 "avg_score": avg_score,
                 "decision": decision,
-            })
+            }, session_id)
 
             # Revision round
-            _emit_sse(upload_id, "revision_start", {"round": round_num})
+            _emit_sse(upload_id, "revision_start", {"round": round_num}, session_id)
             tm.update_task(task_id, progress=progress_base + (35 // rounds),
                            message=f"Revision round {round_num}")
 
@@ -413,7 +680,7 @@ def _run_review_pipeline(upload_id: str, task_id: str, config: dict):
                 "round": round_num,
                 "accepted": revision.get("accepted_count", 0),
                 "rebutted": revision.get("rebutted_count", 0),
-            })
+            }, session_id)
 
             # Save progress after each round
             conn = get_connection()
@@ -431,7 +698,7 @@ def _run_review_pipeline(upload_id: str, task_id: str, config: dict):
                 if delta < 0.5 and score_progression[-1] >= 6.0:
                     _emit_sse(upload_id, "converged", {
                         "round": round_num, "score": score_progression[-1],
-                    })
+                    }, session_id)
                     break
 
         # Finalize
@@ -453,7 +720,7 @@ def _run_review_pipeline(upload_id: str, task_id: str, config: dict):
         _emit_sse(upload_id, "complete", {
             "initial_score": score_progression[0] if score_progression else 0,
             "final_score": score_progression[-1] if score_progression else 0,
-        })
+        }, session_id)
 
     except Exception as e:
         logger.exception("Review pipeline failed")
@@ -464,7 +731,7 @@ def _run_review_pipeline(upload_id: str, task_id: str, config: dict):
         )
         conn.commit()
         tm.update_task(task_id, status=TaskStatus.FAILED, error=str(e))
-        _emit_sse(upload_id, "error", {"message": str(e)})
+        _emit_sse(upload_id, "error", {"message": str(e)}, session_id)
 
 
 # ── Status & Data Endpoints ────────────────────────────────────────
@@ -477,16 +744,23 @@ def get_status(upload_id):
     if not upload:
         return jsonify({"success": False, "error": "Upload not found"}), 404
 
+    metadata = upload["metadata"] or {}
+
     return jsonify({
         "success": True,
         "data": {
             **_summarize_upload(upload),
             "section_count": len(upload["sections"]),
             "sections": [s.get("name", "") for s in upload["sections"]],
-            "word_count": upload["metadata"].get("word_count", 0),
+            "word_count": metadata.get("word_count", 0),
             "reference_count": len(upload["raw_references"]),
             "review_config": upload["review_config"],
             "error": upload["error"],
+            "parse_warnings": metadata.get("parse_warnings", []),
+            "parse_quality_breakdown": metadata.get("parse_quality", {}),
+            "tables": metadata.get("tables", []),
+            "figures": metadata.get("figures", []),
+            "formulas": metadata.get("formulas", []),
         },
     })
 
@@ -533,22 +807,27 @@ def get_draft(upload_id):
 @paper_rehab_bp.route("/paper-lab/<upload_id>/stream", methods=["GET"])
 def stream_progress(upload_id):
     """SSE stream for live review/revision progress."""
+    upload = _load_upload(upload_id) or {}
+    requested_session_id = (request.args.get("session_id") or _current_review_session_id(upload)).strip()
+
     def generate():
         last_idx = 0
         timeout = 600  # 10 minutes max
         start = time.time()
+        session_id = requested_session_id
 
-        yield f"data: {json.dumps({'type': 'connected', 'upload_id': upload_id})}\n\n"
+        yield f"data: {json.dumps({'type': 'connected', 'upload_id': upload_id, 'session_id': session_id})}\n\n"
 
         while time.time() - start < timeout:
             events = _sse_events.get(upload_id, [])
-            if last_idx < len(events):
-                for evt in events[last_idx:]:
+            filtered_events = [evt for evt in events if not session_id or evt.get("session_id") == session_id]
+            if last_idx < len(filtered_events):
+                for evt in filtered_events[last_idx:]:
                     yield f"event: {evt['type']}\ndata: {json.dumps(evt['data'], default=str)}\n\n"
-                last_idx = len(events)
+                last_idx = len(filtered_events)
 
                 # Check if complete
-                if events and events[-1]["type"] in ("complete", "error"):
+                if filtered_events and filtered_events[-1]["type"] in ("complete", "error"):
                     break
             time.sleep(1)
 
@@ -649,9 +928,16 @@ def run_specialist_review(upload_id):
                 meta = latest.get("metadata", {}) or {}
                 meta["specialist_review"] = payload
                 conn = get_connection()
+                # Bug #5 fix: also update status so frontend can track the
+                # specialist-review lifecycle across refreshes. Only advance
+                # status forward (don't regress from review_complete).
+                current_status = latest.get("status", "")
+                new_status = current_status
+                if current_status in ("review_complete", "gap_filled"):
+                    new_status = "specialist_complete"
                 conn.execute(
-                    "UPDATE paper_uploads SET metadata = ?, updated_at = ? WHERE upload_id = ?",
-                    (json.dumps(meta), datetime.now().isoformat(), upload_id),
+                    "UPDATE paper_uploads SET metadata = ?, status = ?, updated_at = ? WHERE upload_id = ?",
+                    (json.dumps(meta), new_status, datetime.now().isoformat(), upload_id),
                 )
                 conn.commit()
 
@@ -1054,6 +1340,15 @@ def _save_viz_cache(upload_id: str, key: str, data: dict):
     conn.commit()
 
 
+def _artifact_provenance(upload: dict, source: str) -> dict:
+    return {
+        "generated_by": source,
+        "generated_at": datetime.now().isoformat(),
+        "derived_from_upload_version": upload.get("updated_at") or upload.get("created_at") or "",
+        "upload_status": upload.get("status", ""),
+    }
+
+
 @paper_rehab_bp.route("/paper-lab/<upload_id>/analyze-figures", methods=["POST"])
 def analyze_figures(upload_id):
     """
@@ -1217,6 +1512,229 @@ def get_visualizations(upload_id):
     return jsonify({"success": True, "data": viz})
 
 
+@paper_rehab_bp.route("/paper-lab/<upload_id>/visualization-plan", methods=["POST"])
+def visualization_plan(upload_id):
+    """Generate structured visualization recommendations from manuscript + reviews."""
+    upload = _load_upload(upload_id)
+    if not upload:
+        return jsonify({"success": False, "error": "Upload not found"}), 404
+
+    from ..services.ais.paper_orchestra_service import PaperOrchestraService
+
+    service = PaperOrchestraService()
+    plan = service.build_visualization_plan(upload)
+    return jsonify({"success": True, "data": plan})
+
+
+@paper_rehab_bp.route("/paper-lab/<upload_id>/visualization-artifacts", methods=["GET"])
+def list_visualization_artifacts(upload_id):
+    """List persisted visualization artifacts for a manuscript."""
+    upload = _load_upload(upload_id)
+    if not upload:
+        return jsonify({"success": False, "error": "Upload not found"}), 404
+
+    from ..services.ais.visualization_artifact_service import VisualizationArtifactService
+
+    service = VisualizationArtifactService()
+    return jsonify({"success": True, "data": service.list_for_upload(upload_id)})
+
+
+@paper_rehab_bp.route("/paper-lab/<upload_id>/artifacts", methods=["POST"])
+def create_visualization_artifact(upload_id):
+    """Create a persisted visualization artifact."""
+    upload = _load_upload(upload_id)
+    if not upload:
+        return jsonify({"success": False, "error": "Upload not found"}), 404
+
+    payload = request.get_json(silent=True) or {}
+    artifact_type = payload.get("type", "chart")
+    intent = payload.get("intent", "summarize")
+    title = payload.get("title") or "Untitled Artifact"
+    from ..services.ais.visualization_artifact_service import VisualizationArtifactService
+
+    service = VisualizationArtifactService()
+    artifact = service.create(
+        upload_id=upload_id,
+        artifact_type=artifact_type,
+        intent=intent,
+        title=title,
+        payload=payload.get("payload", {}),
+        audit=payload.get("audit", {}),
+        provenance={**_artifact_provenance(upload, "manual_create"), **(payload.get("provenance") or {})},
+        status=payload.get("status", "draft"),
+    )
+    return jsonify({"success": True, "data": artifact}), 201
+
+
+@paper_rehab_bp.route("/paper-lab/<upload_id>/artifacts/<artifact_id>", methods=["GET"])
+def get_visualization_artifact(upload_id, artifact_id):
+    """Get one persisted visualization artifact."""
+    upload = _load_upload(upload_id)
+    if not upload:
+        return jsonify({"success": False, "error": "Upload not found"}), 404
+
+    from ..services.ais.visualization_artifact_service import VisualizationArtifactService
+
+    artifact = VisualizationArtifactService().get(artifact_id)
+    if not artifact or artifact.get("upload_id") != upload_id:
+        return jsonify({"success": False, "error": "Artifact not found"}), 404
+    return jsonify({"success": True, "data": artifact})
+
+
+@paper_rehab_bp.route("/paper-lab/<upload_id>/artifacts/<artifact_id>", methods=["PUT"])
+def update_visualization_artifact(upload_id, artifact_id):
+    """Update a persisted visualization artifact."""
+    upload = _load_upload(upload_id)
+    if not upload:
+        return jsonify({"success": False, "error": "Upload not found"}), 404
+
+    from ..services.ais.visualization_artifact_service import VisualizationArtifactService
+
+    body = request.get_json(silent=True) or {}
+    service = VisualizationArtifactService()
+    artifact = service.get(artifact_id)
+    if not artifact or artifact.get("upload_id") != upload_id:
+        return jsonify({"success": False, "error": "Artifact not found"}), 404
+
+    updated = service.update(
+        artifact_id,
+        title=body.get("title"),
+        status=body.get("status"),
+        payload_patch=body.get("payload"),
+        audit_patch=body.get("audit"),
+        provenance_patch=body.get("provenance"),
+        increment_version=bool(body.get("increment_version", True)),
+    )
+    return jsonify({"success": True, "data": updated})
+
+
+@paper_rehab_bp.route("/paper-lab/<upload_id>/artifacts/<artifact_id>/render", methods=["POST"])
+def render_visualization_artifact(upload_id, artifact_id):
+    """Render an artifact into a browser-oriented representation."""
+    upload = _load_upload(upload_id)
+    if not upload:
+        return jsonify({"success": False, "error": "Upload not found"}), 404
+
+    from ..services.ais.visualization_artifact_service import VisualizationArtifactService
+    service = VisualizationArtifactService()
+    artifact = service.get(artifact_id)
+    if not artifact or artifact.get("upload_id") != upload_id:
+        return jsonify({"success": False, "error": "Artifact not found"}), 404
+
+    payload = artifact.get("payload", {})
+    rendering = payload.get("rendering", {})
+    artifact_type = artifact.get("type", "chart")
+    default_formats = {
+        "graphical_abstract": ["html", "json"],
+        "slide": ["json"],
+        "poster_panel": ["json"],
+        "chart": ["json", "svg", "png"],
+        "diagram": ["json", "svg"],
+        "table": ["json", "csv"],
+    }.get(artifact_type, ["json"])
+    export_formats = list(dict.fromkeys((payload.get("export_formats") or []) + default_formats))
+    inferred_engine = payload.get("recommended_engine") or rendering.get("engine") or (
+        "html" if artifact_type in {"graphical_abstract", "slide", "poster_panel"} else "vega-lite"
+    )
+    inferred_spec = rendering.get("spec")
+    if inferred_spec is None:
+        if artifact_type == "slide":
+            inferred_spec = {"slides": payload.get("slides", [])}
+        elif artifact_type == "poster_panel":
+            inferred_spec = {"panels": payload.get("panels", [])}
+        else:
+            inferred_spec = payload.get("spec") or payload.get("content_description") or payload
+    updated = service.update(
+        artifact_id,
+        status="ready" if not payload.get("assumptions") else "needs_input",
+        payload_patch={
+            "rendering": {
+                **rendering,
+                "engine": inferred_engine,
+                "spec": inferred_spec,
+                "rendered_at": datetime.now().isoformat(),
+            },
+            "export_formats": export_formats,
+        },
+        provenance_patch=_artifact_provenance(upload, "artifact_render"),
+        increment_version=True,
+    )
+    return jsonify({"success": True, "data": updated})
+
+
+@paper_rehab_bp.route("/paper-lab/<upload_id>/artifacts/<artifact_id>/audit", methods=["POST"])
+def audit_visualization_artifact(upload_id, artifact_id):
+    """Audit an artifact and persist readiness signals."""
+    upload = _load_upload(upload_id)
+    if not upload:
+        return jsonify({"success": False, "error": "Upload not found"}), 404
+
+    from ..services.ais.visualization_artifact_service import VisualizationArtifactService
+    service = VisualizationArtifactService()
+    artifact = service.get(artifact_id)
+    if not artifact or artifact.get("upload_id") != upload_id:
+        return jsonify({"success": False, "error": "Artifact not found"}), 404
+
+    payload = artifact.get("payload", {})
+    assumptions = payload.get("assumptions") or []
+    rendering = payload.get("rendering") or {}
+    has_rendering = rendering.get("spec") is not None
+    issues = []
+    if assumptions:
+        issues.append("Resolve inferred data assumptions before export.")
+    if artifact.get("type") in {"chart", "diagram", "graphical_abstract"} and not has_rendering:
+        issues.append("Render the artifact before export.")
+    consistency_status = "pass"
+    if issues:
+        consistency_status = "fail" if not has_rendering else "warn"
+    audit = {
+        "confidence": 0.93 if not issues else (0.72 if has_rendering else 0.44),
+        "issues": issues,
+        "consistency_status": consistency_status,
+        "ready": not issues,
+    }
+    updated = service.update(
+        artifact_id,
+        status="ready" if audit["ready"] else "needs_input",
+        audit_patch=audit,
+        provenance_patch=_artifact_provenance(upload, "artifact_audit"),
+        increment_version=True,
+    )
+    return jsonify({"success": True, "data": updated})
+
+
+@paper_rehab_bp.route("/paper-lab/<upload_id>/artifacts/<artifact_id>/export", methods=["POST"])
+def export_visualization_artifact(upload_id, artifact_id):
+    """Return an export-ready artifact package."""
+    upload = _load_upload(upload_id)
+    if not upload:
+        return jsonify({"success": False, "error": "Upload not found"}), 404
+
+    from ..services.ais.visualization_artifact_service import VisualizationArtifactService
+    artifact = VisualizationArtifactService().get(artifact_id)
+    if not artifact or artifact.get("upload_id") != upload_id:
+        return jsonify({"success": False, "error": "Artifact not found"}), 404
+
+    audit = artifact.get("audit") or {}
+    payload = artifact.get("payload", {})
+    blocked_by = []
+    if payload.get("assumptions"):
+        blocked_by.extend(payload.get("assumptions", []))
+    blocked_by.extend(audit.get("issues") or [])
+    ready = not blocked_by and bool(audit.get("ready", False))
+    payload = artifact.get("payload", {})
+    package = _artifact_export_bundle(artifact)
+    return jsonify({
+        "success": True,
+        "data": {
+            "artifact": artifact,
+            "ready": ready,
+            "blocked_by": blocked_by if not ready else [],
+            "package": package,
+        },
+    })
+
+
 @paper_rehab_bp.route("/paper-lab/<upload_id>/render-figures", methods=["POST"])
 def render_figures(upload_id):
     """
@@ -1235,8 +1753,29 @@ def render_figures(upload_id):
 
     try:
         from ..services.ais.scientific_viz import render_figures as _render
+        from ..services.ais.visualization_artifact_service import VisualizationArtifactService
         rendered = _render(figure_analysis)
         _save_viz_cache(upload_id, "rendered_figures", {"figures": rendered, "count": len(rendered)})
+        artifact_service = VisualizationArtifactService()
+        for fig in rendered:
+            artifact_service.create_or_replace_by_title(
+                upload_id=upload_id,
+                artifact_type="chart",
+                intent="reconstruct",
+                title=fig.get("ref") or fig.get("title") or "Rendered Figure",
+                payload={
+                    "source_refs": [fig.get("ref", "")],
+                    "rendering": {
+                        "engine": "vega-lite",
+                        "spec": fig.get("vega_lite_spec"),
+                    },
+                    "export_formats": ["json", "svg", "png"],
+                    "assumptions": list(fig.get("data_requirements", []) or []),
+                    "issues": list(fig.get("issues", []) or []),
+                },
+                provenance=_artifact_provenance(upload, "render_figures"),
+                status="needs_input" if fig.get("data_requirements") else "ready",
+            )
         return jsonify({"success": True, "data": {"figures": rendered, "count": len(rendered)}})
     except Exception as e:
         logger.exception("render_figures failed")
@@ -1263,8 +1802,25 @@ def audit_figures_endpoint(upload_id):
 
     try:
         from ..services.ais.scientific_viz import audit_figures as _audit
+        from ..services.ais.visualization_artifact_service import VisualizationArtifactService
         audit_result = _audit(figure_analysis, full_text)
         _save_viz_cache(upload_id, "figure_audit", audit_result)
+        artifact_service = VisualizationArtifactService()
+        for entry in audit_result.get("figures", []):
+            artifact_service.create_or_replace_by_title(
+                upload_id=upload_id,
+                artifact_type="chart",
+                intent="reconstruct",
+                title=entry.get("ref") or "Audited Figure",
+                audit={
+                    "confidence": float(entry.get("score", 0)) / 10.0,
+                    "issues": [check.get("note", "") for check in entry.get("checks", []) if check.get("status") != "pass"],
+                    "consistency_status": "pass" if float(entry.get("score", 0)) >= 8 else "warn",
+                    "ready": float(entry.get("score", 0)) >= 8,
+                },
+                provenance=_artifact_provenance(upload, "audit_figures"),
+                status="ready" if float(entry.get("score", 0)) >= 8 else "needs_input",
+            )
         return jsonify({"success": True, "data": audit_result})
     except Exception as e:
         logger.exception("audit_figures failed")
@@ -1334,3 +1890,233 @@ async def generate_illustrations(upload_id: str):
         logger.exception("paperbanana illustration failed")
         return jsonify({"success": False, "error": str(e)}), 500
 
+
+@paper_rehab_bp.route("/paper-lab/<upload_id>/literature-review", methods=["POST"])
+def grounded_literature_review(upload_id):
+    """Return verified literature suggestions tied to a focus area."""
+    upload = _load_upload(upload_id)
+    if not upload:
+        return jsonify({"success": False, "error": "Upload not found"}), 404
+
+    data = request.get_json(silent=True) or {}
+    focus = (data.get("focus") or "literature review").strip()
+    from ..services.ais.paper_orchestra_service import PaperOrchestraService
+
+    result = PaperOrchestraService().grounded_literature_review(upload, focus)
+    _update_upload_metadata(upload_id, lambda meta: meta.update({
+        "last_grounded_literature_review": result,
+        "grounded_literature_history": [*(meta.get("grounded_literature_history") or []), {
+            "focus": focus,
+            "ready": result.get("ready", False),
+            "suggestion_count": len(result.get("suggestions", [])),
+            "verified_count": len([item for item in result.get("suggestions", []) if item.get("verified")]),
+            "created_at": datetime.now().isoformat(),
+        }][-20:],
+    }))
+    return jsonify({"success": True, "data": result})
+
+
+@paper_rehab_bp.route("/paper-lab/<upload_id>/refine-section", methods=["POST"])
+def refine_section(upload_id):
+    """Return a section-scoped revision package with structured diff metadata."""
+    upload = _load_upload(upload_id)
+    if not upload:
+        return jsonify({"success": False, "error": "Upload not found"}), 404
+
+    data = request.get_json(silent=True) or {}
+    action = (data.get("action") or "improve_introduction").strip()
+    visualization_plan = data.get("visualization_plan")
+    from ..services.ais.paper_orchestra_service import PaperOrchestraService
+
+    result = PaperOrchestraService().refine_section(upload, action, visualization_plan)
+    refinement_id = f"refine_{uuid.uuid4().hex[:10]}"
+    result["refinement_id"] = refinement_id
+    result["applied"] = False
+    _update_upload_metadata(upload_id, lambda meta: meta.update({
+        "last_section_refinement": result,
+        "section_refinement_history": [*(meta.get("section_refinement_history") or []), {
+            "refinement_id": refinement_id,
+            "action": action,
+            "section": result.get("section"),
+            "summary": result.get("diff", {}).get("summary", ""),
+            "created_at": datetime.now().isoformat(),
+            "applied": False,
+        }][-20:],
+    }))
+    return jsonify({"success": True, "data": result})
+
+
+@paper_rehab_bp.route("/paper-lab/<upload_id>/apply-refinement", methods=["POST"])
+def apply_refinement(upload_id):
+    """Apply a previously generated refinement to the current manuscript draft."""
+    upload = _load_upload(upload_id)
+    if not upload:
+        return jsonify({"success": False, "error": "Upload not found"}), 404
+
+    data = request.get_json(silent=True) or {}
+    refinement = data.get("refinement") or {}
+    refinement_id = (refinement.get("refinement_id") or data.get("refinement_id") or "").strip()
+    section = (refinement.get("section") or "").strip()
+    revised_text = refinement.get("revised_text") or ""
+    action = refinement.get("action") or "manual_apply"
+    if not refinement_id or not section or not revised_text:
+        return jsonify({"success": False, "error": "refinement_id, section, and revised_text are required"}), 400
+
+    updated_upload = _apply_section_revision_to_upload(upload, section, revised_text, action, refinement_id)
+    _update_upload_metadata(upload_id, lambda meta: meta.update({
+        "last_applied_refinement_id": refinement_id,
+        "section_refinement_history": [
+            {
+                **item,
+                "applied": True if item.get("refinement_id") == refinement_id else item.get("applied", False),
+                "applied_at": datetime.now().isoformat() if item.get("refinement_id") == refinement_id else item.get("applied_at"),
+            }
+            for item in (meta.get("section_refinement_history") or [])
+        ],
+    }))
+
+    return jsonify({
+        "success": True,
+        "data": {
+            "upload_id": upload_id,
+            "refinement_id": refinement_id,
+            "section": section,
+            "current_draft": updated_upload.get("current_draft", ""),
+            "sections": updated_upload.get("sections", []),
+        },
+    })
+
+
+@paper_rehab_bp.route("/paper-lab/<upload_id>/draft-history", methods=["GET"])
+def draft_history(upload_id):
+    """Return persisted draft/refinement/literature activity history for an upload."""
+    upload = _load_upload(upload_id)
+    if not upload:
+        return jsonify({"success": False, "error": "Upload not found"}), 404
+
+    metadata = upload.get("metadata") or {}
+    return jsonify({
+        "success": True,
+        "data": {
+            "upload_id": upload_id,
+            "applied_refinements": list(metadata.get("applied_section_refinements") or []),
+            "section_refinement_history": list(metadata.get("section_refinement_history") or []),
+            "grounded_literature_history": list(metadata.get("grounded_literature_history") or []),
+            "last_applied_refinement_id": metadata.get("last_applied_refinement_id"),
+        },
+    })
+
+
+@paper_rehab_bp.route("/paper-lab/<upload_id>/revert-refinement", methods=["POST"])
+def revert_refinement(upload_id):
+    """Revert a previously applied refinement from manuscript history."""
+    upload = _load_upload(upload_id)
+    if not upload:
+        return jsonify({"success": False, "error": "Upload not found"}), 404
+
+    data = request.get_json(silent=True) or {}
+    refinement_id = (data.get("refinement_id") or "").strip()
+    if not refinement_id:
+        return jsonify({"success": False, "error": "refinement_id is required"}), 400
+
+    updated_upload = _revert_section_refinement(upload, refinement_id)
+    if not updated_upload:
+        return jsonify({"success": False, "error": "Refinement not found"}), 404
+
+    return jsonify({
+        "success": True,
+        "data": {
+            "upload_id": upload_id,
+            "reverted_refinement_id": refinement_id,
+            "current_draft": updated_upload.get("current_draft", ""),
+            "sections": updated_upload.get("sections", []),
+        },
+    })
+
+
+@paper_rehab_bp.route("/paper-lab/<upload_id>/graphical-abstract", methods=["POST"])
+def graphical_abstract(upload_id):
+    """Generate and persist a graphical abstract artifact."""
+    upload = _load_upload(upload_id)
+    if not upload:
+        return jsonify({"success": False, "error": "Upload not found"}), 404
+
+    data = request.get_json(silent=True) or {}
+    layout_mode = (data.get("layout_mode") or "process_summary").strip()
+    from ..services.ais.paper_orchestra_service import PaperOrchestraService
+    from ..services.ais.visualization_artifact_service import VisualizationArtifactService
+
+    payload = PaperOrchestraService().generate_graphical_abstract(upload, layout_mode)
+    artifact = VisualizationArtifactService().create_or_replace_by_title(
+        upload_id=upload_id,
+        artifact_type="graphical_abstract",
+        intent="summarize",
+        title=payload.get("title", "Graphical Abstract"),
+        payload={
+            "rendering": {"engine": "html", "spec": payload.get("html")},
+            "layout_mode": payload.get("layout_mode"),
+            "export_formats": payload.get("export_formats", ["html", "json"]),
+            "assumptions": payload.get("assumptions", []),
+        },
+        provenance=_artifact_provenance(upload, "graphical_abstract"),
+        status="needs_input" if payload.get("assumptions") else "ready",
+    )
+    return jsonify({"success": True, "data": artifact})
+
+
+@paper_rehab_bp.route("/paper-lab/<upload_id>/slide-starter", methods=["POST"])
+def slide_starter(upload_id):
+    """Generate and persist a scientific slide starter artifact."""
+    upload = _load_upload(upload_id)
+    if not upload:
+        return jsonify({"success": False, "error": "Upload not found"}), 404
+
+    from ..services.ais.paper_orchestra_service import PaperOrchestraService
+    from ..services.ais.visualization_artifact_service import VisualizationArtifactService
+
+    artifact_service = VisualizationArtifactService()
+    artifacts = artifact_service.list_for_upload(upload_id)
+    payload = PaperOrchestraService().generate_slide_starter(upload, artifacts)
+    artifact = artifact_service.create_or_replace_by_title(
+        upload_id=upload_id,
+        artifact_type="slide",
+        intent="summarize",
+        title=payload.get("title", "Slide Starter"),
+        payload={
+            "slides": payload.get("slides", []),
+            "export_formats": payload.get("export_formats", ["json"]),
+            "assumptions": [] if artifacts else ["Select visuals to enrich the generated slides."],
+        },
+        provenance=_artifact_provenance(upload, "slide_starter"),
+        status="ready" if artifacts else "needs_input",
+    )
+    return jsonify({"success": True, "data": artifact})
+
+
+@paper_rehab_bp.route("/paper-lab/<upload_id>/poster-starter", methods=["POST"])
+def poster_starter(upload_id):
+    """Generate and persist a poster starter artifact."""
+    upload = _load_upload(upload_id)
+    if not upload:
+        return jsonify({"success": False, "error": "Upload not found"}), 404
+
+    from ..services.ais.paper_orchestra_service import PaperOrchestraService
+    from ..services.ais.visualization_artifact_service import VisualizationArtifactService
+
+    artifact_service = VisualizationArtifactService()
+    artifacts = artifact_service.list_for_upload(upload_id)
+    payload = PaperOrchestraService().generate_poster_starter(upload, artifacts)
+    artifact = artifact_service.create_or_replace_by_title(
+        upload_id=upload_id,
+        artifact_type="poster_panel",
+        intent="summarize",
+        title=payload.get("title", "Poster Starter"),
+        payload={
+            "panels": payload.get("panels", []),
+            "export_formats": payload.get("export_formats", ["json"]),
+            "assumptions": [] if artifacts else ["Choose artifact placements for the poster layout."],
+        },
+        provenance=_artifact_provenance(upload, "poster_starter"),
+        status="ready" if artifacts else "needs_input",
+    )
+    return jsonify({"success": True, "data": artifact})

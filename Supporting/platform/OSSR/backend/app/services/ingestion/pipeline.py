@@ -12,10 +12,12 @@ import math
 import re
 import threading
 import time
+import tempfile
 import uuid
 import xml.etree.ElementTree as ET
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from typing import Dict, Any, List, Optional
 from urllib.parse import quote
 
@@ -1195,6 +1197,8 @@ class IngestionPipeline:
 
     FETCH_TIMEOUT_SECONDS = 45
     MAX_FETCH_WORKERS = 4
+    MAX_FULL_TEXT_PARSE_COUNT = 10
+    FULL_TEXT_PARSE_EXTENSIONS = {".pdf", ".doc", ".docx", ".txt", ".md", ".markdown"}
     CACHE_TTL_HOURS = {
         AcademicSource.ARXIV: 24 * 7,
         AcademicSource.BIORXIV: 24,
@@ -1280,19 +1284,25 @@ class IngestionPipeline:
             )
             new_papers = self._parse(all_metadata)
 
-            # Stage 3: EXTRACT (LLM entity extraction)
+            # Stage 3: FULL-TEXT PARSE (optional)
             self.task_manager.update_task(
-                task_id, progress=50, message=f"Extracting entities from {len(new_papers)} papers..."
+                task_id, progress=40, message="Parsing full-text documents where available..."
             )
-            enriched_papers = self._extract_entities(new_papers, task_id)
+            parsed_papers = self._enrich_full_text_documents(new_papers, task_id)
 
-            # Stage 4: ENRICH (citation cross-referencing)
+            # Stage 4: EXTRACT (LLM entity extraction)
+            self.task_manager.update_task(
+                task_id, progress=55, message=f"Extracting entities from {len(parsed_papers)} papers..."
+            )
+            enriched_papers = self._extract_entities(parsed_papers, task_id)
+
+            # Stage 5: ENRICH (citation cross-referencing)
             self.task_manager.update_task(
                 task_id, progress=75, message="Enriching citation data..."
             )
             self._enrich_citations(enriched_papers)
 
-            # Stage 5: STORE
+            # Stage 6: STORE
             self.task_manager.update_task(
                 task_id, progress=85, message="Storing papers..."
             )
@@ -1317,6 +1327,100 @@ class IngestionPipeline:
         except Exception as e:
             logger.exception(f"Ingestion pipeline failed: {e}")
             self.task_manager.fail_task(task_id, str(e))
+
+    def _enrich_full_text_documents(self, papers: List[Paper], task_id: str) -> List[Paper]:
+        """Optionally fetch and parse full-text PDFs/docs into normalized metadata."""
+        candidates = [paper for paper in papers if self._should_attempt_full_text_parse(paper.full_text_url)]
+        if not candidates:
+            return papers
+
+        total = min(len(candidates), self.MAX_FULL_TEXT_PARSE_COUNT)
+        for index, paper in enumerate(candidates[:total], start=1):
+            try:
+                parsed = self._parse_full_text_url(paper.full_text_url or "", paper.title)
+                if not parsed:
+                    continue
+
+                parsed_doc = parsed.metadata.get("parsed_document_v2") or {}
+                paper.metadata["document_parse"] = {
+                    "parser_engine": parsed.metadata.get("parser_engine"),
+                    "parser_mode": parsed.metadata.get("parser_mode"),
+                    "parse_quality": parsed.metadata.get("parse_quality", {}),
+                    "word_count": parsed.metadata.get("word_count", 0),
+                    "section_count": len(parsed.sections),
+                    "ocr_used": parsed.metadata.get("ocr_used", False),
+                }
+                paper.metadata["document_markdown"] = parsed_doc.get("markdown", "")
+                paper.metadata["document_sections"] = [section.to_dict() for section in parsed.sections]
+                paper.metadata["document_tables"] = parsed.metadata.get("tables", [])
+                paper.metadata["document_figures"] = parsed.metadata.get("figures", [])
+                paper.metadata["document_formulas"] = parsed.metadata.get("formulas", [])
+                paper.metadata["document_citations"] = parsed_doc.get("citations", [])
+                paper.metadata["document_bbox_index"] = parsed_doc.get("bbox_index", {})
+                paper.metadata["document_parse_warnings"] = parsed.metadata.get("parse_warnings", [])
+                paper.metadata["document_outline"] = [section.name for section in parsed.sections]
+                if parsed.full_text and len(parsed.full_text) > len(paper.abstract or ""):
+                    paper.metadata["document_plain_text"] = parsed.full_text
+                search_parts = [
+                    paper.title,
+                    paper.abstract,
+                    parsed.full_text[:12000] if parsed.full_text else "",
+                    parsed_doc.get("markdown", "")[:12000],
+                    " ".join(section.name for section in parsed.sections[:24]),
+                ]
+                paper.metadata["document_search_text"] = "\n".join(part for part in search_parts if part).strip()[:24000]
+
+            except Exception as exc:
+                logger.warning("Full-text parse failed for %s: %s", paper.full_text_url, exc)
+                paper.metadata.setdefault("document_parse", {})
+                paper.metadata["document_parse"].update({
+                    "error": str(exc),
+                    "parser_engine": "unavailable",
+                })
+
+            self.task_manager.update_task(
+                task_id,
+                progress=40 + int(10 * (index / max(total, 1))),
+                message=f"Parsing full-text documents... ({index}/{total})",
+            )
+
+        return papers
+
+    @classmethod
+    def _should_attempt_full_text_parse(cls, full_text_url: Optional[str]) -> bool:
+        if not full_text_url:
+            return False
+        path = Path(full_text_url.split("?", 1)[0])
+        return path.suffix.lower() in cls.FULL_TEXT_PARSE_EXTENSIONS
+
+    def _parse_full_text_url(self, full_text_url: str, title: str):
+        from ..ais.paper_parser import PaperParser
+
+        response = requests.get(full_text_url, timeout=self.FETCH_TIMEOUT_SECONDS)
+        response.raise_for_status()
+
+        url_path = Path(full_text_url.split("?", 1)[0])
+        suffix = url_path.suffix.lower()
+        if suffix not in self.FULL_TEXT_PARSE_EXTENSIONS:
+            content_type = response.headers.get("content-type", "").lower()
+            if "pdf" in content_type:
+                suffix = ".pdf"
+            elif "word" in content_type:
+                suffix = ".docx"
+            elif "markdown" in content_type:
+                suffix = ".md"
+            else:
+                suffix = ".txt"
+
+        tmp_path: Optional[Path] = None
+        try:
+            with tempfile.NamedTemporaryFile(prefix="ingest_doc_", suffix=suffix, delete=False) as tmp:
+                tmp.write(response.content)
+                tmp_path = Path(tmp.name)
+            return PaperParser().parse(str(tmp_path))
+        finally:
+            if tmp_path:
+                tmp_path.unlink(missing_ok=True)
 
     def _fetch(
         self,
