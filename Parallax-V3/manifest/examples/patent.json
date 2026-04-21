@@ -1,0 +1,16 @@
+{
+  "session_id": "33333333-3333-4333-8333-333333333333",
+  "research_question": "Can the method be reframed as a patentable workflow?",
+  "target_venue": "patent",
+  "citation_style": "nature",
+  "max_refinement_iters": 1,
+  "budget_usd": 5.0,
+  "ethics_flags": [
+    "no_human_subjects"
+  ],
+  "refinement_policy": {
+    "plateau_threshold": 1.5,
+    "plateau_window": 1
+  }
+}
+

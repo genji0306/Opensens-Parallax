@@ -70,6 +70,10 @@ export interface PaperDraft {
   citations: Array<{ id: string; title: string; doi?: string }>
   metadata: Record<string, unknown>
   review_overall?: number
+  word_count?: number
+  upload_id?: string
+  draft?: string
+  status?: string
 }
 
 /** Debate summary from GET /simulate/:id/summary */
@@ -121,6 +125,23 @@ export interface PaperUpload {
   language: string
   field?: string
   detected_field?: string
+  parser_engine?: string
+  parser_mode?: string
+  parse_quality?: Record<string, unknown>
+  ocr_used?: boolean
+  document_counts?: {
+    sections?: number
+    tables?: number
+    figures?: number
+    formulas?: number
+    references?: number
+  }
+  parse_warnings?: string[]
+  parse_quality_breakdown?: Record<string, unknown>
+  sections?: string[]
+  tables?: Array<Record<string, unknown>>
+  figures?: Array<Record<string, unknown>>
+  formulas?: Array<Record<string, unknown>>
   status: string
   round_count?: number
   rounds_completed?: number

@@ -1,0 +1,131 @@
+{
+  "command": [
+    "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+    "/Users/applefamily/.codex/skills/codex-autoresearch/scripts/autoresearch_runtime_ctl.py",
+    "run",
+    "--repo",
+    "/Users/applefamily/Desktop/Business/Opensens/03 - R&D Projects/Opensens Darklab/Opensens Parallax",
+    "--launch-path",
+    "/Users/applefamily/Desktop/Business/Opensens/03 - R&D Projects/Opensens Darklab/Opensens Parallax/Parallax-V3/.codex-autoresearch/autoresearch-launch.json",
+    "--results-path",
+    "/Users/applefamily/Desktop/Business/Opensens/03 - R&D Projects/Opensens Darklab/Opensens Parallax/Parallax-V3/.codex-autoresearch/research-results.tsv",
+    "--runtime-path",
+    "/Users/applefamily/Desktop/Business/Opensens/03 - R&D Projects/Opensens Darklab/Opensens Parallax/Parallax-V3/.codex-autoresearch/autoresearch-runtime.json",
+    "--log-path",
+    "/Users/applefamily/Desktop/Business/Opensens/03 - R&D Projects/Opensens Darklab/Opensens Parallax/Parallax-V3/.codex-autoresearch/autoresearch-runtime.log",
+    "--sleep-seconds",
+    "5",
+    "--max-stagnation",
+    "3",
+    "--codex-bin",
+    "codex",
+    "--state-path",
+    "Parallax-V3/.codex-autoresearch/autoresearch-state.json"
+  ],
+  "created_at": "2026-04-16T14:26:08Z",
+  "last_commit_gate": {
+    "blockers": [],
+    "decision": "allow",
+    "destructive_approved": false,
+    "phase": "precommit",
+    "repo_gates": [
+      {
+        "blockers": [],
+        "decision": "allow",
+        "destructive_approved": false,
+        "phase": "precommit",
+        "repo": "/Users/applefamily/Desktop/Business/Opensens/03 - R&D Projects/Opensens Darklab/Opensens Parallax",
+        "role": "primary",
+        "rollback_policy": "revert",
+        "scope_patterns": [
+          "Parallax-V3",
+          "Parallax-V2",
+          "Supporting",
+          "platform",
+          ".claude",
+          ".moat",
+          "Parallax-V1",
+          "memory"
+        ],
+        "staged_artifacts": [],
+        "unexpected_worktree": [],
+        "warnings": []
+      }
+    ],
+    "rollback_policy": "revert",
+    "scope_patterns": [
+      "Parallax-V3",
+      "Parallax-V2",
+      "Supporting",
+      "platform",
+      ".claude",
+      ".moat",
+      "Parallax-V1",
+      "memory"
+    ],
+    "staged_artifacts": [],
+    "unexpected_worktree": [],
+    "warnings": []
+  },
+  "last_decision": "stop",
+  "last_health_check": {
+    "blockers": [],
+    "decision": "ok",
+    "free_mb": 614937,
+    "has_results": false,
+    "has_state": false,
+    "main_rows": 0,
+    "repo_worktree_checks": [
+      {
+        "repo": "/Users/applefamily/Desktop/Business/Opensens/03 - R&D Projects/Opensens Darklab/Opensens Parallax",
+        "role": "primary",
+        "scope_patterns": [
+          "Parallax-V3",
+          "Parallax-V2",
+          "Supporting",
+          "platform",
+          ".claude",
+          ".moat",
+          "Parallax-V1",
+          "memory"
+        ],
+        "unexpected_worktree": []
+      }
+    ],
+    "results_path": "/Users/applefamily/Desktop/Business/Opensens/03 - R&D Projects/Opensens Darklab/Opensens Parallax/Parallax-V3/.codex-autoresearch/research-results.tsv",
+    "resume_decision": "fresh_start",
+    "resume_detail": "fresh_start",
+    "state_path": "/Users/applefamily/Desktop/Business/Opensens/03 - R&D Projects/Opensens Darklab/Opensens Parallax/Parallax-V3/.codex-autoresearch/autoresearch-state.json",
+    "warnings": []
+  },
+  "last_reason": "goal_reached",
+  "last_seen_iteration": 3,
+  "last_seen_status": "keep",
+  "launch_context": {
+    "decision": "fresh",
+    "launch_manifest_present": true,
+    "launch_path": "/Users/applefamily/Desktop/Business/Opensens/03 - R&D Projects/Opensens Darklab/Opensens Parallax/Parallax-V3/.codex-autoresearch/autoresearch-launch.json",
+    "reason": "confirmed_launch_without_artifacts",
+    "reasons": [
+      "Launch manifest is already confirmed; a fresh runtime can initialize artifacts."
+    ],
+    "results_path": "/Users/applefamily/Desktop/Business/Opensens/03 - R&D Projects/Opensens Darklab/Opensens Parallax/Parallax-V3/.codex-autoresearch/research-results.tsv",
+    "resume_strategy": "launch_manifest_ready",
+    "runtime_path": "/Users/applefamily/Desktop/Business/Opensens/03 - R&D Projects/Opensens Darklab/Opensens Parallax/Parallax-V3/.codex-autoresearch/autoresearch-runtime.json",
+    "runtime_present": true,
+    "runtime_running": false,
+    "state_path": "/Users/applefamily/Desktop/Business/Opensens/03 - R&D Projects/Opensens Darklab/Opensens Parallax/Parallax-V3/.codex-autoresearch/autoresearch-state.json"
+  },
+  "launch_path": "/Users/applefamily/Desktop/Business/Opensens/03 - R&D Projects/Opensens Darklab/Opensens Parallax/Parallax-V3/.codex-autoresearch/autoresearch-launch.json",
+  "log_path": "/Users/applefamily/Desktop/Business/Opensens/03 - R&D Projects/Opensens Darklab/Opensens Parallax/Parallax-V3/.codex-autoresearch/autoresearch-runtime.log",
+  "pgid": 86359,
+  "pid": 86359,
+  "repo": "/Users/applefamily/Desktop/Business/Opensens/03 - R&D Projects/Opensens Darklab/Opensens Parallax",
+  "requested_stop_at": null,
+  "results_path": "/Users/applefamily/Desktop/Business/Opensens/03 - R&D Projects/Opensens Darklab/Opensens Parallax/Parallax-V3/.codex-autoresearch/research-results.tsv",
+  "state_path": "/Users/applefamily/Desktop/Business/Opensens/03 - R&D Projects/Opensens Darklab/Opensens Parallax/Parallax-V3/.codex-autoresearch/autoresearch-state.json",
+  "status": "terminal",
+  "terminal_reason": "goal_reached",
+  "updated_at": "2026-04-16T14:41:15Z",
+  "version": 1
+}

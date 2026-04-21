@@ -1,0 +1,69 @@
+{
+  "config": {
+    "direction": "lower",
+    "execution_policy": "danger_full_access",
+    "goal": "Reduce API_OATH_GAP_COUNT to 0 in Parallax-V3 by implementing the real FastAPI entrypoint, real /api/v3/run execution and SSE completion, workspace input materialization, and codex-oath phase discipline while preserving the existing V3 test suite.",
+    "guard": "cd Parallax-V3 && pytest tests -q && python3 -m parallax_v3.smoke",
+    "iterations": 30,
+    "metric": "api_oath_gap_count",
+    "parallel_mode": "serial",
+    "repos": [
+      {
+        "path": "/Users/applefamily/Desktop/Business/Opensens/03 - R&D Projects/Opensens Darklab/Opensens Parallax",
+        "role": "primary",
+        "scope": "Parallax-V3,Parallax-V2,Supporting,platform,.claude,.moat,Parallax-V1,memory"
+      }
+    ],
+    "rollback_policy": "revert",
+    "scope": "Parallax-V3,Parallax-V2,Supporting,platform,.claude,.moat,Parallax-V1,memory",
+    "session_mode": "background",
+    "stop_condition": null,
+    "verify": "cd Parallax-V3 && python3 .codex-autoresearch/verify_api_oath.py",
+    "web_search": "disabled"
+  },
+  "mode": "fix",
+  "run_tag": "parallax-v3-api-oath-20260416-2130",
+  "state": {
+    "baseline_metric": 4,
+    "best_iteration": 3,
+    "best_metric": 0,
+    "blocked": 0,
+    "consecutive_discards": 0,
+    "crashes": 0,
+    "current_labels": [],
+    "current_metric": 0,
+    "discards": 0,
+    "iteration": 3,
+    "keeps": 3,
+    "last_commit": "eed6ffb",
+    "last_repo_commits": {
+      "/Users/applefamily/Desktop/Business/Opensens/03 - R&D Projects/Opensens Darklab/Opensens Parallax": "eed6ffb"
+    },
+    "last_status": "keep",
+    "last_trial_commit": "eed6ffb",
+    "last_trial_labels": [],
+    "last_trial_metric": 0,
+    "last_trial_repo_commits": {
+      "/Users/applefamily/Desktop/Business/Opensens/03 - R&D Projects/Opensens Darklab/Opensens Parallax": "eed6ffb"
+    },
+    "no_ops": 0,
+    "pivot_count": 0
+  },
+  "supervisor": {
+    "last_exit_kind": "terminal",
+    "last_observed_iteration": 3,
+    "last_observed_metric": 0,
+    "last_observed_signature": "{\"iteration\":3,\"last_status\":\"keep\",\"last_trial_commit\":\"eed6ffb\",\"last_trial_labels\":[],\"last_trial_metric\":0}",
+    "last_observed_status": "keep",
+    "last_observed_updated_at": "2026-04-16T14:39:37Z",
+    "last_reason": "Fix mode reached zero remaining errors.",
+    "last_turn_finished_at": "2026-04-16T14:41:15Z",
+    "recommended_action": "stop",
+    "restart_count": 1,
+    "should_continue": false,
+    "stagnation_count": 0,
+    "terminal_reason": "goal_reached"
+  },
+  "updated_at": "2026-04-16T14:39:37Z",
+  "version": 1
+}

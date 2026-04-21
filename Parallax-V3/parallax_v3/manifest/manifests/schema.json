@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SessionManifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "session_id",
+    "research_question",
+    "target_venue",
+    "citation_style"
+  ],
+  "properties": {
+    "session_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "research_question": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_venue": {
+      "type": "string",
+      "minLength": 1
+    },
+    "citation_style": {
+      "type": "string",
+      "minLength": 1
+    },
+    "max_refinement_iters": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "budget_usd": {
+      "type": "number",
+      "minimum": 0
+    },
+    "ethics_flags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "refinement_policy": {
+      "type": "object"
+    }
+  }
+}
+

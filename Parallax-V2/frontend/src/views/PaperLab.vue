@@ -5,6 +5,7 @@ import type { PaperUpload } from '@/types/api'
 import {
   uploadPaper,
   startReview,
+  getUploadStatus,
   getRounds,
   getDraft,
   listUploads,
@@ -20,8 +21,9 @@ import GlassPanel from '@/components/shared/GlassPanel.vue'
 import ActionButton from '@/components/shared/ActionButton.vue'
 import StatusBadge from '@/components/shared/StatusBadge.vue'
 import StatusBreadcrumb from '@/components/paper/StatusBreadcrumb.vue'
-import VisualizationPanel from '@/components/paper/VisualizationPanel.vue'
 import ComparativeAnalysisPanel from '@/components/paper/ComparativeAnalysisPanel.vue'
+import ReviewOverviewPanel from '@/components/paper/ReviewOverviewPanel.vue'
+import VisualizationStudio from '@/components/paper/VisualizationStudio.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -113,6 +115,8 @@ const compareMode = ref(false)
 
 const uploading = ref(false)
 const reviewing = ref(false)
+const importing = ref(false)
+const importError = ref<string | null>(null)
 const loadingUploads = ref(false)
 const uploadsError = ref<string | null>(null)
 const dragOver = ref(false)
@@ -128,15 +132,19 @@ const showConfig = ref(false)
 
 // Review progress
 const reviewProgress = ref<string>('')
+const exportFeedback = ref<string | null>(null)
+const inlineNotice = ref<string | null>(null)
 
 // Loaded data
 const roundsData = ref<RoundsResponse | null>(null)
 const currentDraft = ref<DraftResponse | null>(null)
+const loadingUploadDetail = ref(false)
 
 // Expandable round toggles
 
 // Unsubscribe handle for SSE
 let unsubscribeSSE: (() => void) | null = null
+let activeReviewSessionId: string | undefined
 
 function normalizeUpload(upload: PaperUpload): PaperUpload {
   const scoreProgression = Array.isArray(upload.review_scores)
@@ -164,6 +172,98 @@ function normalizeUpload(upload: PaperUpload): PaperUpload {
     score_progression: upload.score_progression ?? scoreProgression,
     round_count: roundCount,
     rounds_completed: upload.rounds_completed ?? roundCount,
+    parser_engine: upload.parser_engine ?? 'unknown',
+    parser_mode: upload.parser_mode ?? 'unknown',
+    parse_quality: upload.parse_quality ?? {},
+    ocr_used: upload.ocr_used ?? false,
+    document_counts: upload.document_counts ?? {},
+    parse_warnings: upload.parse_warnings ?? [],
+    parse_quality_breakdown: upload.parse_quality_breakdown ?? upload.parse_quality ?? {},
+    sections: upload.sections ?? [],
+    tables: upload.tables ?? [],
+    figures: upload.figures ?? [],
+    formulas: upload.formulas ?? [],
+  }
+}
+
+function parserLabel(parserEngine?: string | null): string {
+  const value = (parserEngine || 'unknown').replace(/[_+]/g, ' ').trim()
+  return value ? value.replace(/\b\w/g, (char) => char.toUpperCase()) : 'Unknown'
+}
+
+function parseOverallScore(upload: PaperUpload | null | undefined): number | null {
+  const overall = upload?.parse_quality?.overall
+  return typeof overall === 'number' ? overall : null
+}
+
+function parseQualityLabel(upload: PaperUpload | null | undefined): string {
+  const overall = parseOverallScore(upload)
+  if (overall == null) return 'Unknown'
+  if (overall >= 0.85) return 'High'
+  if (overall >= 0.65) return 'Medium'
+  return 'Low'
+}
+
+function parseQualityClass(upload: PaperUpload | null | undefined): string {
+  const overall = parseOverallScore(upload)
+  if (overall == null) return 'unknown'
+  if (overall >= 0.85) return 'good'
+  if (overall >= 0.65) return 'warn'
+  return 'bad'
+}
+
+function formatParseMetric(value: unknown): string {
+  return typeof value === 'number' ? value.toFixed(2) : 'n/a'
+}
+
+function previewText(value: unknown, maxLength = 180): string {
+  if (typeof value !== 'string' || !value.trim()) return 'No preview available'
+  const compact = value.replace(/\s+/g, ' ').trim()
+  return compact.length > maxLength ? `${compact.slice(0, maxLength - 1)}…` : compact
+}
+
+function tablePreview(table: Record<string, unknown>): string {
+  return previewText(table.markdown ?? table.html ?? table.title, 220)
+}
+
+function figurePreview(figure: Record<string, unknown>): string {
+  return previewText(figure.caption ?? figure.title, 180)
+}
+
+function formulaPreview(formula: Record<string, unknown>): string {
+  return previewText(formula.latex, 160)
+}
+
+function pageLabel(entity: Record<string, unknown>): string {
+  const page = entity.page
+  return typeof page === 'number' && page > 0 ? `Page ${page}` : 'Page n/a'
+}
+
+function bboxLabel(entity: Record<string, unknown>): string | null {
+  const bbox = entity.bbox
+  if (!Array.isArray(bbox) || bbox.length < 4) return null
+  const values = bbox.slice(0, 4).map((value) => (
+    typeof value === 'number' ? Math.round(value) : value
+  ))
+  return `bbox ${values.join(', ')}`
+}
+
+async function refreshSelectedUpload(uploadId: string) {
+  loadingUploadDetail.value = true
+  try {
+    const res = await getUploadStatus(uploadId)
+    const detail = normalizeUpload(res.data?.data as PaperUpload)
+    selectedUpload.value = detail
+    uploads.value = uploads.value.map((entry) => (
+      entry.upload_id === uploadId
+        ? { ...entry, ...detail }
+        : entry
+    ))
+  } catch (err) {
+    const msg = getApiErrorMessage(err, 'Failed to load manuscript details')
+    inlineNotice.value = msg
+  } finally {
+    loadingUploadDetail.value = false
   }
 }
 
@@ -252,8 +352,12 @@ watch([selectedUploadIds, compareMode], () => {
   const q = { ...route.query }
   if (compareMode.value && selectedUploadIds.value.length > 0) {
     q.uploads = selectedUploadIds.value.join(',')
+    delete q.upload_id
   } else {
     delete q.uploads
+    if (selectedUpload.value?.upload_id) {
+      q.upload_id = selectedUpload.value.upload_id
+    }
   }
   router.replace({ query: q })
 })
@@ -289,6 +393,19 @@ function getApiErrorMessage(err: unknown, fallback = 'Request failed'): string {
     return err.message
   }
   return fallback
+}
+
+function pushSelectionToRoute(uploadId: string | null) {
+  const query = { ...route.query }
+  if (uploadId) {
+    query.upload_id = uploadId
+  } else {
+    delete query.upload_id
+  }
+  if (!compareMode.value) {
+    delete query.uploads
+  }
+  router.replace({ query })
 }
 
 async function fetchUploads() {
@@ -346,15 +463,17 @@ function handleFileSelect(e: Event) {
 
 async function handleFileUpload(file: File): Promise<string | null> {
   const validTypes = [
+    'application/pdf',
+    'application/msword',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     'text/plain',
     'text/markdown',
   ]
-  const validExtensions = ['.docx', '.txt', '.md', '.markdown']
+  const validExtensions = ['.pdf', '.doc', '.docx', '.txt', '.md', '.markdown']
   const ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase()
 
   if (!validTypes.includes(file.type) && !validExtensions.includes(ext)) {
-    alert('Please upload a .docx, .txt, .md, or .markdown file')
+    inlineNotice.value = 'Please upload a .pdf, .doc, .docx, .txt, .md, or .markdown file.'
     return null
   }
 
@@ -368,13 +487,14 @@ async function handleFileUpload(file: File): Promise<string | null> {
       if (newUpload) {
         selectUpload(newUpload)
       }
+      inlineNotice.value = 'Upload complete. Review-ready manuscript selected.'
       return uploadId
     }
   } catch (err) {
     const msg = getApiErrorMessage(err, 'Upload failed')
     uploadsError.value = `Upload failed: ${msg}`
     console.error('Upload failed:', msg, err)
-    alert(`Upload failed: ${msg}`)
+    inlineNotice.value = `Upload failed: ${msg}`
   } finally {
     uploading.value = false
   }
@@ -388,12 +508,16 @@ function selectUpload(upload: PaperUpload) {
     unsubscribeSSE = null
   }
   selectedUpload.value = upload
+  pushSelectionToRoute(upload.upload_id)
   reviewProgress.value = ''
   roundsData.value = null
   currentDraft.value = null
+  inlineNotice.value = null
 
+  refreshSelectedUpload(upload.upload_id)
   // Load rounds + draft if available
   loadRoundsAndDraft(upload.upload_id)
+  loadSpecialistSnapshot(upload.upload_id)
 }
 
 async function loadRoundsAndDraft(uploadId: string) {
@@ -429,6 +553,20 @@ async function loadRoundsAndDraft(uploadId: string) {
   }
 }
 
+async function loadSpecialistSnapshot(uploadId: string) {
+  specialistResults.value = null
+  specialistStatus.value = 'idle'
+  try {
+    const res = await getSpecialistReview(uploadId)
+    if (res.data?.data) {
+      specialistResults.value = res.data.data
+      specialistStatus.value = 'done'
+    }
+  } catch {
+    specialistStatus.value = 'idle'
+  }
+}
+
 async function syncRouteState() {
   const uploadId = route.query.upload_id as string | undefined
   if (selectUploadById(uploadId)) {
@@ -445,6 +583,9 @@ async function syncRouteState() {
     return
   }
 
+  // Bug #9 fix: show progress + error state during auto-import
+  importing.value = true
+  importError.value = null
   try {
     const res = await exportDraft(runId, 'markdown')
     const markdown = res.data?.data
@@ -455,9 +596,14 @@ async function syncRouteState() {
       if (newUploadId) {
         await router.replace({ name: 'paper-lab', query: { upload_id: newUploadId } })
       }
+    } else {
+      importError.value = 'No draft available for this pipeline run.'
     }
-  } catch (err) {
-    console.warn('Could not auto-import pipeline draft:', err)
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    importError.value = `Could not import pipeline draft: ${msg}`
+  } finally {
+    importing.value = false
   }
 }
 
@@ -468,16 +614,18 @@ async function handleStartReview() {
 
   try {
     showConfig.value = false
-    await startReview(selectedUpload.value.upload_id, {
+    const startRes = await startReview(selectedUpload.value.upload_id, {
       rounds: reviewConfig.value.rounds,
       reviewers: reviewConfig.value.reviewers,
       authors: reviewConfig.value.authors,
       live: reviewConfig.value.live,
     })
+    activeReviewSessionId = startRes.data?.data?.session_id
 
     // Subscribe to SSE for progress
     unsubscribeSSE = subscribeToProgress(
       selectedUpload.value.upload_id,
+      activeReviewSessionId,
       (event) => {
         switch (event.type) {
           case 'review_start':
@@ -501,11 +649,18 @@ async function handleStartReview() {
             fetchUploads()
             if (selectedUpload.value) {
               loadRoundsAndDraft(selectedUpload.value.upload_id)
+              loadSpecialistSnapshot(selectedUpload.value.upload_id)
             }
             break
           case 'error':
             reviewProgress.value = 'Review failed.'
             reviewing.value = false
+            inlineNotice.value = 'Review failed. Inspect the latest backend error and try again.'
+            break
+          case 'stream_error':
+            reviewProgress.value = 'Live stream disconnected.'
+            reviewing.value = false
+            inlineNotice.value = 'Live progress connection was lost. Refresh the upload state and retry if needed.'
             break
         }
       },
@@ -514,6 +669,7 @@ async function handleStartReview() {
     console.error('Start review failed:', err)
     reviewing.value = false
     reviewProgress.value = 'Failed to start review.'
+    inlineNotice.value = getApiErrorMessage(err, 'Failed to start review.')
   }
 }
 
@@ -548,6 +704,7 @@ async function handleSpecialistReview() {
     const res = await runSpecialistReview(selectedUpload.value.upload_id, { target: 'draft' })
     const data = res.data?.data as unknown as Record<string, unknown>
     if (data?.task_id) pollSpecialistResults(selectedUpload.value.upload_id)
+    inlineNotice.value = 'Specialist review started.'
   } catch (err) {
     const msg = getApiErrorMessage(err, 'Specialist review failed')
     uploadsError.value = `Specialist review failed: ${msg}`
@@ -574,17 +731,30 @@ function sparklinePath(scores: number[], w = 44, h = 14): string {
 
 function handleExportDocx() {
   if (!selectedUpload.value) return
-  exportDocx(selectedUpload.value.upload_id)
+  try {
+    exportDocx(selectedUpload.value.upload_id)
+    exportFeedback.value = 'Download started — check your browser downloads.'
+    setTimeout(() => { exportFeedback.value = null }, 4000)
+  } catch {
+    exportFeedback.value = 'Export failed — please try again.'
+  }
 }
 
 function handleResponseToReviewers() {
   if (!selectedUpload.value) return
-  getResponseToReviewers(selectedUpload.value.upload_id, 'docx')
+  try {
+    getResponseToReviewers(selectedUpload.value.upload_id, 'docx')
+    exportFeedback.value = 'Response document opened in new tab.'
+    setTimeout(() => { exportFeedback.value = null }, 4000)
+  } catch {
+    exportFeedback.value = 'Export failed — please try again.'
+  }
 }
 
 function handleRewriteInstructions() {
   if (!selectedUpload.value) return
   getRewriteInstructions(selectedUpload.value.upload_id)
+  exportFeedback.value = 'Rewrite instructions opened in new tab.'
 }
 
 const isPaperLabEmpty = computed(() => uploads.value.length === 0 && !loadingUploads.value)
@@ -619,12 +789,12 @@ function formatDate(iso: string): string {
           {{ uploading ? 'progress_activity' : 'cloud_upload' }}
         </span>
         <p class="upload-zone__text">
-          {{ uploading ? 'Uploading...' : 'Drop a .docx, .txt, .md, or .markdown file here' }}
+          {{ uploading ? 'Uploading...' : 'Drop a .pdf, .doc, .docx, .txt, .md, or .markdown file here' }}
         </p>
         <label v-if="!uploading" class="upload-zone__browse">
           <input
             type="file"
-            accept=".docx,.txt,.md,.markdown"
+            accept=".pdf,.doc,.docx,.txt,.md,.markdown"
             class="sr-only"
             @change="handleFileSelect"
           />
@@ -656,12 +826,12 @@ function formatDate(iso: string): string {
           {{ uploading ? 'progress_activity' : 'cloud_upload' }}
         </span>
         <p class="upload-zone__text">
-          {{ uploading ? 'Uploading...' : 'Drop a .docx, .txt, .md, or .markdown file here' }}
+          {{ uploading ? 'Uploading...' : 'Drop a .pdf, .doc, .docx, .txt, .md, or .markdown file here' }}
         </p>
         <label v-if="!uploading" class="upload-zone__browse">
           <input
             type="file"
-            accept=".docx,.txt,.md,.markdown"
+            accept=".pdf,.doc,.docx,.txt,.md,.markdown"
             class="sr-only"
             @change="handleFileSelect"
           />
@@ -716,6 +886,13 @@ function formatDate(iso: string): string {
             <span>{{ upload.language }} / {{ upload.field }}</span>
             <span>{{ formatDate(upload.created_at) }}</span>
           </div>
+          <div class="upload-item__parse">
+            <span class="upload-item__parser">{{ parserLabel(upload.parser_engine) }}</span>
+            <span class="upload-item__parse-pill" :class="`upload-item__parse-pill--${parseQualityClass(upload)}`">
+              {{ parseQualityLabel(upload) }}
+            </span>
+            <span v-if="upload.ocr_used" class="upload-item__ocr">OCR</span>
+          </div>
           <!-- Sparkline + round count -->
           <div class="upload-item__bottom">
             <div v-if="upload.review_scores && upload.review_scores.length > 1" class="upload-item__sparkline">
@@ -763,6 +940,17 @@ function formatDate(iso: string): string {
             </div>
           </div>
 
+          <!-- Export feedback (Bug #10) -->
+          <div v-if="exportFeedback" class="export-feedback">
+            <span class="material-symbols-outlined" style="font-size: 16px;">info</span>
+            <span>{{ exportFeedback }}</span>
+          </div>
+
+          <div v-if="inlineNotice" class="export-feedback export-feedback--neutral">
+            <span class="material-symbols-outlined" style="font-size: 16px;">tips_and_updates</span>
+            <span>{{ inlineNotice }}</span>
+          </div>
+
           <!-- Paper Info Card -->
           <GlassPanel class="paper-info" padding="16px">
             <div class="paper-info__header">
@@ -773,9 +961,132 @@ function formatDate(iso: string): string {
               <span><strong>Field:</strong> {{ selectedUpload.field || selectedUpload.detected_field || 'Undetected' }}</span>
               <span><strong>Language:</strong> {{ selectedUpload.language || 'en' }}</span>
               <span><strong>Uploaded:</strong> {{ formatDate(selectedUpload.created_at) }}</span>
+              <span><strong>Parser:</strong> {{ parserLabel(selectedUpload.parser_engine) }}</span>
+              <span><strong>Parse Quality:</strong> {{ parseQualityLabel(selectedUpload) }}</span>
               <span v-if="(selectedUpload.round_count ?? 0) > 0"><strong>Rounds:</strong> {{ selectedUpload.round_count }}</span>
               <span v-if="selectedUpload.initial_score != null"><strong>Initial Score:</strong> {{ selectedUpload.initial_score?.toFixed(1) }}</span>
               <span v-if="selectedUpload.final_score != null"><strong>Final Score:</strong> {{ selectedUpload.final_score?.toFixed(1) }}</span>
+            </div>
+            <div class="paper-info__parse-grid">
+              <div class="paper-info__parse-card">
+                <span class="paper-info__parse-label">Overall</span>
+                <strong>{{ parseOverallScore(selectedUpload) != null ? parseOverallScore(selectedUpload)?.toFixed(2) : 'n/a' }}</strong>
+              </div>
+              <div class="paper-info__parse-card">
+                <span class="paper-info__parse-label">Sections</span>
+                <strong>{{ selectedUpload.document_counts?.sections ?? 0 }}</strong>
+              </div>
+              <div class="paper-info__parse-card">
+                <span class="paper-info__parse-label">Tables</span>
+                <strong>{{ selectedUpload.document_counts?.tables ?? 0 }}</strong>
+              </div>
+              <div class="paper-info__parse-card">
+                <span class="paper-info__parse-label">Figures</span>
+                <strong>{{ selectedUpload.document_counts?.figures ?? 0 }}</strong>
+              </div>
+              <div class="paper-info__parse-card">
+                <span class="paper-info__parse-label">Formulas</span>
+                <strong>{{ selectedUpload.document_counts?.formulas ?? 0 }}</strong>
+              </div>
+              <div class="paper-info__parse-card">
+                <span class="paper-info__parse-label">References</span>
+                <strong>{{ selectedUpload.document_counts?.references ?? 0 }}</strong>
+              </div>
+            </div>
+            <div class="paper-info__drilldown">
+              <div class="paper-info__drilldown-header">
+                <h3 class="paper-info__drilldown-title">Document Parse</h3>
+                <span v-if="loadingUploadDetail" class="paper-info__loading">Refreshing…</span>
+              </div>
+              <div class="paper-info__quality-list">
+                <div class="paper-info__quality-item">
+                  <span>Title detection</span>
+                  <strong>{{ formatParseMetric(selectedUpload.parse_quality_breakdown?.title_confidence) }}</strong>
+                </div>
+                <div class="paper-info__quality-item">
+                  <span>Section coverage</span>
+                  <strong>{{ formatParseMetric(selectedUpload.parse_quality_breakdown?.section_coverage) }}</strong>
+                </div>
+                <div class="paper-info__quality-item">
+                  <span>Reading order</span>
+                  <strong>{{ formatParseMetric(selectedUpload.parse_quality_breakdown?.reading_order) }}</strong>
+                </div>
+                <div class="paper-info__quality-item">
+                  <span>Table retention</span>
+                  <strong>{{ formatParseMetric(selectedUpload.parse_quality_breakdown?.table_retention) }}</strong>
+                </div>
+                <div class="paper-info__quality-item">
+                  <span>Figure retention</span>
+                  <strong>{{ formatParseMetric(selectedUpload.parse_quality_breakdown?.figure_retention) }}</strong>
+                </div>
+                <div class="paper-info__quality-item">
+                  <span>Formula retention</span>
+                  <strong>{{ formatParseMetric(selectedUpload.parse_quality_breakdown?.formula_retention) }}</strong>
+                </div>
+              </div>
+              <div v-if="selectedUpload.parse_warnings?.length" class="paper-info__warnings">
+                <div class="paper-info__warnings-title">Parse warnings</div>
+                <ul class="paper-info__warning-list">
+                  <li v-for="(warning, index) in selectedUpload.parse_warnings" :key="index">{{ warning }}</li>
+                </ul>
+              </div>
+              <div class="paper-info__entity-grid">
+                <div class="paper-info__entity-card">
+                  <div class="paper-info__entity-title">Sections</div>
+                  <div class="paper-info__entity-values">
+                    <span v-for="section in selectedUpload.sections?.slice(0, 6)" :key="section">{{ section }}</span>
+                    <span v-if="!selectedUpload.sections?.length">None</span>
+                  </div>
+                </div>
+                <div class="paper-info__entity-card">
+                  <div class="paper-info__entity-title">Tables</div>
+                  <div class="paper-info__entity-previews">
+                    <div v-for="(table, index) in selectedUpload.tables?.slice(0, 3)" :key="index" class="paper-info__entity-preview">
+                      <div class="paper-info__entity-preview-header">
+                        <strong>{{ String(table.ref ?? table.table_id ?? table.title ?? `Table ${index + 1}`) }}</strong>
+                        <div class="paper-info__entity-preview-meta">
+                          <span>{{ pageLabel(table) }}</span>
+                          <span v-if="bboxLabel(table)">{{ bboxLabel(table) }}</span>
+                        </div>
+                      </div>
+                      <p>{{ tablePreview(table) }}</p>
+                    </div>
+                    <span v-if="!selectedUpload.tables?.length">None</span>
+                  </div>
+                </div>
+                <div class="paper-info__entity-card">
+                  <div class="paper-info__entity-title">Figures</div>
+                  <div class="paper-info__entity-previews">
+                    <div v-for="(figure, index) in selectedUpload.figures?.slice(0, 3)" :key="index" class="paper-info__entity-preview">
+                      <div class="paper-info__entity-preview-header">
+                        <strong>{{ String(figure.ref ?? figure.figure_id ?? figure.title ?? `Figure ${index + 1}`) }}</strong>
+                        <div class="paper-info__entity-preview-meta">
+                          <span>{{ pageLabel(figure) }}</span>
+                          <span v-if="bboxLabel(figure)">{{ bboxLabel(figure) }}</span>
+                        </div>
+                      </div>
+                      <p>{{ figurePreview(figure) }}</p>
+                    </div>
+                    <span v-if="!selectedUpload.figures?.length">None</span>
+                  </div>
+                </div>
+                <div class="paper-info__entity-card">
+                  <div class="paper-info__entity-title">Formulas</div>
+                  <div class="paper-info__entity-previews">
+                    <div v-for="(formula, index) in selectedUpload.formulas?.slice(0, 3)" :key="index" class="paper-info__entity-preview">
+                      <div class="paper-info__entity-preview-header">
+                        <strong>{{ String(formula.ref ?? formula.formula_id ?? `Formula ${index + 1}`) }}</strong>
+                        <div class="paper-info__entity-preview-meta">
+                          <span>{{ pageLabel(formula) }}</span>
+                          <span v-if="bboxLabel(formula)">{{ bboxLabel(formula) }}</span>
+                        </div>
+                      </div>
+                      <p class="paper-info__formula-preview">{{ formulaPreview(formula) }}</p>
+                    </div>
+                    <span v-if="!selectedUpload.formulas?.length">None</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </GlassPanel>
 
@@ -815,8 +1126,19 @@ function formatDate(iso: string): string {
             <p v-else class="config-summary">{{ reviewConfig.rounds }} rounds · {{ reviewConfig.reviewers }} reviewers · {{ reviewConfig.authors }} authors</p>
           </GlassPanel>
 
-          <!-- Visualization Panel (completed reviews) -->
-          <VisualizationPanel :uploadId="selectedUpload.upload_id" v-if="isReviewComplete(selectedUpload.status)" />
+          <ReviewOverviewPanel
+            v-if="isReviewComplete(selectedUpload.status)"
+            :title="selectedUpload.title || 'Untitled Manuscript'"
+            :roundsData="roundsData"
+            :currentDraft="currentDraft"
+            :specialistResults="specialistResults"
+            :specialistStatus="specialistStatus"
+          />
+
+          <VisualizationStudio
+            v-if="isReviewComplete(selectedUpload.status)"
+            :uploadId="selectedUpload.upload_id"
+          />
 
           <!-- Awaiting Review placeholder -->
           <div v-if="isReadyForReview(selectedUpload.status) && !reviewing" class="awaiting-review">
@@ -824,6 +1146,15 @@ function formatDate(iso: string): string {
             <p style="color: var(--text-secondary); font-size: 14px; margin: 0;">Ready for adversarial review. Click <strong>Start Adversarial Review</strong> above to begin the multi-round peer review simulation.</p>
           </div>
         </template>
+        <!-- Bug #9: importing state -->
+        <div v-else-if="importing" class="empty-main">
+          <span class="material-symbols-outlined" style="font-size: 48px; color: var(--os-brand); margin-bottom: 16px; animation: spin 1.2s linear infinite;">sync</span>
+          <p class="empty-main__hint">Importing pipeline draft...</p>
+        </div>
+        <div v-else-if="importError" class="empty-main">
+          <span class="material-symbols-outlined" style="font-size: 48px; color: #dc2626; margin-bottom: 16px;">error_outline</span>
+          <p class="empty-main__hint" style="color: #dc2626;">{{ importError }}</p>
+        </div>
         <div v-else class="empty-main">
           <span class="material-symbols-outlined" style="font-size: 48px; color: var(--text-tertiary); margin-bottom: 16px;">query_stats</span>
           <p class="empty-main__hint">Select an upload or drag a new manuscript to begin.</p>
@@ -1007,6 +1338,44 @@ function formatDate(iso: string): string {
   color: var(--text-tertiary);
 }
 
+.upload-item__parse {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+
+.upload-item__parser {
+  color: var(--text-secondary);
+}
+
+.upload-item__parse-pill,
+.upload-item__ocr {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: 999px;
+  border: 1px solid var(--border-secondary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.upload-item__parse-pill--good {
+  color: #34d399;
+  border-color: rgba(52, 211, 153, 0.35);
+}
+
+.upload-item__parse-pill--warn {
+  color: #fbbf24;
+  border-color: rgba(251, 191, 36, 0.35);
+}
+
+.upload-item__parse-pill--bad {
+  color: #f87171;
+  border-color: rgba(248, 113, 113, 0.35);
+}
+
 .upload-item__bottom {
   display: flex;
   justify-content: space-between;
@@ -1076,6 +1445,189 @@ function formatDate(iso: string): string {
 
 .paper-info__meta strong {
   color: var(--text-primary);
+}
+
+.paper-info__parse-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.paper-info__parse-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-secondary);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.paper-info__parse-label {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.paper-info__drilldown {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.paper-info__drilldown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.paper-info__drilldown-title {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.paper-info__loading {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.paper-info__quality-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+.paper-info__quality-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-secondary);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.paper-info__warnings {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.paper-info__warnings-title,
+.paper-info__entity-title {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.paper-info__warning-list {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.paper-info__entity-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.paper-info__entity-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-secondary);
+}
+
+.paper-info__entity-values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.paper-info__entity-values span {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-secondary);
+  font-size: 11px;
+  color: var(--text-secondary);
+  max-width: 100%;
+}
+
+.paper-info__entity-previews {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.paper-info__entity-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-secondary);
+}
+
+.paper-info__entity-preview strong {
+  font-size: 12px;
+  color: var(--text-primary);
+}
+
+.paper-info__entity-preview-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.paper-info__entity-preview-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.paper-info__entity-preview-header span {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.paper-info__entity-preview p {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.paper-info__formula-preview {
+  font-family: var(--font-mono);
+  word-break: break-word;
+}
+
+.export-feedback--neutral {
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
 /* Review Progress */
@@ -1164,5 +1716,142 @@ function formatDate(iso: string): string {
   border-radius: var(--radius-lg);
   background: rgba(255, 255, 255, 0.02);
   padding: 32px;
+}
+
+/* Review Overview */
+.review-overview__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.review-overview__title,
+.current-draft__title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-primary);
+}
+.review-overview__score {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.review-overview__empty {
+  color: var(--text-tertiary);
+  font-style: italic;
+  margin: 0;
+}
+.review-rounds {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.review-round-card {
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  background: var(--bg-tertiary);
+}
+.review-round-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.review-round-card__comments {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.review-comment {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+.review-comment__severity {
+  flex-shrink: 0;
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  padding: 1px 6px;
+  border-radius: 4px;
+  align-self: flex-start;
+}
+.review-comment__severity--critical { background: #fecaca; color: #991b1b; }
+.review-comment__severity--major    { background: #fde68a; color: #92400e; }
+.review-comment__severity--minor    { background: #bfdbfe; color: #1e40af; }
+.review-comment__severity--suggestion { background: #e5e7eb; color: #374151; }
+.review-comment--more { font-size: 12px; color: var(--text-tertiary); font-style: italic; }
+
+/* Current draft section */
+.current-draft__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.current-draft__words {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+.current-draft__toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 12px;
+}
+.current-draft__toc-label {
+  color: var(--text-tertiary);
+}
+.current-draft__toc-item {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-secondary);
+  border-radius: 4px;
+  padding: 2px 8px;
+  color: var(--text-secondary);
+}
+
+/* Export feedback */
+.export-feedback {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  color: var(--text-secondary);
+  animation: fadeIn 200ms ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .paper-lab__body {
+    flex-direction: column !important;
+  }
+  .paper-lab__body > * {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
 }
 </style>
