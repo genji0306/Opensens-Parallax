@@ -1,0 +1,90 @@
+{
+  "topic": "Hydrolysis of Tetra-butyl Titanate (TBT) in Water-Friendly Solvent System as Binder for Zinc Flake Coating Process",
+  "run_dir": "/Users/applefamily/Desktop/Business/Opensens/03 - R&D Projects/Opensens Darklab/Opensens Parallax/Parallax-V3/workspace/manual-explore/20260416-143512",
+  "idea_path": "/Users/applefamily/Desktop/Business/Opensens/03 - R&D Projects/Opensens Darklab/Opensens Parallax/Parallax-V3/workspace/manual-explore/20260416-143512/idea.md",
+  "log_path": "/Users/applefamily/Desktop/Business/Opensens/03 - R&D Projects/Opensens Darklab/Opensens Parallax/Parallax-V3/workspace/manual-explore/20260416-143512/experimental_log.md",
+  "agent_count": 9,
+  "agents": [
+    {
+      "agent_id": "search",
+      "status": "success",
+      "model": "claude-sonnet-4-6",
+      "cached": false,
+      "input_tokens": 309,
+      "output_tokens": 70,
+      "response": "[mock:claude-sonnet-4-6] Scope: full_pipeline\nHot items: ['Hydrolysis of Tetra-butyl Titanate (TBT) in Water-Friendly Solvent System as Binder for Zinc Flake Coating Process', 'Focus on hydrolysis control, binder formation, and zinc flake coating process compatibility.']\nWarm summaries: ['Initial exploration only; no verified experimental results are available yet.']\nCold paths: ['workspace/manual-explore/20260416-143512/idea.md', 'workspace/manual-explore/20260416-143512/experimental_log.md']\nToken estimate: 512\nResearch question: Hydrolysis of Tetra-butyl Titanate (TBT) in Water-Friendly Solvent System as Binder for Zinc Flake Coating Process"
+    },
+    {
+      "agent_id": "map",
+      "status": "success",
+      "model": "claude-sonnet-4-6",
+      "cached": false,
+      "input_tokens": 276,
+      "output_tokens": 70,
+      "response": "[mock:claude-sonnet-4-6] Scope: full_pipeline\nHot items: ['Hydrolysis of Tetra-butyl Titanate (TBT) in Water-Friendly Solvent System as Binder for Zinc Flake Coating Process', 'Focus on hydrolysis control, binder formation, and zinc flake coating process compatibility.']\nWarm summaries: ['Initial exploration only; no verified experimental results are available yet.']\nCold paths: ['workspace/manual-explore/20260416-143512/idea.md', 'workspace/manual-explore/20260416-143512/experimental_log.md']\nToken estimate: 512\nResearch question: Hydrolysis of Tetra-butyl Titanate (TBT) in Water-Friendly Solvent System as Binder for Zinc Flake Coating Process"
+    },
+    {
+      "agent_id": "debate",
+      "status": "success",
+      "model": "claude-sonnet-4-6",
+      "cached": false,
+      "input_tokens": 325,
+      "output_tokens": 70,
+      "response": "[mock:claude-sonnet-4-6] Scope: full_pipeline\nHot items: ['Hydrolysis of Tetra-butyl Titanate (TBT) in Water-Friendly Solvent System as Binder for Zinc Flake Coating Process', 'Focus on hydrolysis control, binder formation, and zinc flake coating process compatibility.']\nWarm summaries: ['Initial exploration only; no verified experimental results are available yet.']\nCold paths: ['workspace/manual-explore/20260416-143512/idea.md', 'workspace/manual-explore/20260416-143512/experimental_log.md']\nToken estimate: 512\nResearch question: Hydrolysis of Tetra-butyl Titanate (TBT) in Water-Friendly Solvent System as Binder for Zinc Flake Coating Process"
+    },
+    {
+      "agent_id": "validate",
+      "status": "success",
+      "model": "claude-sonnet-4-6",
+      "cached": false,
+      "input_tokens": 341,
+      "output_tokens": 70,
+      "response": "[mock:claude-sonnet-4-6] Scope: full_pipeline\nHot items: ['Hydrolysis of Tetra-butyl Titanate (TBT) in Water-Friendly Solvent System as Binder for Zinc Flake Coating Process', 'Focus on hydrolysis control, binder formation, and zinc flake coating process compatibility.']\nWarm summaries: ['Initial exploration only; no verified experimental results are available yet.']\nCold paths: ['workspace/manual-explore/20260416-143512/idea.md', 'workspace/manual-explore/20260416-143512/experimental_log.md']\nToken estimate: 512\nResearch question: Hydrolysis of Tetra-butyl Titanate (TBT) in Water-Friendly Solvent System as Binder for Zinc Flake Coating Process"
+    },
+    {
+      "agent_id": "ideas",
+      "status": "success",
+      "model": "claude-sonnet-4-6",
+      "cached": false,
+      "input_tokens": 309,
+      "output_tokens": 70,
+      "response": "[mock:claude-sonnet-4-6] Scope: full_pipeline\nHot items: ['Hydrolysis of Tetra-butyl Titanate (TBT) in Water-Friendly Solvent System as Binder for Zinc Flake Coating Process', 'Focus on hydrolysis control, binder formation, and zinc flake coating process compatibility.']\nWarm summaries: ['Initial exploration only; no verified experimental results are available yet.']\nCold paths: ['workspace/manual-explore/20260416-143512/idea.md', 'workspace/manual-explore/20260416-143512/experimental_log.md']\nToken estimate: 512\nResearch question: Hydrolysis of Tetra-butyl Titanate (TBT) in Water-Friendly Solvent System as Binder for Zinc Flake Coating Process"
+    },
+    {
+      "agent_id": "draft",
+      "status": "success",
+      "model": "claude-sonnet-4-6",
+      "cached": false,
+      "input_tokens": 375,
+      "output_tokens": 70,
+      "response": "[mock:claude-sonnet-4-6] Scope: full_pipeline\nHot items: ['Hydrolysis of Tetra-butyl Titanate (TBT) in Water-Friendly Solvent System as Binder for Zinc Flake Coating Process', 'Focus on hydrolysis control, binder formation, and zinc flake coating process compatibility.']\nWarm summaries: ['Initial exploration only; no verified experimental results are available yet.']\nCold paths: ['workspace/manual-explore/20260416-143512/idea.md', 'workspace/manual-explore/20260416-143512/experimental_log.md']\nToken estimate: 512\nResearch question: Hydrolysis of Tetra-butyl Titanate (TBT) in Water-Friendly Solvent System as Binder for Zinc Flake Coating Process"
+    },
+    {
+      "agent_id": "experiment",
+      "status": "success",
+      "model": "claude-sonnet-4-6",
+      "cached": false,
+      "input_tokens": 276,
+      "output_tokens": 70,
+      "response": "[mock:claude-sonnet-4-6] Scope: full_pipeline\nHot items: ['Hydrolysis of Tetra-butyl Titanate (TBT) in Water-Friendly Solvent System as Binder for Zinc Flake Coating Process', 'Focus on hydrolysis control, binder formation, and zinc flake coating process compatibility.']\nWarm summaries: ['Initial exploration only; no verified experimental results are available yet.']\nCold paths: ['workspace/manual-explore/20260416-143512/idea.md', 'workspace/manual-explore/20260416-143512/experimental_log.md']\nToken estimate: 512\nResearch question: Hydrolysis of Tetra-butyl Titanate (TBT) in Water-Friendly Solvent System as Binder for Zinc Flake Coating Process"
+    },
+    {
+      "agent_id": "revise",
+      "status": "success",
+      "model": "claude-sonnet-4-6",
+      "cached": false,
+      "input_tokens": 341,
+      "output_tokens": 70,
+      "response": "[mock:claude-sonnet-4-6] Scope: full_pipeline\nHot items: ['Hydrolysis of Tetra-butyl Titanate (TBT) in Water-Friendly Solvent System as Binder for Zinc Flake Coating Process', 'Focus on hydrolysis control, binder formation, and zinc flake coating process compatibility.']\nWarm summaries: ['Initial exploration only; no verified experimental results are available yet.']\nCold paths: ['workspace/manual-explore/20260416-143512/idea.md', 'workspace/manual-explore/20260416-143512/experimental_log.md']\nToken estimate: 512\nResearch question: Hydrolysis of Tetra-butyl Titanate (TBT) in Water-Friendly Solvent System as Binder for Zinc Flake Coating Process"
+    },
+    {
+      "agent_id": "pass",
+      "status": "success",
+      "model": "claude-sonnet-4-6",
+      "cached": false,
+      "input_tokens": 341,
+      "output_tokens": 70,
+      "response": "[mock:claude-sonnet-4-6] Scope: full_pipeline\nHot items: ['Hydrolysis of Tetra-butyl Titanate (TBT) in Water-Friendly Solvent System as Binder for Zinc Flake Coating Process', 'Focus on hydrolysis control, binder formation, and zinc flake coating process compatibility.']\nWarm summaries: ['Initial exploration only; no verified experimental results are available yet.']\nCold paths: ['workspace/manual-explore/20260416-143512/idea.md', 'workspace/manual-explore/20260416-143512/experimental_log.md']\nToken estimate: 512\nResearch question: Hydrolysis of Tetra-butyl Titanate (TBT) in Water-Friendly Solvent System as Binder for Zinc Flake Coating Process"
+    }
+  ]
+}

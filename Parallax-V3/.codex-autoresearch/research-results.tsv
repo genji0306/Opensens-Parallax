@@ -1,0 +1,11 @@
+# environment: cpu=16 ram=32768MB python=3.13.2 platform=Darwin-x86_64 network=enabled
+# metric_direction: lower
+# mode: fix
+# run_tag: parallax-v3-api-oath-20260416-2130
+# parallel: serial
+# web_search: disabled
+iteration	commit	metric	delta	guard	status	description
+0	eed6ffb	4	0	-	baseline	Baseline API oath gaps before V3 API/runtime fixes
+1	eed6ffb+wt1	3	-1	pass	keep	Add the real parallax_v3.api.main FastAPI entrypoint
+2	eed6ffb	1	-2	pass	keep	Execute /api/v3/run inline, materialize workspace inputs, and emit progress plus complete events
+3	eed6ffb	0	-1	pass	keep	Clamp phase transitions to one step and add repo-local smoke fixture inputs

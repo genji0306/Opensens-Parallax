@@ -1,0 +1,14 @@
+{
+  "session_id": "22222222-2222-4222-8222-222222222222",
+  "research_question": "What grant proposal would best support this research program?",
+  "target_venue": "grant_nsf",
+  "citation_style": "apa",
+  "max_refinement_iters": 2,
+  "budget_usd": 10.0,
+  "ethics_flags": [],
+  "refinement_policy": {
+    "plateau_threshold": 0.5,
+    "plateau_window": 2
+  }
+}
+

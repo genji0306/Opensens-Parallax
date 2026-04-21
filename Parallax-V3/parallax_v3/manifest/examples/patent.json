@@ -1,0 +1,14 @@
+{
+  "session_id": "33333333-3333-4333-8333-333333333333",
+  "research_question": "Novel solid-state electrolyte composite with lithium-ion conductivity exceeding 10 mS/cm at room temperature for next-generation battery applications.",
+  "target_venue": "patent",
+  "citation_style": "ieee",
+  "max_refinement_iters": 2,
+  "budget_usd": 12.0,
+  "ethics_flags": [],
+  "refinement_policy": {
+    "plateau_threshold": 1.0,
+    "plateau_window": 2,
+    "revert_on_decrease": false
+  }
+}

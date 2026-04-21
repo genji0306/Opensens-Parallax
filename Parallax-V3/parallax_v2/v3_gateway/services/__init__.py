@@ -1,0 +1,2 @@
+"""Shim service namespace."""
+

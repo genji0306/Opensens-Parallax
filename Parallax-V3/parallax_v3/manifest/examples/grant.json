@@ -1,0 +1,14 @@
+{
+  "session_id": "22222222-2222-4222-8222-222222222222",
+  "research_question": "Can electrochemical CO2 reduction at nanostructured copper electrodes achieve Faradaic efficiency >85% for ethylene at industrial current densities?",
+  "target_venue": "grant_nsf",
+  "citation_style": "apa",
+  "max_refinement_iters": 2,
+  "budget_usd": 15.0,
+  "ethics_flags": ["environmental_impact_statement_required"],
+  "refinement_policy": {
+    "plateau_threshold": 0.5,
+    "plateau_window": 2,
+    "revert_on_decrease": true
+  }
+}

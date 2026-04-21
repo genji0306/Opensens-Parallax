@@ -1,0 +1,16 @@
+{
+  "session_id": "11111111-1111-4111-8111-111111111111",
+  "research_question": "How can a harnessed engine improve collaborative scientific writing?",
+  "target_venue": "neurips",
+  "citation_style": "ieee",
+  "max_refinement_iters": 3,
+  "budget_usd": 25.0,
+  "ethics_flags": [
+    "no_human_subjects"
+  ],
+  "refinement_policy": {
+    "plateau_threshold": 1.0,
+    "plateau_window": 2
+  }
+}
+

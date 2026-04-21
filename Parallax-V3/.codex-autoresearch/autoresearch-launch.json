@@ -1,0 +1,40 @@
+{
+  "approvals": {},
+  "config": {
+    "direction": "lower",
+    "execution_policy": "danger_full_access",
+    "goal": "Reduce API_OATH_GAP_COUNT to 0 in Parallax-V3 by implementing the real FastAPI entrypoint, real /api/v3/run execution and SSE completion, workspace input materialization, and codex-oath phase discipline while preserving the existing V3 test suite.",
+    "guard": "cd Parallax-V3 && pytest tests -q && python3 -m parallax_v3.smoke",
+    "iterations": 30,
+    "metric": "api_oath_gap_count",
+    "parallel_mode": "serial",
+    "repos": [
+      {
+        "path": "/Users/applefamily/Desktop/Business/Opensens/03 - R&D Projects/Opensens Darklab/Opensens Parallax",
+        "role": "primary",
+        "scope": "Parallax-V3,Parallax-V2,Supporting,platform,.claude,.moat,Parallax-V1,memory"
+      }
+    ],
+    "rollback_policy": "revert",
+    "run_tag": "parallax-v3-api-oath-20260416-2130",
+    "scope": "Parallax-V3,Parallax-V2,Supporting,platform,.claude,.moat,Parallax-V1,memory",
+    "session_mode": "background",
+    "stop_condition": null,
+    "verify": "cd Parallax-V3 && python3 .codex-autoresearch/verify_api_oath.py",
+    "web_search": "disabled"
+  },
+  "created_at": "2026-04-16T14:25:53Z",
+  "defaults": {},
+  "mode": "fix",
+  "notes": [
+    "Baseline verify on 2026-04-16 reports API_OATH_GAP_COUNT=4.",
+    "Current counted gaps: missing parallax_v3.api.main, missing complete SSE event, missing workspace/<session_id> materialization, direct EXPLORE -> ACT transition.",
+    "Do not edit unrelated Parallax-V2, Supporting, or other repo areas unless an explicitly necessary compatibility shim is required; prefer V3-only fixes.",
+    "Honor codex oath constraints from CODEX.md/CLAUDE.md: no contracts.py edits, no generic shell tool, preserve SSE field names, no sys.path import hacks into V2, no direct workspace writes outside the intended store path."
+  ],
+  "original_goal": "background go Parallax-v3 and fix all API to go with codex oath",
+  "prompt_text": "Fix Parallax-V3 API/runtime to match CODEX.md and CLAUDE.md contract: provide parallax_v3.api.main:app, make /api/v3/run execute a smoke-safe pipeline path, emit V2-compatible SSE complete/progress/error/heartbeat events, materialize workspace/<session_id>/inputs, and enforce EXPLORE->PLAN->ACT without direct skip. Keep edits inside Parallax-V3 even though supervisor scope includes other dirty top-level paths only to satisfy the managed commit gate.",
+  "resume_seed": {},
+  "updated_at": "2026-04-16T14:25:53Z",
+  "version": 1
+}

@@ -1,0 +1,7 @@
+# Exclude all runtime session directories (UUIDs)
+*
+!.gitignore
+!fixtures/
+!fixtures/**
+!manual-explore/
+!manual-explore/**
